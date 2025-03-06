@@ -1,6 +1,6 @@
 @font-face {
   font-family: RuneScript;
-  src: "runescape.ttf";
+  src: url("runescape.ttf");
 }
 
 body {
@@ -38,6 +38,7 @@ main {
   border-style: inset;
   min-height: 50px;
   margin: 10px auto;
+  max-width: 35vw;
 }
 
 .footer {
