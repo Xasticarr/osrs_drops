@@ -30,7 +30,6 @@ main {
 
 .header {
   color: gold;
-  /* margin-left: 50px; */
   padding: 16px;
   display: flex;
   align-items: center;
@@ -38,6 +37,7 @@ main {
   border: 10px;
   border-style: inset;
   min-height: 50px;
+  margin: 10px auto;
 }
 
 .footer {
