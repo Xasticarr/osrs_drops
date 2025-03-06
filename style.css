@@ -1,0 +1,62 @@
+@font-face {
+  font-family: RuneScript;
+  src: url(/assets/runescape.ttf);
+}
+
+body {
+  font-family: RuneScript, Verdana, Geneva, Tahoma, sans-serif;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  background: black;
+}
+
+main {
+  flex: 1;
+}
+
+.page-wrap {
+  background: url(https://www.runescape.com/img/rsp777/bg2.jpg) repeat-y center
+    top;
+  margin: 0 auto;
+  overflow-y: hidden;
+  padding: 0 50px;
+  width: 815px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-width: 100vh;
+}
+
+.header {
+  color: gold;
+  /* margin-left: 50px; */
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  border: 10px;
+  border-style: inset;
+  min-height: 50px;
+}
+
+.footer {
+  min-height: 50px;
+}
+
+.logo {
+  font-size: 30px;
+}
+
+ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 20px;
+}
+
+a {
+  color: gold;
+  text-decoration: none;
+}
