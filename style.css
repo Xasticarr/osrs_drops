@@ -34,11 +34,9 @@ main {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  border: 10px;
-  border-style: inset;
   min-height: 50px;
   margin: 10px auto;
-  max-width: 35vw;
+  max-width: 40vw;
 }
 
 .footer {
