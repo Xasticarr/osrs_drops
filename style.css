@@ -44,7 +44,7 @@ main {
 }
 
 .logo {
-  font-size: 30px;
+  font-size: 40px;
 }
 
 .banner {
@@ -61,12 +61,42 @@ main {
   margin-bottom: 3px;
 }
 
+.button_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  width: 500px;
+}
+
+.drop_button {
+  background: url(https://www.runescape.com/img/rsp777/splash/compare_users.gif)
+    no-repeat center;
+  color: white;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  font-weight: bold;
+  height: 120px;
+  margin-right: 10px;
+  padding: 12px;
+  text-align: center;
+  vertical-align: top;
+  width: 150px;
+  font-size: 24px;
+}
+
+.drop_button_contents {
+}
+
 ul {
   display: flex;
   list-style: none;
   margin: 0;
   padding: 0;
   gap: 20px;
+  font-size: 20px;
 }
 
 a {
