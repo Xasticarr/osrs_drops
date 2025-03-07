@@ -47,6 +47,20 @@ main {
   font-size: 30px;
 }
 
+.banner {
+  background: url(https://www.runescape.com/img/rsp777/title2/rslogo3.png)
+    no-repeat center;
+  display: flex;
+  margin-bottom: 25px;
+  min-height: 135px;
+  text-align: center;
+}
+
+.banner_title {
+  font-size: 0.5em;
+  margin-bottom: 3px;
+}
+
 ul {
   display: flex;
   list-style: none;
