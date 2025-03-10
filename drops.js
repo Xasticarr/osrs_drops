@@ -141,4 +141,4 @@ function generateDrop() {
 
 // generateDrop(); //Running this now Chooses a table, then a drop, and console logs them both!
 
-//The plan is to eventually tie this to a button and make it populate somewhere on the page.
+//The plan is to eventually tie this to a button and make it populate somewhere on the page
