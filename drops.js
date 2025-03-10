@@ -111,3 +111,22 @@ function getDropTable() {
 
 // console.log(getDropTable());
 //Nice, this is showing the name of the drop tables
+
+//Now we need to roll for a specific item when we hit a drop table
+
+function rollForItem(tableName) {
+  let table = dropTables[tableName];
+  let totalWeight = table.reduce((sum, item) => sum + item.weight, 0);
+  let roll = rollRandomNumber(totalWeight);
+
+  let cumulativeWeight = 0;
+  for (let item of table) {
+    cumulativeWeight += item.weight;
+    if (roll <= cumulativeWeight) {
+      return item.item;
+    }
+  }
+}
+
+// console.log(rollForItem("rare"));
+//This is choosing an item from the specific table. Now we just need to make a function that 1. Chooses a table, and 2. Chooses an item from that table.
