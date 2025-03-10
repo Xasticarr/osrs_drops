@@ -80,3 +80,34 @@ const dropTables = {
 // console.log(dropTables);
 
 //Added item weights to influence drop chances. This will make certain drops more rare than others. Based weights out of 1000
+
+//Now need to make chances to roll each specific table
+
+const tableChances = [
+  { name: "low", chance: 25 },
+  { name: "steel", chance: 20 },
+  { name: "mithril", chance: 20 },
+  { name: "adamant", chance: 15 },
+  { name: "rune", chance: 12 },
+  { name: "dragon", chance: 7 },
+  { name: "rare", chance: 1 },
+];
+
+// console.log(tableChances);
+// Chance to roll each table will be out of 100
+
+function getDropTable() {
+  let roll = rollRandomNumber(100);
+  let accumulatedChance = 0;
+
+  for (let table of tableChances) {
+    accumulatedChance += table.chance;
+    if (roll <= accumulatedChance) {
+      return table.name;
+    }
+  }
+  return "low"; //In case we somehow don't hit a table
+}
+
+// console.log(getDropTable());
+//Nice, this is showing the name of the drop tables
