@@ -83,17 +83,35 @@ main {
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
-  /* font-weight: bold; */
   height: 120px;
   margin-right: 12px;
   padding: 20px;
   text-align: center;
   vertical-align: top;
+  height: 125px;
   width: 150px;
+  text-decoration: none;
+
+  border: none;
+  outline: none;
+  background-color: transparent;
+  font-size: 16px; /*Adjust this as needed */
+  font-weight: normal;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.1s ease-in-out, opacity 0.1s ease-in-out;
+}
+
+.drop_button:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
 }
 
 .drop_button_content {
+  font-family: RuneScript;
   font-size: 24px;
+  font-weight: normal;
+  display: flex;
   align-content: center;
 }
 
