@@ -137,6 +137,26 @@ function generateDrop() {
 
   let itemDrop = rollForItem(dropTable);
   console.log(`You looted: ${itemDrop}!`);
+
+  //Trying something besides "alert" because I want the option to roll again right from the box that appears
+
+  //   alert(`You hit the ${dropTable.toLocaleUpperCase()} drop table \nYou received: ${itemDrop}!`);
+
+  let repeat = confirm(
+    `You hit the ${dropTable.toLocaleUpperCase()} drop table \nYou received: ${itemDrop}!\n\nWould you like to roll again?`
+  );
+
+  if (repeat) {
+    generateDrop();
+    //Nothing below allowed me to be able to spam click OK in the confirmation box to rapidly call the function
+
+    // let intervalId = setInterval(function () {
+    //   generateDrop(); //This should call the function again
+    // }, 0); //Start interval to check after a small delay
+    // setTimeout(function () {
+    //   clearInterval(intervalId); //Stop interval after 1 execution
+    // }, 100); //Clear interval after a short delay to allow a retry
+  }
 }
 
 // generateDrop(); //Running this now Chooses a table, then a drop, and console logs them both!
