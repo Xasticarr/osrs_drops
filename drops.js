@@ -130,3 +130,15 @@ function rollForItem(tableName) {
 
 // console.log(rollForItem("rare"));
 //This is choosing an item from the specific table. Now we just need to make a function that 1. Chooses a table, and 2. Chooses an item from that table.
+
+function generateDrop() {
+  let dropTable = getDropTable();
+  console.log(`You hit the ${dropTable} drop table!`);
+
+  let itemDrop = rollForItem(dropTable);
+  console.log(`You looted: ${itemDrop}!`);
+}
+
+// generateDrop(); //Running this now Chooses a table, then a drop, and console logs them both!
+
+//The plan is to eventually tie this to a button and make it populate somewhere on the page.
