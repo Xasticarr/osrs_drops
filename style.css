@@ -170,6 +170,31 @@ main {
   padding: 15px 0;
 }
 
+#itemModal table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+#itemModal th,
+#itemModal td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+#itemModal tr {
+  height: 40px;
+}
+
+#itemModal tr:nth-child(even) {
+  background-color: #3a3a3a;
+}
+
+#itemModal td:nth-child(2) {
+  white-space: pre-line;
+}
+
 .close-button {
   background: red;
   color: white;
