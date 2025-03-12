@@ -211,7 +211,7 @@ function getAllDropTablesAndItems() {
   return tablesAndItems;
 }
 
-console.log(getAllDropTablesAndItems()); //This generates an array. Might want to display in a table?
+// console.log(getAllDropTablesAndItems()); //This generates an array. Might want to display in a table?
 
 function getOddsOfRolling() {
   let odds = [];
@@ -237,13 +237,89 @@ function getOddsOfRolling() {
     );
 
     tableItems.forEach((item) => {
+      let itemChance = (item.weight / totalItemWeight) * 100;
+      let cumulativeItemChance = (table.chance / totalTableChance) * itemChance;
+
       let itemOdds = {
         item: item.item,
-        chance: (item.weight / totalItemWeight) * 100, //Calculate individual item chance
+        chance: itemChance.toFixed(2), //Individual Chance In Table
+        cumulativeChance: cumulativeItemChance
+          ? cumulativeItemChance.toFixed(3)
+          : "0.000", //Cumulative (effective) chance to get this item per roll
       };
       tableOdds.items.push(itemOdds);
     });
     odds.push(tableOdds);
   });
   return odds;
+}
+
+// console.log(getOddsOfRolling());
+
+function populateCumulativeOddsModal() {
+  let odds = getOddsOfRolling();
+  let modalContent = document.querySelector("#tableModal .modal-body");
+
+  while (modalContent.firstChild) {
+    modalContent.removeChild(modalContent.firstChild);
+  }
+  //Create a table for a nice display
+
+  let table = document.createElement("table");
+  let tableHeader = document.createElement("thead");
+  let headerRow = document.createElement("tr");
+
+  let headerCell1 = document.createElement("th");
+  headerCell1.textContent = "Drop Table";
+  headerRow.appendChild(headerCell1);
+
+  let headerCell2 = document.createElement("th");
+  headerCell2.textContent = "Item";
+  headerRow.appendChild(headerCell2);
+
+  let headerCell3 = document.createElement("th");
+  headerCell3.textContent = "Item Chance (%)";
+  headerRow.appendChild(headerCell3);
+
+  let headerCell4 = document.createElement("th");
+  headerCell4.textContent = "Cumulative Item Chance (%)";
+  headerRow.appendChild(headerCell4);
+
+  tableHeader.appendChild(headerRow);
+  table.appendChild(tableHeader);
+
+  //Add Rows
+
+  let tableBody = document.createElement("tbody");
+
+  odds.forEach((tableData) => {
+    tableData.items.forEach((item) => {
+      let row = document.createElement("tr");
+
+      let tableCell1 = document.createElement("td");
+      tableCell1.textContent = tableData.table.toUpperCase();
+      row.appendChild(tableCell1);
+
+      let tableCell2 = document.createElement("td");
+      tableCell2.textContent = item.item;
+      row.appendChild(tableCell2);
+
+      let tableCell3 = document.createElement("td");
+      tableCell3.textContent = item.itemChance;
+      row.appendChild(tableCell3);
+
+      let tableCell4 = document.createElement("td");
+      tableCell4.textContent = item.cumulativeChance;
+      row.appendChild(tableCell4);
+
+      tableBody.appendChild(row);
+    });
+  });
+
+  table.appendChild(tableBody);
+  modalContent.appendChild(table);
+
+  //Pop the Modal Up
+
+  document.getElementById("tableModal").style.display = "flex";
 }
