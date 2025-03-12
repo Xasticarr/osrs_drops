@@ -163,11 +163,13 @@ main {
 .modal-header {
   border-bottom: 1px solid gold;
   padding-bottom: 10px;
+  font-size: 25px;
 }
 
 .modal-body {
   text-align: center;
   padding: 15px 0;
+  font-size: 22px;
 }
 
 #itemModal table {
@@ -196,16 +198,28 @@ main {
 }
 
 .close-button {
-  background: red;
+  background: darkred;
   color: white;
   border: none;
   padding: 5px 10px;
   cursor: pointer;
   border-radius: 5px;
+  min-height: 50px;
+  min-width: 50px;
+  font-size: 30px;
 }
 
 .close-button:hover {
-  background: darkred;
+  background: rgb(77, 0, 0);
+}
+
+.modal-button {
+  background: rgb(73, 12, 65);
+  border-radius: 8px;
+  height: 40px;
+  font-family: RuneScript, sans-serif;
+  font-size: 25px;
+  color: gold;
 }
 
 ul {
