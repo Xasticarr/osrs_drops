@@ -131,6 +131,9 @@ function rollForItem(tableName) {
 // console.log(rollForItem("rare"));
 //This is choosing an item from the specific table. Now we just need to make a function that 1. Chooses a table, and 2. Chooses an item from that table.
 
+//Decided to comment out all of the code I was working on and leave comments so I could look at it later, and re-write code below so it looks cleaner
+
+/*
 function generateDrop() {
   let dropTable = getDropTable();
   console.log(`You hit the ${dropTable} drop table!`);
@@ -162,3 +165,34 @@ function generateDrop() {
 // generateDrop(); //Running this now Chooses a table, then a drop, and console logs them both!
 
 //The plan is to eventually tie this to a button and make it populate somewhere on the page
+*/
+
+//This is where I'll clean up the code, and integrate the custom modal I set up so it will all hopefully look nicer.
+function generateDrop() {
+  let dropTable = getDropTable();
+  // console.log(`You hit the ${dropTable} drop table!`);
+  let itemDrop = rollForItem(dropTable);
+  // console.log(`You looted: ${itemDrop}!`);
+
+  //Get the Drop result container
+  let dropResultText = document.getElementById("dropResultText");
+  //Clear previous drop content
+  dropResultText.textContent = "";
+
+  let dropTableText = document.createElement("p");
+  dropTableText.textContent = `You hit the ${dropTable.toUpperCase()} drop table!`;
+
+  let itemDropText = document.createElement("p");
+  itemDropText.textContent = `You received: ${itemDrop}!`;
+
+  //This should append them with no issues
+  dropResultText.appendChild(dropTableText);
+  dropResultText.appendChild(itemDropText);
+
+  //This SHOULD make the modal appear
+  document.getElementById("dropModal").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("dropModal").style.display = "none";
+}

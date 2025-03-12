@@ -13,9 +13,12 @@ body {
 
 main {
   display: flex;
+  flex-direction: column;
   flex: 1;
-  justify-content: center;
-  align-items: flex-start;
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: 20px;
+  min-height: auto;
 }
 
 .page-wrap {
@@ -71,7 +74,7 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 24px;
+  padding: 12px;
   width: 500px;
 }
 
@@ -113,6 +116,61 @@ main {
   font-weight: normal;
   display: flex;
   align-content: center;
+}
+
+.modal {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  margin-top: 20px; /*This makes it appear below buttons*/
+  border-radius: 10px;
+  color: gold;
+  font-family: RuneScript, sans-serif;
+  width: 60%;
+  max-width: 600px;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background: #222;
+  border-radius: 10px;
+  width: 100%;
+}
+
+.modal-header,
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.modal-header {
+  border-bottom: 1px solid gold;
+  padding-bottom: 10px;
+}
+
+.modal-body {
+  text-align: center;
+  padding: 15px 0;
+}
+
+.close-button {
+  background: red;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.close-button:hover {
+  background: darkred;
 }
 
 ul {

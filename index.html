@@ -38,6 +38,23 @@
             <div class="drop_button_content">Never Purple!</div>
           </button>
         </div>
+
+        <div id="dropModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Drop Results</h2>
+              <button class="close-button" onclick="closeModal()">X</button>
+            </div>
+            <div class="modal-body">
+              <p id="dropResultText">
+                <!--Drop results should show up here now -->
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button onclick="generateDrop()">Roll Again</button>
+            </div>
+          </div>
+        </div>
       </main>
       <footer class="footer"></footer>
     </div>
