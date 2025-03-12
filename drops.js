@@ -212,6 +212,51 @@ function getAllDropTablesAndItems() {
   return tablesAndItems;
 }
 
+function populateItemsModal() {
+  let tablesAndItems = getAllDropTablesAndItems();
+  let modalContent = document.querySelector("#itemModal .modal-body");
+
+  while (modalContent.firstChild) {
+    modalContent.removeChild(modalContent.firstChild);
+  }
+
+  let table = document.createElement("table");
+  let tableHeader = document.createElement("thead");
+  let headerRow = document.createElement("tr");
+
+  let headerCell1 = document.createElement("th");
+  headerCell1.textContent = "Drop Table";
+  headerRow.appendChild(headerCell1);
+
+  let headerCell2 = document.createElement("th");
+  headerCell2.textContent = "Items";
+  headerRow.appendChild(headerCell2);
+
+  tableHeader.appendChild(headerRow);
+  table.appendChild(tableHeader);
+
+  let tableBody = document.createElement("tbody");
+
+  tablesAndItems.forEach((tableData) => {
+    let row = document.createElement("tr");
+
+    let tableCell1 = document.createElement("td");
+    tableCell1.textContent = tableData.table.toUpperCase();
+    row.appendChild(tableCell1);
+
+    let tableCell2 = document.createElement("td");
+    tableCell2.textContent = tableData.items.join(", ");
+    row.appendChild(tableCell2);
+
+    tableBody.appendChild(row);
+  });
+
+  table.appendChild(tableBody);
+  modalContent.appendChild(table);
+
+  document.getElementById("itemModal").style.display = "flex";
+}
+
 // console.log(getAllDropTablesAndItems()); //This generates an array. Might want to display in a table?
 
 function getOddsOfRolling() {
