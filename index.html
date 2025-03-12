@@ -32,10 +32,10 @@
             <div class="drop_button_content">Roll a Drop!</div>
           </button>
           <button class="drop_button" href="#">
-            <div class="drop_button_content">Buying GF!</div>
+            <div class="drop_button_content">What Can I Get?</div>
           </button>
           <button class="drop_button" href="#">
-            <div class="drop_button_content">Never Purple!</div>
+            <div class="drop_button_content">What Are The Odds?</div>
           </button>
         </div>
 
@@ -55,6 +55,35 @@
             </div>
           </div>
         </div>
+        <!--End of First Modal-->
+        <div id="itemModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Potential Items</h2>
+              <button class="close-button" onclick="closeModal()">X</button>
+            </div>
+            <div class="modal-body">
+              <p id="potentialItemText">
+                <!--Item results should show up here now -->
+              </p>
+            </div>
+          </div>
+        </div>
+        <!--End of Second Modal-->
+        <div id="tableModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Table Chances</h2>
+              <button class="close-button" onclick="closeModal()">X</button>
+            </div>
+            <div class="modal-body">
+              <p id="tableChanceText">
+                <!--Drop results should show up here now -->
+              </p>
+            </div>
+          </div>
+        </div>
+        <!--End of Third Modal-->
       </main>
       <footer class="footer"></footer>
     </div>
