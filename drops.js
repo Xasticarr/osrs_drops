@@ -193,8 +193,9 @@ function generateDrop() {
   document.getElementById("dropModal").style.display = "flex";
 }
 
-function closeModal() {
-  document.getElementById("dropModal").style.display = "none";
+function closeModal(event) {
+  const modal = event.target.closest(".modal");
+  modal.style.display = "none";
 }
 
 //Might swap to get element by class name
@@ -242,7 +243,7 @@ function getOddsOfRolling() {
 
       let itemOdds = {
         item: item.item,
-        chance: itemChance.toFixed(2), //Individual Chance In Table
+        chance: itemChance ? itemChance.toFixed(2) : "0.00", //Individual Chance In Table
         cumulativeChance: cumulativeItemChance
           ? cumulativeItemChance.toFixed(3)
           : "0.000", //Cumulative (effective) chance to get this item per roll
@@ -305,7 +306,7 @@ function populateCumulativeOddsModal() {
       row.appendChild(tableCell2);
 
       let tableCell3 = document.createElement("td");
-      tableCell3.textContent = item.itemChance;
+      tableCell3.textContent = item.chance;
       row.appendChild(tableCell3);
 
       let tableCell4 = document.createElement("td");
