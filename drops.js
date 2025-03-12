@@ -212,3 +212,38 @@ function getAllDropTablesAndItems() {
 }
 
 console.log(getAllDropTablesAndItems()); //This generates an array. Might want to display in a table?
+
+function getOddsOfRolling() {
+  let odds = [];
+
+  //First need table odds
+  let totalTableChance = tableChances.reduce(
+    (sum, table) => sum + table.chance,
+    0
+  );
+
+  tableChances.forEach((table) => {
+    let tableOdds = {
+      table: table.name,
+      chance: (table.chance / totalTableChance) * 100, //Get table chance as a percentage
+      items: [],
+    };
+
+    //Now we need odds for each item in the table
+    let tableItems = dropTables[table.name];
+    let totalItemWeight = tableItems.reduce(
+      (sum, item) => sum + item.weight,
+      0
+    );
+
+    tableItems.forEach((item) => {
+      let itemOdds = {
+        item: item.item,
+        chance: (item.weight / totalItemWeight) * 100, //Calculate individual item chance
+      };
+      tableOdds.items.push(itemOdds);
+    });
+    odds.push(tableOdds);
+  });
+  return odds;
+}
