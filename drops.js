@@ -196,3 +196,19 @@ function generateDrop() {
 function closeModal() {
   document.getElementById("dropModal").style.display = "none";
 }
+
+//Might swap to get element by class name
+
+function getAllDropTablesAndItems() {
+  let tablesAndItems = [];
+  for (let tableName in dropTables) {
+    let tableItems = dropTables[tableName].map((item) => item.item);
+    tablesAndItems.push({
+      table: tableName,
+      items: tableItems,
+    });
+  }
+  return tablesAndItems;
+}
+
+console.log(getAllDropTablesAndItems()); //This generates an array. Might want to display in a table?
