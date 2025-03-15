@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <title>Generic Drop Roller</title>
-    <script src="../drops.js"></script>
+    <script src="../JS/genericDrops.js"></script>
     <link rel="stylesheet" href="../style.css" />
   </head>
 
@@ -28,16 +28,68 @@
       </header>
       <main>
         <div class="button_container">
-          <button class="drop_button" href="#">
+          <button class="drop_button" onclick="generateDrop()">
             <div class="drop_button_content">Roll a Drop!</div>
           </button>
-          <button class="drop_button" href="#">
-            <div class="drop_button_content">Meet My Main in Camelot!</div>
+          <button class="drop_button" onclick="populateItemsModal()">
+            <div class="drop_button_content">What Can I Get?</div>
           </button>
-          <button class="drop_button" href="#">
-            <div class="drop_button_content">Trimming Armor!</div>
+          <button class="drop_button" onclick="populateCumulativeOddsModal()">
+            <div class="drop_button_content">What Are The Odds?</div>
           </button>
         </div>
+
+        <div id="dropModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Drop Results</h2>
+              <button class="close-button" onclick="closeModal(event)">
+                X
+              </button>
+            </div>
+            <div class="modal-body">
+              <p id="dropResultText">
+                <!--Drop results should show up here now -->
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button class="modal-button" onclick="generateDrop()">
+                🎲 Roll Again 🎲
+              </button>
+            </div>
+          </div>
+        </div>
+        <!--End of First Modal-->
+        <div id="itemModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Potential Items</h2>
+              <button class="close-button" onclick="closeModal(event)">
+                X
+              </button>
+            </div>
+            <div class="modal-body">
+              <p id="potentialItemText">
+                <!--Item results should show up here now -->
+              </p>
+            </div>
+          </div>
+        </div>
+        <!--End of Second Modal-->
+        <div id="tableModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Table Chances</h2>
+              <button class="close-button" onclick="closeModal(event)">
+                X
+              </button>
+            </div>
+            <div class="modal-body">
+              <!--Drop results should show up here now -->
+            </div>
+          </div>
+        </div>
+        <!--End of Third Modal-->
       </main>
       <footer class="footer">
         <h4><a href="../index.html">Return to Main Menu</a></h4>
