@@ -8,12 +8,65 @@ function rollItemQuantity(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+//I actually need to make the Rare Drop Table its own thing because pretty much everything can access it (even though it sucks)
+
+const rareDropTable = {
+  ammo: [
+    { item: "Nature rune", quantity: 67, rarity: 1 / 42.67 },
+    { item: "Adamant javelin", quantity: 20, rarity: 1 / 64 },
+    { item: "Death rune", quantity: 45, rarity: 1 / 64 },
+    { item: "Law rune", quantity: 45, rarity: 1 / 64 },
+    { item: "Rune arrow", quantity: 42, rarity: 1 / 64 },
+    { item: "Steel arrow", quantity: 150, rarity: 1 / 64 },
+  ],
+  equipment: [
+    { item: "Rune 2h sword", quantity: 1, rarity: 1 / 42.67 },
+    { item: "Rune battleaxe", quantity: 1, rarity: 1 / 42.67 },
+    { item: "Rune sq shield", quantity: 1, rarity: 1 / 64 },
+    { item: "Dragon med helm", quantity: 1, rarity: 1 / 128 },
+    { item: "Rune kiteshield", quantity: 1, rarity: 1 / 128 },
+  ],
+  other: [
+    { item: "Coins", quantity: 3000, rarity: 1 / 6.095 },
+    { item: "Loop half of key", quantity: 1, rarity: 1 / 6.4 },
+    { item: "Tooth half of key", quantity: 1, rarity: 1 / 6.4 },
+    { item: "Runite bar", quantity: 1, rarity: 1 / 25.6 },
+    { item: "Dragonstone", quantity: 1, rarity: 1 / 64 },
+    { item: "Silver ore (noted)", quantity: 100, rarity: 1 / 64 },
+  ],
+  "sub-tables": [
+    { item: "Gem table", rarity: 1 / 6.4, type: "table" },
+    { item: "Mega Rare table", rarity: 1 / 8.533, type: "table" },
+  ],
+  "Gem table": [
+    { item: "Nothing", quantity: 1, rarity: 1 / 2.032 },
+    { item: "Uncut sapphire", quantity: 1, rarity: 1 / 2.032 },
+    { item: "Uncut emerald", quantity: 1, rarity: 1 / 2.032 },
+    { item: "Uncut ruby", quantity: 1, rarity: 1 / 2.032 },
+    { item: "Chaos talisman", quantity: 1, rarity: 1 / 2.032 },
+    { item: "Nature talisman", quantity: 1, rarity: 1 / 2.032 },
+    { item: "Uncut diamond", quantity: 1, rarity: 1 / 2.032 },
+    { item: "Rune javelin", quantity: 1, rarity: 1 / 2.032 },
+    { item: "Loop half of key", quantity: 1, rarity: 1 / 2.032 },
+    { item: "Tooth half of key", quantity: 1, rarity: 1 / 2.032 },
+    { item: "Mega Rare table", rarity: 1 / 128, type: "table" },
+  ],
+  "Mega Rare table": [
+    { item: "Nothing (Mega Rare)", quantity: 1, rarity: 1 / 1.133 },
+    { item: "Rune spear", quantity: 1, rarity: 1 / 16 },
+    { item: "Shield left half", quantity: 1, rarity: 1 / 32 },
+    { item: "Dragon spear", quantity: 1, rarity: 1 / 42.67 },
+  ],
+};
+
 //Now we gotta set up the bosses. To keep it in line with OSRS, unfortunatly every boss gets it's own individual drop tables.
 
 const bosses = {
   Zulrah: {
     doubleRoll: true,
     tripleRoll: false,
+    rDT: true,
+    rDTChance: 9 / 248,
     dropTables: {
       always: [{ item: "Zulrah's scales", quantity: [100, 299] }],
       unique: [
