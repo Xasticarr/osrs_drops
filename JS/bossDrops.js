@@ -147,19 +147,29 @@ const bosses = {
   } /*Zulrah ends here*/,
 };
 
+// console.log(typeof bosses.Zulrah.dropTables);
+// console.log(typeof bosses.Zulrah.dropTables.unique);
+// console.log(bosses.Zulrah.dropTables.unique);
+
 function calculateTableProbabilities(boss) {
   let tableChances = {};
 
   for (const [table, items] of Object.entries(boss.dropTables)) {
-    if (table === "always") continue;
-
-    let tableChance = items.reduce((sum, item) => sum + item.rarity, 0);
+    if (table === "always" || !Array.isArray(items)) continue;
+    //Might remove everything after || but testing for now.
+    let tableChance = items.reduce((sum, item) => sum + (item.rarity || 0), 0);
     tableChances[table] = tableChance;
   }
 
-  if (boss.rDT) {
-    tableChances["rareDropTable"] = boss.rDTChance;
-  }
+  // if (boss.rDT) {
+  //   if (!boss.dropTables["rareDropTable"]) {
+  //     boss.dropTables["rareDropTable"] = rareDropTable;
+  //     console.log("Rare Drop Table initialized");
+  //   }
+  //   console.log("Rare Drop Table:", boss.dropTables["rareDropTable"]);
+
+  //   tableChances["rareDropTable"] = boss.rDTChance;
+  // }
 
   let totalChance = Object.values(tableChances).reduce(
     (sum, chance) => sum + chance,
@@ -170,11 +180,13 @@ function calculateTableProbabilities(boss) {
   for (const [table, chance] of Object.entries(tableChances)) {
     tableChancesPercent[table] = (chance / totalChance) * 100;
   }
-
+  // console.log("This is the %", tableChancesPercent);
   return tableChancesPercent;
 }
+// console.log(calculateTableProbabilities(bosses.Zulrah));
+//This shows the % chance for each table accessible by Zulrah
 
-console.log(calculateTableProbabilities(bosses.Zulrah));
+//Okay so this is for sure returning the table chances as %. I might try and make another function to get all these values and get them to 2 decimal places with .toFixed(2) and then just create a table out of them.
 
 //Need drop logic now, will recycle code from genericDrops. Gonna need to change it to work with boss drops though.
 
@@ -193,23 +205,43 @@ function getBossDropTable(boss) {
   return "other";
 }
 
-console.log(getBossDropTable(bosses.Zulrah));
+//This seems to be rolling correctly for a table.
+// console.log("This is getting a table: ", getBossDropTable(bosses.Zulrah));
+
+// This is broken, will have to try and fix.
 
 function rollForBossItem(boss, tableName) {
   let table = boss.dropTables[tableName];
-  if (!table) return null;
+  console.log("This is the Table:", table);
+  if (!table || !Array.isArray(table)) return null;
 
-  let totalWeight = table.reduce((sum, item) => sum + item.rarity, 0);
-  let roll = rollRandomNumber(totalWeight);
+  let totalWeight = table.reduce((sum, item) => sum + (item.rarity || 0), 0);
+  console.log("Total Weight", totalWeight);
+
+  //Holy shit this fixed it!
+
+  let roll = Math.random() * totalWeight;
+  // let roll = rollRandomNumber() * totalWeight;
+  //Something is breaking right here. Roll shows up as 1 (when function(totalWeight)) or NaN (when function() * totalWeight)
+  console.log("Roll", roll);
 
   let cumulativeWeight = 0;
-  for (let item of table) {
+  for (const item of table) {
     cumulativeWeight += item.rarity;
+    console.log(cumulativeWeight);
     if (roll <= cumulativeWeight) {
-      return item.item;
+      console.log(
+        "Leaving this is, it does not show in console",
+        "Item Drop:",
+        item.item
+      );
+      return { item: item.item, quantity: item.quantity };
+      //This line is not populating properly in the modal now.
     }
   }
+  return null;
 }
+// console.log(rollForBossItem(bosses.Zulrah));
 
 function generateBossDrop(boss) {
   let rolls = 1; //Default to one roll
@@ -229,7 +261,9 @@ function generateBossDrop(boss) {
 
   for (let i = 0; i < rolls; i++) {
     let dropTable = getBossDropTable(boss);
+    console.log(dropTable);
     let itemDrop = rollForBossItem(boss, dropTable);
+    console.log(itemDrop);
 
     if (itemDrop) {
       drops.push({ dropTable, itemDrop });
@@ -262,3 +296,38 @@ function populateBossDropModal(drops) {
   //pop up the modal
   document.getElementById("bossDropModal").style.display = "flex";
 }
+
+function closeModal(event) {
+  const modal = event.target.closest(".modal");
+  modal.style.display = "none";
+}
+
+function openBossSelectionModal() {
+  document.getElementById("bossSelectionModal").style.display = "flex";
+}
+
+function slayBoss(event) {
+  const selectedBoss = event.target.getAttribute("boss-data");
+  console.log("Selected Boss:", selectedBoss);
+  const boss = bosses[selectedBoss];
+  console.log(boss);
+
+  closeModal(event);
+
+  generateBossDrop(boss);
+}
+
+document.querySelectorAll(".bossSlay").forEach((button) => {
+  button.addEventListener("click", slayBoss);
+});
+
+//This did not work
+
+// document.querySelectorAll(".bossSlay").forEach((button) => {
+//   button.addEventListener("click", function () {
+//     const bossName = button.getAttribute("boss-data");
+//     const drops = generateBossDrop(bossName);
+
+//     populateBossDropModal(drops);
+//   });
+// });

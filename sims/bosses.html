@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <title>Boss Drops</title>
-    <script src="../JS/bossDrops.js"></script>
+    <script src="../JS/bossDrops.js" defer></script>
     <link rel="stylesheet" href="../style.css" />
   </head>
 
@@ -28,16 +28,69 @@
       </header>
       <main>
         <div class="button_container">
-          <button class="drop_button" href="#">
-            <div class="drop_button_content">Roll a Drop!</div>
+          <button class="drop_button" onclick="openBossSelectionModal()">
+            <div class="drop_button_content">Slay a Boss!</div>
           </button>
           <button class="drop_button" href="#">
-            <div class="drop_button_content">Free Trip to Lumbridge!</div>
+            <div class="drop_button_content">Big Pickle!</div>
           </button>
           <button class="drop_button" href="#">
             <div class="drop_button_content">I'm So Dry!</div>
           </button>
         </div>
+
+        <!-- Boss Selection Modal -->
+
+        <div id="bossSelectionModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>What boss would you like to slay?</h2>
+              <button class="close-button" onclick="closeModal(event)">
+                X
+              </button>
+            </div>
+            <div class="modal-body">
+              <!-- This is where boss buttons go -->
+              <button
+                class="bossButton modal-button bossSlay"
+                boss-data="Zulrah"
+              >
+                💰🐍Zulrah🐍💰
+              </button>
+              <button
+                class="bossButton modal-button bossSlay"
+                boss-data="Vorkath"
+              >
+                💀🐉Vorkath🐉💀
+              </button>
+              <button
+                class="bossButton modal-button bossSlay"
+                boss-data="Muspah"
+              >
+                👻🪱Phantom Muspah🪱👻
+              </button>
+              <!-- Add  more buttons for more bosses later -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Boss Drop Modal (for results) -->
+
+        <div id="bossDropModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Drop Results</h2>
+              <button class="close-button" onclick="closeModal(event)">
+                X
+              </button>
+            </div>
+            <div class="modal-body">
+              <p id="bossDropResultText"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- End of bossDropModal -->
       </main>
       <footer class="footer">
         <h4><a href="../index.html">Return to Main Menu</a></h4>
