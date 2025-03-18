@@ -212,29 +212,29 @@ function getBossDropTable(boss) {
 
 function rollForBossItem(boss, tableName) {
   let table = boss.dropTables[tableName];
-  console.log("This is the Table:", table);
+  // console.log("This is the Table:", table);
   if (!table || !Array.isArray(table)) return null;
 
   let totalWeight = table.reduce((sum, item) => sum + (item.rarity || 0), 0);
-  console.log("Total Weight", totalWeight);
+  // console.log("Total Weight", totalWeight);
 
   //Holy shit this fixed it!
 
   let roll = Math.random() * totalWeight;
   // let roll = rollRandomNumber() * totalWeight;
   //Something is breaking right here. Roll shows up as 1 (when function(totalWeight)) or NaN (when function() * totalWeight)
-  console.log("Roll", roll);
+  // console.log("Roll", roll);
 
   let cumulativeWeight = 0;
   for (const item of table) {
     cumulativeWeight += item.rarity;
-    console.log(cumulativeWeight);
+    // console.log(cumulativeWeight);
     if (roll <= cumulativeWeight) {
-      console.log(
-        "Leaving this is, it does not show in console",
-        "Item Drop:",
-        item.item
-      );
+      // console.log(
+      //   "Leaving this is, it does not show in console",
+      //   "Item Drop:",
+      //   item.item
+      // );
       return { item: item.item, quantity: item.quantity };
       //This line is not populating properly in the modal now.
     }
@@ -256,18 +256,27 @@ function generateBossDrop(boss) {
   }
 
   let drops = [];
-
+  // console.log("1. drops when it was made", drops);
   //Roll the appropriate number of times
 
   for (let i = 0; i < rolls; i++) {
     let dropTable = getBossDropTable(boss);
-    console.log(dropTable);
+    // console.log("Drop Table in generate boss drop", dropTable);
     let itemDrop = rollForBossItem(boss, dropTable);
-    console.log(itemDrop);
+    // console.log("Item Drop in generate boss drop", itemDrop);
+
+    // console.log("2. drops ater table and ItemDrop", drops);
 
     if (itemDrop) {
-      drops.push({ dropTable, itemDrop });
+      drops.push({
+        dropTable,
+        item: itemDrop.item,
+        quantity: itemDrop.quantity,
+      });
+      // console.log("drops INSIDE if:", drops);
     }
+    // console.log("drops AFTER if", drops);
+    // console.log(typeof drops);
   }
   //We're gonna populate the modal here using a separate function
 
@@ -281,13 +290,13 @@ function populateBossDropModal(drops) {
   bossDropResultText.textContent = "";
 
   //Loop through each drop and display it
-  drops.forEach(({ dropTable, itemDrop }) => {
+  drops.forEach(({ dropTable, item, quantity }) => {
     const bossDropTableText = document.createElement("p");
 
     bossDropTableText.textContent = `You hit the ${dropTable.toUpperCase()} drop table!`;
 
     const bossItemDropText = document.createElement("p");
-    bossItemDropText.textContent = `You received: ${itemDrop}!`;
+    bossItemDropText.textContent = `You received: ${quantity}x ${item}!`;
 
     bossDropResultText.appendChild(bossDropTableText);
     bossDropResultText.appendChild(bossItemDropText);
@@ -308,9 +317,9 @@ function openBossSelectionModal() {
 
 function slayBoss(event) {
   const selectedBoss = event.target.getAttribute("boss-data");
-  console.log("Selected Boss:", selectedBoss);
+  // console.log("Selected Boss:", selectedBoss);
   const boss = bosses[selectedBoss];
-  console.log(boss);
+  // console.log(boss);
 
   closeModal(event);
 
