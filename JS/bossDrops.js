@@ -59,7 +59,7 @@ const rareDropTable = {
   ],
 };
 
-//Now we gotta set up the bosses. To keep it in line with OSRS, unfortunatly every boss gets it's own individual drop tables.
+//Now we gotta set up the bosses. To keep it in line with OSRS, unfortunately every boss gets it's own individual drop tables.
 
 const bosses = {
   Zulrah: {
@@ -146,3 +146,33 @@ const bosses = {
     },
   } /*Zulrah ends here*/,
 };
+
+function calculateTableProbabilities(boss) {
+  let tableChances = {};
+
+  for (const [table, items] of Object.entries(boss.dropTables)) {
+    if (table === "always") continue;
+
+    let tableChance = items.reduce((sum, item) => sum + item.rarity, 0);
+    tableChances[table] = tableChance;
+  }
+
+  if (boss.rDT) {
+    tableChances["rareDropTable"] = boss.rDTChance;
+  }
+
+  let totalChance = Object.values(tableChances).reduce(
+    (sum, chance) => sum + chance,
+    0
+  );
+
+  let tableChancesPercent = {};
+  for (const [table, chance] of Object.entries(tableChances)) {
+    tableChancesPercent[table] = (chance / totalChance) * 100;
+  }
+
+  return tableChancesPercent;
+}
+
+console.log(calculateTableProbabilities(bosses.Zulrah));
+//
