@@ -210,3 +210,32 @@ function rollForBossItem(boss, tableName) {
     }
   }
 }
+
+function generateBossDrop(boss) {
+  let rolls = 1; //Default to one roll
+
+  //Check for special drop rules
+
+  if (boss.doubleRoll) {
+    rolls = 2;
+  }
+  if (boss.tripleRoll) {
+    rolls = 3;
+  }
+
+  let drops = [];
+
+  //Roll the appropriate number of times
+
+  for (let i = 0; i < rolls; i++) {
+    let dropTable = getBossDropTable(boss);
+    let itemDrop = rollForBossItem(boss, dropTable);
+
+    if (itemDrop) {
+      drops.push({ dropTable, itemDrop });
+    }
+  }
+  //We're gonna populate the modal here using a separate function
+
+  // populateBossDropModal(drops);
+}
