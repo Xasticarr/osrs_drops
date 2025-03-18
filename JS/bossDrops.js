@@ -243,6 +243,10 @@ function rollForBossItem(boss, tableName) {
 }
 // console.log(rollForBossItem(bosses.Zulrah));
 
+//Using generate function to set up reroll button in the modal later on
+let lastBossRolled = null;
+//This is where we'll store the last boss rolled
+
 function generateBossDrop(boss) {
   let rolls = 1; //Default to one roll
 
@@ -279,7 +283,7 @@ function generateBossDrop(boss) {
     // console.log(typeof drops);
   }
   //We're gonna populate the modal here using a separate function
-
+  lastBossRolled = boss;
   populateBossDropModal(drops);
 }
 
