@@ -175,4 +175,22 @@ function calculateTableProbabilities(boss) {
 }
 
 console.log(calculateTableProbabilities(bosses.Zulrah));
-//
+
+//Need drop logic now, will recycle code from genericDrops. Gonna need to change it to work with boss drops though.
+
+function getBossDropTable(boss) {
+  let tableChances = calculateTableProbabilities(boss);
+  let roll = rollRandomNumber(100);
+  let accumulatedChance = 0;
+
+  for (const [table, chance] of Object.entries(tableChances)) {
+    accumulatedChance += chance;
+    if (roll <= accumulatedChance) {
+      return table;
+    }
+  }
+
+  return "other";
+}
+
+console.log(getBossDropTable(bosses.Zulrah));
