@@ -237,5 +237,28 @@ function generateBossDrop(boss) {
   }
   //We're gonna populate the modal here using a separate function
 
-  // populateBossDropModal(drops);
+  populateBossDropModal(drops);
+}
+
+function populateBossDropModal(drops) {
+  const bossDropResultText = document.getElementById("bossDropResultText");
+
+  //Clear previous drop content
+  bossDropResultText.textContent = "";
+
+  //Loop through each drop and display it
+  drops.forEach(({ dropTable, itemDrop }) => {
+    const bossDropTableText = document.createElement("p");
+
+    bossDropTableText.textContent = `You hit the ${dropTable.toUpperCase()} drop table!`;
+
+    const bossItemDropText = document.createElement("p");
+    bossItemDropText.textContent = `You received: ${itemDrop}!`;
+
+    bossDropResultText.appendChild(bossDropTableText);
+    bossDropResultText.appendChild(bossItemDropText);
+  });
+
+  //pop up the modal
+  document.getElementById("bossDropModal").style.display = "flex";
 }
