@@ -194,3 +194,19 @@ function getBossDropTable(boss) {
 }
 
 console.log(getBossDropTable(bosses.Zulrah));
+
+function rollForBossItem(boss, tableName) {
+  let table = boss.dropTables[tableName];
+  if (!table) return null;
+
+  let totalWeight = table.reduce((sum, item) => sum + item.rarity, 0);
+  let roll = rollRandomNumber(totalWeight);
+
+  let cumulativeWeight = 0;
+  for (let item of table) {
+    cumulativeWeight += item.rarity;
+    if (roll <= cumulativeWeight) {
+      return item.item;
+    }
+  }
+}
