@@ -245,6 +245,7 @@ function rollForBossItem(boss, tableName) {
 
 //Using generate function to set up reroll button in the modal later on
 let lastBossRolled = null;
+let lastBossName = "";
 //This is where we'll store the last boss rolled
 
 function generateBossDrop(boss) {
@@ -263,6 +264,21 @@ function generateBossDrop(boss) {
   // console.log("1. drops when it was made", drops);
   //Roll the appropriate number of times
 
+  //Setting up guaranteed drops
+
+  if (boss.dropTables.always) {
+    boss.dropTables.always.forEach(({ item, quantity }) => {
+      let finalQuantity = Array.isArray(quantity)
+        ? rollItemQuantity(quantity[0], quantity[1])
+        : quantity;
+      drops.push({
+        dropTable: "always",
+        item,
+        quantity: finalQuantity,
+      });
+    });
+  }
+
   for (let i = 0; i < rolls; i++) {
     let dropTable = getBossDropTable(boss);
     // console.log("Drop Table in generate boss drop", dropTable);
@@ -272,10 +288,14 @@ function generateBossDrop(boss) {
     // console.log("2. drops ater table and ItemDrop", drops);
 
     if (itemDrop) {
+      let finalQuantity = Array.isArray(itemDrop.quantity)
+        ? rollItemQuantity(itemDrop.quantity[0], itemDrop.quantity[1])
+        : itemDrop.quantity;
+
       drops.push({
         dropTable,
         item: itemDrop.item,
-        quantity: itemDrop.quantity,
+        quantity: finalQuantity,
       });
       // console.log("drops INSIDE if:", drops);
     }
@@ -284,6 +304,8 @@ function generateBossDrop(boss) {
   }
   //We're gonna populate the modal here using a separate function
   lastBossRolled = boss;
+  lastBossName =
+    Object.keys(bosses).find((name) => bosses[name] === boss) || "Unknown Boss";
   populateBossDropModal(drops);
 }
 
@@ -293,25 +315,34 @@ function populateBossDropModal(drops) {
   //Clear previous drop content
   bossDropResultText.textContent = "";
 
+  let bossName = lastBossName;
+  // console.log(lastBossName);
+
   //Loop through each drop and display it
   drops.forEach(({ dropTable, item, quantity }) => {
     const bossDropTableText = document.createElement("p");
 
-    let formattedDropTable = dropTable
-      .replace(/([a-z])([A-Z])/g, "$1 $2")
-      .toUpperCase();
-
-    if (dropTable === "rareDropTable") {
-      bossDropTableText.textContent = `You hit the RARE DROP TABLE!`;
+    if (dropTable === "always") {
+      // console.log(bossName);
+      bossDropTableText.textContent = `You received ${bossName} drop: ${quantity}x ${item}!`;
+      bossDropResultText.appendChild(bossDropTableText);
     } else {
-      bossDropTableText.textContent = `You hit the ${formattedDropTable} drop table!`;
+      let formattedDropTable = dropTable
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        .toUpperCase();
+
+      if (dropTable === "rareDropTable") {
+        bossDropTableText.textContent = `You hit the RARE DROP TABLE!`;
+      } else {
+        bossDropTableText.textContent = `You hit the ${formattedDropTable} drop table!`;
+      }
+
+      const bossItemDropText = document.createElement("p");
+      bossItemDropText.textContent = `You received: ${quantity}x ${item}!`;
+
+      bossDropResultText.appendChild(bossDropTableText);
+      bossDropResultText.appendChild(bossItemDropText);
     }
-
-    const bossItemDropText = document.createElement("p");
-    bossItemDropText.textContent = `You received: ${quantity}x ${item}!`;
-
-    bossDropResultText.appendChild(bossDropTableText);
-    bossDropResultText.appendChild(bossItemDropText);
   });
 
   //pop up the modal
