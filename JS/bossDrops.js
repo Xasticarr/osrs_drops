@@ -160,16 +160,10 @@ function calculateTableProbabilities(boss) {
     let tableChance = items.reduce((sum, item) => sum + (item.rarity || 0), 0);
     tableChances[table] = tableChance;
   }
-
-  // if (boss.rDT) {
-  //   if (!boss.dropTables["rareDropTable"]) {
-  //     boss.dropTables["rareDropTable"] = rareDropTable;
-  //     console.log("Rare Drop Table initialized");
-  //   }
-  //   console.log("Rare Drop Table:", boss.dropTables["rareDropTable"]);
-
-  //   tableChances["rareDropTable"] = boss.rDTChance;
-  // }
+  //Adding in rareDropTable chances for calculation
+  if (boss.rDT) {
+    tableChances["rareDropTable"] = boss.rDTChance;
+  }
 
   let totalChance = Object.values(tableChances).reduce(
     (sum, chance) => sum + chance,
@@ -211,7 +205,13 @@ function getBossDropTable(boss) {
 // This is broken, will have to try and fix.
 
 function rollForBossItem(boss, tableName) {
-  let table = boss.dropTables[tableName];
+  let table;
+
+  if (tableName === "rareDropTable") {
+    table = Object.values(rareDropTable).flat(); //Flattens rDT categories
+  } else {
+    table = boss.dropTables[tableName];
+  }
   // console.log("This is the Table:", table);
   if (!table || !Array.isArray(table)) return null;
 
