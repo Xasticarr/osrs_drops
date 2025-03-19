@@ -297,7 +297,15 @@ function populateBossDropModal(drops) {
   drops.forEach(({ dropTable, item, quantity }) => {
     const bossDropTableText = document.createElement("p");
 
-    bossDropTableText.textContent = `You hit the ${dropTable.toUpperCase()} drop table!`;
+    let formattedDropTable = dropTable
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .toUpperCase();
+
+    if (dropTable === "rareDropTable") {
+      bossDropTableText.textContent = `You hit the RARE DROP TABLE!`;
+    } else {
+      bossDropTableText.textContent = `You hit the ${formattedDropTable} drop table!`;
+    }
 
     const bossItemDropText = document.createElement("p");
     bossItemDropText.textContent = `You received: ${quantity}x ${item}!`;
