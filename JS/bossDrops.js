@@ -35,21 +35,21 @@ const rareDropTable = {
     { item: "Silver ore (noted)", quantity: 100, rarity: 1 / 64 },
   ],
   "sub-tables": [
-    { item: "Gem table", rarity: 1 / 6.4, type: "table" },
-    { item: "Mega Rare table", rarity: 1 / 8.533, type: "table" },
+    { item: "Gem table", quantity: 1, rarity: 1 / 6.4, type: "table" },
+    { item: "Mega Rare table", quantity: 1, rarity: 1 / 8.533, type: "table" },
   ],
   "Gem table": [
     { item: "Nothing", quantity: 1, rarity: 1 / 2.032 },
-    { item: "Uncut sapphire", quantity: 1, rarity: 1 / 2.032 },
-    { item: "Uncut emerald", quantity: 1, rarity: 1 / 2.032 },
-    { item: "Uncut ruby", quantity: 1, rarity: 1 / 2.032 },
-    { item: "Chaos talisman", quantity: 1, rarity: 1 / 2.032 },
-    { item: "Nature talisman", quantity: 1, rarity: 1 / 2.032 },
-    { item: "Uncut diamond", quantity: 1, rarity: 1 / 2.032 },
-    { item: "Rune javelin", quantity: 1, rarity: 1 / 2.032 },
-    { item: "Loop half of key", quantity: 1, rarity: 1 / 2.032 },
-    { item: "Tooth half of key", quantity: 1, rarity: 1 / 2.032 },
-    { item: "Mega Rare table", rarity: 1 / 128, type: "table" },
+    { item: "Uncut sapphire", quantity: 1, rarity: 1 / 4 },
+    { item: "Uncut emerald", quantity: 1, rarity: 1 / 8 },
+    { item: "Uncut ruby", quantity: 1, rarity: 1 / 16 },
+    { item: "Chaos talisman", quantity: 1, rarity: 1 / 42.67 },
+    { item: "Nature talisman", quantity: 1, rarity: 1 / 42.67 },
+    { item: "Uncut diamond", quantity: 1, rarity: 1 / 64 },
+    { item: "Rune javelin", quantity: 1, rarity: 1 / 128 },
+    { item: "Loop half of key", quantity: 1, rarity: 1 / 128 },
+    { item: "Tooth half of key", quantity: 1, rarity: 1 / 128 },
+    { item: "Mega Rare table", quantity: 1, rarity: 1 / 128, type: "table" },
   ],
   "Mega Rare table": [
     { item: "Nothing (Mega Rare)", quantity: 1, rarity: 1 / 1.133 },
@@ -215,13 +215,30 @@ function rollForBossItem(boss, tableName) {
 
   if (tableName === "rareDropTable") {
     table = Object.values(rareDropTable).flat(); //Flattens rDT categories
+  } else if (rareDropTable[tableName]) {
+    table = rareDropTable[tableName];
   } else {
     table = boss.dropTables[tableName];
   }
-  // console.log("This is the Table:", table);
+  console.log(
+    `Rolling within sub-table: ${tableName}, Retrieved table:`,
+    table
+  );
   if (!table || !Array.isArray(table)) return null;
 
+  if (!table || !Array.isArray(table) || table.length === 0) {
+    console.error(
+      `Table "${tableName}" is either missing, not an array, or empty!`,
+      table
+    );
+    return null;
+  }
+
   let totalWeight = table.reduce((sum, item) => sum + (item.rarity || 0), 0);
+  if (totalWeight === 0) {
+    console.log("Total Weight is 0 for some reason");
+    return null;
+  }
   // console.log("Total Weight", totalWeight);
 
   //Holy shit this fixed it!
@@ -234,17 +251,46 @@ function rollForBossItem(boss, tableName) {
   let cumulativeWeight = 0;
   for (const item of table) {
     cumulativeWeight += item.rarity;
-    // console.log(cumulativeWeight);
+    // console.log(
+    //   `Rolling... ${roll} <= ${cumulativeWeight} for item: ${item.item}`
+    // );
     if (roll <= cumulativeWeight) {
+      console.log(`Selected item: ${item.item}`);
+
+      if (item.type === "table" && rareDropTable[item.item]) {
+        console.log(`Entering sub-table: ${item.item}`);
+
+        const subTable = rareDropTable[item.item];
+        console.log(`Sub-table details:`, subTable);
+
+        if (!subTable || subTable.length === 0) {
+          return null;
+        }
+        console.log(`Rolling for sub-table: ${item.item}`);
+        let result = rollForBossItem(boss, item.item);
+        console.log(
+          `Sub-table result AFTER rolling sub-table: ${item.item}`,
+          result
+        );
+        console.log(
+          `Rolling within sub-table: ${tableName}, retrieved table:`,
+          table
+        ); //debugging
+
+        if (result) {
+          return result;
+        }
+      }
       // console.log(
       //   "Leaving this is, it does not show in console",
       //   "Item Drop:",
       //   item.item
       // );
-      return { item: item.item, quantity: item.quantity };
+      return { item: item.item, quantity: item.quantity || 1 };
       //This line is not populating properly in the modal now.
     }
   }
+  console.warn(`No item found in ${tableName}`);
   return null;
 }
 // console.log(rollForBossItem(bosses.Zulrah));
@@ -285,11 +331,11 @@ function generateBossDrop(boss) {
     });
   }
 
-  // let uniqueDrop = null;
+  // let rareDrop = null;
   // let attempts = 0;
   // let maxAttempts = 100;
 
-  // while (!uniqueDrop && attempts < maxAttempts) {
+  // while (!rareDrop && attempts < maxAttempts) {
   //   let dropTable = getBossDropTable(boss);
   //   let itemDrop = rollForBossItem(boss, dropTable);
 
@@ -304,15 +350,15 @@ function generateBossDrop(boss) {
   //       quantity: finalQuantity,
   //     });
 
-  //     if (dropTable === "unique") {
-  //       uniqueDrop = itemDrop;
+  //     if (dropTable === "rareDropTable") {
+  //       rareDrop = itemDrop;
   //     }
   //   }
   //   attempts++;
   // }
 
-  // if (!uniqueDrop) {
-  //   console.warn("Failed to find a unique drop after", maxAttempts, "attempts");
+  // if (!rareDrop) {
+  //   console.warn("Failed to find a rare drop after", maxAttempts, "attempts");
   // }
 
   for (let i = 0; i < rolls; i++) {
