@@ -195,6 +195,9 @@ function getBossDropTable(boss) {
   for (const [table, chance] of Object.entries(tableChances)) {
     accumulatedChance += chance;
     if (roll <= accumulatedChance) {
+      if (table === "unique") {
+        playUniqueDropSound();
+      }
       return table;
     }
   }
@@ -416,3 +419,8 @@ document.querySelectorAll(".bossSlay").forEach((button) => {
 //     populateBossDropModal(drops);
 //   });
 // });
+
+function playUniqueDropSound() {
+  let audio = new Audio("../assets/Unique_sound.ogg");
+  audio.play();
+}
