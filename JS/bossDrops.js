@@ -1,7 +1,7 @@
 "use strict";
 
 function rollRandomNumber(max) {
-  return Math.floor(Math.random() * max) + 1;
+  return Math.floor(Math.random() * max);
 }
 
 function rollItemQuantity(min, max) {
@@ -169,11 +169,14 @@ function calculateTableProbabilities(boss) {
     (sum, chance) => sum + chance,
     0
   );
-
+  // console.log("total chance:", totalChance);
+  // console.log("table chances:", tableChances);
   let tableChancesPercent = {};
   for (const [table, chance] of Object.entries(tableChances)) {
     tableChancesPercent[table] = (chance / totalChance) * 100;
+    // parseFloat(((chance / totalChance) * 100).toFixed(2));
   }
+  // console.log(tableChancesPercent);
   // console.log("This is the %", tableChancesPercent);
   return tableChancesPercent;
 }
@@ -278,6 +281,36 @@ function generateBossDrop(boss) {
       });
     });
   }
+
+  // let uniqueDrop = null;
+  // let attempts = 0;
+  // let maxAttempts = 100;
+
+  // while (!uniqueDrop && attempts < maxAttempts) {
+  //   let dropTable = getBossDropTable(boss);
+  //   let itemDrop = rollForBossItem(boss, dropTable);
+
+  //   if (itemDrop) {
+  //     let finalQuantity = Array.isArray(itemDrop.quantity)
+  //       ? rollItemQuantity(itemDrop.quantity[0], itemDrop.quantity[1])
+  //       : itemDrop.quantity;
+
+  //     drops.push({
+  //       dropTable,
+  //       item: itemDrop.item,
+  //       quantity: finalQuantity,
+  //     });
+
+  //     if (dropTable === "unique") {
+  //       uniqueDrop = itemDrop;
+  //     }
+  //   }
+  //   attempts++;
+  // }
+
+  // if (!uniqueDrop) {
+  //   console.warn("Failed to find a unique drop after", maxAttempts, "attempts");
+  // }
 
   for (let i = 0; i < rolls; i++) {
     let dropTable = getBossDropTable(boss);
