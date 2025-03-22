@@ -11,7 +11,7 @@ function rollItemQuantity(min, max) {
 //I actually need to make the Rare Drop Table its own thing because pretty much everything can access it (even though it sucks)
 
 const rareDropTable = {
-  ammo: [
+  "rare ammo": [
     { item: "Nature rune", quantity: 67, rarity: 1 / 42.67 },
     { item: "Adamant javelin", quantity: 20, rarity: 1 / 64 },
     { item: "Death rune", quantity: 45, rarity: 1 / 64 },
@@ -19,14 +19,14 @@ const rareDropTable = {
     { item: "Rune arrow", quantity: 42, rarity: 1 / 64 },
     { item: "Steel arrow", quantity: 150, rarity: 1 / 64 },
   ],
-  equipment: [
+  "rare equipment": [
     { item: "Rune 2h sword", quantity: 1, rarity: 1 / 42.67 },
     { item: "Rune battleaxe", quantity: 1, rarity: 1 / 42.67 },
     { item: "Rune sq shield", quantity: 1, rarity: 1 / 64 },
     { item: "Dragon med helm", quantity: 1, rarity: 1 / 128 },
     { item: "Rune kiteshield", quantity: 1, rarity: 1 / 128 },
   ],
-  other: [
+  "rare other": [
     { item: "Coins", quantity: 3000, rarity: 1 / 6.095 },
     { item: "Loop half of key", quantity: 1, rarity: 1 / 6.4 },
     { item: "Tooth half of key", quantity: 1, rarity: 1 / 6.4 },
@@ -67,6 +67,11 @@ const bosses = {
     tripleRoll: false,
     rDT: true,
     rDTChance: 9 / 248,
+    tertiaryDrops: [
+      { item: "Clue Scroll (Elite)", quantity: 1, rarity: 1 / 75 },
+      { item: "Jar of Swamp", quantity: 1, rarity: 1 / 3000 },
+      { item: "Pet Snakeling", quantity: 1, rarity: 1 / 4000 },
+    ],
     dropTables: {
       always: [{ item: "Zulrah's scales", quantity: [100, 299] }],
       unique: [
@@ -154,6 +159,13 @@ const bosses = {
 function calculateTableProbabilities(boss) {
   let tableChances = {};
 
+  //Add Rare Drop Table if boss has access
+
+  if (boss.rDT && !boss.dropTables.rareDropTable) {
+    boss.dropTables.rareDropTable = rareDropTable;
+    console.log("Adding Rare Drop Table to boss!");
+  }
+
   for (const [table, items] of Object.entries(boss.dropTables)) {
     if (table === "always" || !Array.isArray(items)) continue;
     //Might remove everything after || but testing for now.
@@ -174,9 +186,12 @@ function calculateTableProbabilities(boss) {
   let tableChancesPercent = {};
   for (const [table, chance] of Object.entries(tableChances)) {
     tableChancesPercent[table] = (chance / totalChance) * 100;
+    // console.log(Object.entries(tableChances));
     // parseFloat(((chance / totalChance) * 100).toFixed(2));
   }
   // console.log(tableChancesPercent);
+  // console.log("Table Chances Breakdown:", tableChances);
+  // console.log("Total Chance Sum:", totalChance);
   // console.log("This is the %", tableChancesPercent);
   return tableChancesPercent;
 }
@@ -201,7 +216,9 @@ function getBossDropTable(boss) {
       return table;
     }
   }
-
+  console.log(
+    "This should return 'other' from dropTables if nothing else hits, because thats the most common table"
+  );
   return "other";
 }
 
@@ -214,18 +231,43 @@ function rollForBossItem(boss, tableName) {
   let table;
 
   if (tableName === "rareDropTable") {
-    table = Object.values(rareDropTable).flat(); //Flattens rDT categories
+    if (
+      !boss.dropTables.rareDropTable ||
+      !boss.dropTables.rareDropTable["sub-tables"]
+    ) {
+      console.error(
+        `Error: rareDropTable or its sub-tables are missing for ${
+          Object.keys(bosses).find((name) => bosses[name] === boss) ||
+          "Unknown Boss"
+        }`
+      );
+
+      return null;
+    }
+
+    let roll = Math.random();
+    let accumulatedChance = 0;
+
+    for (const subTable of boss.dropTables.rareDropTable["sub-tables"]) {
+      accumulatedChance += subTable.rarity;
+      if (roll <= accumulatedChance) {
+        console.log(`Rolled into RDT Sub-Table: ${subTable.item}`);
+        return rollForBossItem(boss, subTable.item);
+      }
+    }
+    console.warn("RDT did not hit any sub-tables");
+    return null;
   } else if (rareDropTable[tableName]) {
     table = rareDropTable[tableName];
+    //This is saying if its an internal table, we use it
+
+    console.log(`This is the internal  *${tableName}* table of the RDT`);
   } else {
     table = boss.dropTables[tableName];
+    //This is saying, otherwise use the normal drop tables
   }
-  console.log(
-    `Rolling within sub-table: ${tableName}, Retrieved table:`,
-    table
-  );
-  if (!table || !Array.isArray(table)) return null;
 
+  //This is for testing and failsafe
   if (!table || !Array.isArray(table) || table.length === 0) {
     console.error(
       `Table "${tableName}" is either missing, not an array, or empty!`,
@@ -235,65 +277,93 @@ function rollForBossItem(boss, tableName) {
   }
 
   let totalWeight = table.reduce((sum, item) => sum + (item.rarity || 0), 0);
+  //This is for testing
   if (totalWeight === 0) {
     console.log("Total Weight is 0 for some reason");
     return null;
   }
-  // console.log("Total Weight", totalWeight);
-
-  //Holy shit this fixed it!
 
   let roll = Math.random() * totalWeight;
+
+  //This was breaking the roll. Fixed it right above.
   // let roll = rollRandomNumber() * totalWeight;
   //Something is breaking right here. Roll shows up as 1 (when function(totalWeight)) or NaN (when function() * totalWeight)
-  // console.log("Roll", roll);
 
   let cumulativeWeight = 0;
   for (const item of table) {
     cumulativeWeight += item.rarity;
-    // console.log(
-    //   `Rolling... ${roll} <= ${cumulativeWeight} for item: ${item.item}`
-    // );
     if (roll <= cumulativeWeight) {
       console.log(`Selected item: ${item.item}`);
 
-      if (item.type === "table" && rareDropTable[item.item]) {
-        console.log(`Entering sub-table: ${item.item}`);
-
-        const subTable = rareDropTable[item.item];
-        console.log(`Sub-table details:`, subTable);
-
-        if (!subTable || subTable.length === 0) {
-          return null;
-        }
-        console.log(`Rolling for sub-table: ${item.item}`);
-        let result = rollForBossItem(boss, item.item);
-        console.log(
-          `Sub-table result AFTER rolling sub-table: ${item.item}`,
-          result
-        );
-        console.log(
-          `Rolling within sub-table: ${tableName}, retrieved table:`,
-          table
-        ); //debugging
-
-        if (result) {
-          return result;
-        }
+      if (item.type === "table") {
+        console.log(`Type = Table! Entering sub-table: ${item.item}`);
+        return rollForBossItem(boss, item.item);
       }
-      // console.log(
-      //   "Leaving this is, it does not show in console",
-      //   "Item Drop:",
-      //   item.item
-      // );
       return { item: item.item, quantity: item.quantity || 1 };
-      //This line is not populating properly in the modal now.
     }
   }
   console.warn(`No item found in ${tableName}`);
   return null;
 }
 // console.log(rollForBossItem(bosses.Zulrah));
+
+function rollForTertiaryDrop(boss) {
+  if (!boss.tertiaryDrops || boss.tertiaryDrops.length === 0) return null;
+
+  //We're just going to generate a random roll, I feel the issue came when we grouped everything up with totalWeight and cumulativeWeight.
+
+  let roll = Math.random();
+  console.log(`Tertiary roll: ${roll}.`);
+
+  //Loop through tertiary items and roll for each INDIVIDUALLY
+  for (const item of boss.tertiaryDrops) {
+    const roll = Math.random();
+    if (roll <= item.rarity) {
+      console.log(`Tertiary roll: ${roll}, and result: ${item.item}`);
+      return { item: item.item, quantity: item.quantity || 1 };
+    }
+  }
+
+  //If no item matches, return null (No drop occurs. THIS SHOULD BE COMMON)
+  console.log("No tertiary drop.");
+  return null;
+}
+
+//Nothing below this worked as intended, and caused a tertiary drop to be granted on EVERY kill.
+
+//Leaving it so I can see it for now.
+
+//   /* If we need Scaling we can uncomment these
+
+//   //Need a scaling factor to make the weights more noticeable. Without this we kept rolling a clue drop on EVERY kill
+
+//   const scaleFactor = 10000; //Can adjust if needed */
+
+//   //Scale the rarity IF NEEDED
+//   let totalWeight = boss.tertiaryDrops.reduce(
+//     (sum, item) => sum + item.rarity,
+//     0
+//   );
+//   //log total weight (scaled)
+//   console.log(`Tertiary total weights: ${totalWeight}.`);
+//   let roll = Math.random() * totalWeight;
+//   //log random roll value
+//   console.log(`Tertiary roll: ${roll}.`);
+
+//   let cumulativeWeight = 0;
+//   for (const item of boss.tertiaryDrops) {
+//     //Scale the cumulative weight IF NEEDED
+//     cumulativeWeight += item.rarity /** scaleFactor*/;
+//     //log cumulative weight
+//     console.log(`Tertiary cumulative weight: ${cumulativeWeight}.`);
+//     if (roll <= cumulativeWeight) {
+//       console.log(`Tertiary roll: ${roll}, and result: ${item.item}`);
+//       return { item: item.item, quantity: item.quantity || 1 };
+//     }
+//   }
+//   console.log("No tertiary drop");
+//   return null;
+// }
 
 //Using generate function to set up reroll button in the modal later on
 let lastBossRolled = null;
@@ -331,35 +401,39 @@ function generateBossDrop(boss) {
     });
   }
 
-  // let rareDrop = null;
-  // let attempts = 0;
-  // let maxAttempts = 100;
+  /* This is purely to roll 100 times and check for specific drops
+  let rareDrop = null;
+  let attempts = 0;
+  let maxAttempts = 100;
 
-  // while (!rareDrop && attempts < maxAttempts) {
-  //   let dropTable = getBossDropTable(boss);
-  //   let itemDrop = rollForBossItem(boss, dropTable);
+  while (!rareDrop && attempts < maxAttempts) {
+    let dropTable = getBossDropTable(boss);
+    let itemDrop = rollForBossItem(boss, dropTable);
 
-  //   if (itemDrop) {
-  //     let finalQuantity = Array.isArray(itemDrop.quantity)
-  //       ? rollItemQuantity(itemDrop.quantity[0], itemDrop.quantity[1])
-  //       : itemDrop.quantity;
+    if (itemDrop) {
+      let finalQuantity = Array.isArray(itemDrop.quantity)
+        ? rollItemQuantity(itemDrop.quantity[0], itemDrop.quantity[1])
+        : itemDrop.quantity;
 
-  //     drops.push({
-  //       dropTable,
-  //       item: itemDrop.item,
-  //       quantity: finalQuantity,
-  //     });
+      drops.push({
+        dropTable,
+        item: itemDrop.item,
+        quantity: finalQuantity,
+      });
 
-  //     if (dropTable === "rareDropTable") {
-  //       rareDrop = itemDrop;
-  //     }
-  //   }
-  //   attempts++;
-  // }
+      if (dropTable === "rareDropTable") {
+        rareDrop = itemDrop;
+      }
+    }
+    attempts++;
+  }
 
-  // if (!rareDrop) {
-  //   console.warn("Failed to find a rare drop after", maxAttempts, "attempts");
-  // }
+  if (!rareDrop) {
+    console.warn("Failed to find a rare drop after", maxAttempts, "attempts");
+  }
+    */
+
+  //Roll for regular drops
 
   for (let i = 0; i < rolls; i++) {
     let dropTable = getBossDropTable(boss);
@@ -381,9 +455,16 @@ function generateBossDrop(boss) {
       });
       // console.log("drops INSIDE if:", drops);
     }
-    // console.log("drops AFTER if", drops);
-    // console.log(typeof drops);
   }
+  let tertiaryDrop = rollForTertiaryDrop(boss);
+  if (tertiaryDrop) {
+    drops.push({
+      dropTable: "tertiary",
+      item: tertiaryDrop.item,
+      quantity: tertiaryDrop.quantity,
+    });
+  }
+
   //We're gonna populate the modal here using a separate function
   lastBossRolled = boss;
   lastBossName =
@@ -399,6 +480,7 @@ function populateBossDropModal(drops) {
 
   let bossName = lastBossName;
   // console.log(lastBossName);
+  let tertiaryDrop = null;
 
   //Loop through each drop and display it
   drops.forEach(({ dropTable, item, quantity }) => {
@@ -408,6 +490,9 @@ function populateBossDropModal(drops) {
       // console.log(bossName);
       bossDropTableText.textContent = `You received ${bossName} drop: ${quantity}x ${item}!`;
       bossDropResultText.appendChild(bossDropTableText);
+    } else if (dropTable === "tertiary") {
+      //Store the tertiary drop here to append later
+      tertiaryDrop = { item, quantity };
     } else {
       let formattedDropTable = dropTable
         .replace(/([a-z])([A-Z])/g, "$1 $2")
@@ -426,6 +511,12 @@ function populateBossDropModal(drops) {
       bossDropResultText.appendChild(bossItemDropText);
     }
   });
+
+  if (tertiaryDrop) {
+    const tertiaryDropText = document.createElement("p");
+    tertiaryDropText.textContent = `You rolled a TERTIARY drop: ${tertiaryDrop.quantity}x ${tertiaryDrop.item}!`;
+    bossDropResultText.appendChild(tertiaryDropText);
+  }
 
   //pop up the modal
   document.getElementById("bossDropModal").style.display = "flex";
@@ -469,4 +560,24 @@ document.querySelectorAll(".bossSlay").forEach((button) => {
 function playUniqueDropSound() {
   let audio = new Audio("../assets/Unique_sound.ogg");
   audio.play();
+}
+
+function testTertiaryDropRate(boss, runs = 100) {
+  let tertiaryCount = 0;
+
+  for (let i = 0; i < runs; i++) {
+    let terDrop = rollForTertiaryDrop(boss);
+
+    if (terDrop) {
+      tertiaryCount++;
+      console.log(
+        `Run ${i + 1}: Tertiary drop - ${terDrop.item} x ${terDrop.quantity}`
+      );
+    }
+  }
+
+  console.log(
+    `Out of ${runs} kills, tertiary drops occurred ${tertiaryCount} times.`
+  );
+  console.log(`Drop rate: ${(tertiaryCount / runs) * 100}%`);
 }
