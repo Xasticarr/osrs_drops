@@ -66,7 +66,7 @@ const bosses = {
     tertiaryDrops: [
       { item: "Clue Scroll (Elite)", quantity: 1, rarity: 1 / 75 },
       { item: "Jar of Swamp", quantity: 1, rarity: 1 / 3000 },
-      { item: "Pet Snakeling", quantity: 1, rarity: 1 / 4000 },
+      { item: "Pet Snakeling", quantity: 1, rarity: 1 / 4000, type: "pet" },
     ],
     dropTables: {
       always: [{ item: "Zulrah's scales", quantity: [100, 299] }],
@@ -146,6 +146,151 @@ const bosses = {
       ],
     },
   } /*Zulrah ends here*/,
+  Vorkath: {
+    doubleRoll: true,
+    tripleRoll: false,
+    rDT: true,
+    rDTChance: 5 / 150,
+    tertiaryDrops: [
+      {
+        item: "Scaly blue dragonhide",
+        quantity: 1,
+        rarity: 1 / 10,
+      },
+      { item: "Vorkath's Head", quantity: 1, rarity: 1 / 50 },
+      { item: "Clue Scroll (Elite)", quantity: 1, rarity: 1 / 65 },
+      { item: "Dragonbone Necklace", quantity: 1, rarity: 1 / 1000 },
+      { item: "Jar of Decay", quantity: 1, rarity: 1 / 3000 },
+      { item: "Vorki", quantity: 1, rarity: 1 / 3000, type: "pet" },
+      { item: "Draconic Visage", quantity: 1, rarity: 1 / 5000 },
+      { item: "Skeletal Visage", quantity: 1, rarity: 1 / 5000 },
+    ],
+    dropTables: {
+      always: [
+        { item: "Superior dragon bones", quantity: 2 },
+        { item: "Blue dragonhide", quantity: 2 },
+      ],
+      equipment: [
+        { item: "Rune longsword", quantity: [2, 3], rarity: 2 * (1 / 30) },
+        { item: "Rune kiteshield", quantity: [2, 3], rarity: 2 * (1 / 30) },
+        {
+          item: "Battlestaff (noted)",
+          quantity: [5, 15],
+          rarity: 2 * (1 / 37.5),
+        },
+        { item: "Dragon battleaxe", quantity: 1, rarity: 2 * (1 / 75) },
+        { item: "Dragon longsword", quantity: 1, rarity: 2 * (1 / 75) },
+        { item: "Dragon platelegs", quantity: 1, rarity: 2 * (1 / 75) },
+        { item: "Dragon plateskirt", quantity: 1, rarity: 2 * (1 / 75) },
+      ],
+      runes: [
+        { item: "Chaos rune", quantity: [650, 1000], rarity: 2 * (1 / 25) },
+        { item: "Death rune", quantity: [300, 500], rarity: 2 * (1 / 25) },
+        { item: "Wrath rune", quantity: [30, 60], rarity: 2 * (1 / 50) },
+      ],
+      dragonhide: [
+        {
+          item: "Blue dragonhide (noted)",
+          quantity: [25, 30],
+          rarity: 2 * (1 / 18.75),
+        },
+        {
+          item: "Green dragonhide (noted)",
+          quantity: [25, 30],
+          rarity: 2 * (1 / 21.43),
+        },
+        {
+          item: "Red dragonhide (noted)",
+          quantity: [20, 25],
+          rarity: 2 * (1 / 21.43),
+        },
+        {
+          item: "Black dragonhide (noted)",
+          quantity: [15, 25],
+          rarity: 2 * (1 / 21.43),
+        },
+      ],
+      fletching: [
+        {
+          item: "Dragon bolts (unf)",
+          quantity: [50, 100],
+          rarity: 2 * (1 / 18.75),
+        },
+        { item: "Dragon dart tip", quantity: [10, 50], rarity: 2 * (1 / 25) },
+        {
+          item: "Dragonstone bolt tips",
+          quantity: [11, 25],
+          rarity: 2 * (1 / 30),
+        },
+        { item: "Onyx bolt tips", quantity: [5, 10], rarity: 2 * (1 / 37.5) },
+        { item: "Rune dart tip", quantity: [75, 100], rarity: 2 * (1 / 50) },
+        { item: "Dragon arrowtips", quantity: [25, 50], rarity: 2 * (1 / 50) },
+        {
+          item: "Diamond bolt tips",
+          quantity: [25, 30],
+          rarity: 2 * (1 / 111),
+        },
+        {
+          item: "Emerald bolt tips",
+          quantity: [25, 30],
+          rarity: 2 * (1 / 138.8),
+        },
+        { item: "Ruby bolt tips", quantity: [25, 30], rarity: 2 * (1 / 138.8) },
+        {
+          item: "Dragonstone bolt tips",
+          quantity: [25, 30],
+          rarity: 2 * (1 / 185),
+        },
+        { item: "Onyx bolt tips", quantity: [25, 30], rarity: 2 * (1 / 370) },
+        {
+          item: "Sapphire bolt tips",
+          quantity: [25, 30],
+          rarity: 2 * (1 / 555),
+        },
+      ],
+      seeds: [
+        { item: "Snapdragon seed", quantity: 1, rarity: 2 * (1 / 112.3) },
+        { item: "Torstol seed", quantity: 1, rarity: 2 * (1 / 118.7) },
+        { item: "Ranarr seed", quantity: 1, rarity: 2 * (1 / 416.7) },
+        { item: "Watermelon seed", quantity: 15, rarity: 2 * (1 / 595.2) },
+        { item: "Willow seed", quantity: 1, rarity: 2 * (1 / 625) },
+        { item: "Mahogany seed", quantity: 1, rarity: 2 * (1 / 694.4) },
+        { item: "Maple seed", quantity: 1, rarity: 2 * (1 / 694.4) },
+        { item: "Teak seed", quantity: 1, rarity: 2 * (1 / 694.4) },
+        { item: "Yew seed", quantity: 1, rarity: 2 * (1 / 694.4) },
+        { item: "Papaya tree seed", quantity: 1, rarity: 2 * (1 / 892.9) },
+        { item: "Magic seed", quantity: 1, rarity: 2 * (1 / 1136) },
+        { item: "Palm tree seed", quantity: 1, rarity: 2 * (1 / 1250) },
+        { item: "Spirit seed", quantity: 1, rarity: 2 * (1 / 1562) },
+        { item: "Dragonfruit tree seed", quantity: 1, rarity: 2 * (1 / 2083) },
+        { item: "Celastrus seed", quantity: 1, rarity: 2 * (1 / 3125) },
+        { item: "Redwood tree seed", quantity: 1, rarity: 2 * (1 / 3125) },
+      ],
+      other: [
+        {
+          item: "Adamantite ore (noted)",
+          quantity: [10, 30],
+          rarity: 2 * (1 / 21.43),
+        },
+        { item: "Coins", quantity: [20000, 81000], rarity: 2 * (1 / 30) },
+        { item: "Grapes (noted)", quantity: [250, 300], rarity: 2 * (1 / 30) },
+        { item: "Magic logs (noted)", quantity: 50, rarity: 2 * (1 / 30) },
+        {
+          item: "Manta ray (noted)",
+          quantity: [35, 55],
+          rarity: 2 * (1 / 37.5),
+        },
+        {
+          item: "Dragon bones (noted)",
+          quantity: [15, 20],
+          rarity: 2 * (1 / 37.5),
+        },
+        { item: "Diamond (noted)", quantity: [10, 20], rarity: 2 * (1 / 37.5) },
+        { item: "Dragonstone (noted)", quantity: [2, 3], rarity: 2 * (1 / 50) },
+        { item: "Wrath talisman", quantity: 1, rarity: 2 * (1 / 50) },
+      ],
+    },
+  },
 };
 
 function calculateTableProbabilities(boss) {
