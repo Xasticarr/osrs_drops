@@ -145,7 +145,7 @@ const bosses = {
         { item: "Zulrah's scales", quantity: 500, rarity: 2 * (1 / 20.67) },
       ],
     },
-  } /*Zulrah ends here*/,
+  }, //Zulrah ends here
   Vorkath: {
     doubleRoll: true,
     tripleRoll: false,
@@ -290,7 +290,7 @@ const bosses = {
         { item: "Wrath talisman", quantity: 1, rarity: 2 * (1 / 50) },
       ],
     },
-  },
+  }, //Vorkath ends here
 };
 
 function calculateTableProbabilities(boss) {
@@ -304,9 +304,16 @@ function calculateTableProbabilities(boss) {
   }
 
   for (const [table, items] of Object.entries(boss.dropTables)) {
-    if (table === "always" || !Array.isArray(items)) continue;
+    if (
+      table === "always" ||
+      !Array.isArray(items) ||
+      table === "rareDropTable"
+    )
+      //Added "|| table === "rareDropTable""
+      continue;
     let tableChance = items.reduce((sum, item) => sum + (item.rarity || 0), 0);
-    tableChances[table] = tableChance;
+    tableChances[table] =
+      tableChance / (boss.doubleRoll ? 2 : boss.tripleRoll ? 3 : 1); //Adjusting for amount of rolls
   }
   //Adding in rareDropTable chances for calculation
   if (boss.rDT) {
@@ -317,20 +324,37 @@ function calculateTableProbabilities(boss) {
     (sum, chance) => sum + chance,
     0
   );
-  let tableChancesPercent = {};
-  for (const [table, chance] of Object.entries(tableChances)) {
-    tableChancesPercent[table] = (chance / totalChance) * 100;
-  }
-  return tableChancesPercent;
+  //Hoping line below fixes skewed drop rates
+  return { tableChances, totalChance };
+
+  //Rolling as a percent is actually skewing drop rates for Rare Drop Table
+  //Normalizing to 100% was the issue, will try returning raw chances and total
+
+  // let tableChancesPercent = {};
+  // for (const [table, chance] of Object.entries(tableChances)) {
+  //   tableChancesPercent[table] = (chance / totalChance) * 100;
+  // }
+  // return tableChancesPercent;
 }
 
 function getBossDropTable(boss) {
-  let tableChances = calculateTableProbabilities(boss);
-  let roll = rollRandomNumber(100);
+  let { tableChances, totalChance } = calculateTableProbabilities(boss);
+  // console.log("Table Chances:", tableChances, "Total:", totalChance);
+  let roll = Math.random() * totalChance; //This should now based on probability function Total Chance
+  // console.log("Roll:", roll);
   let accumulatedChance = 0;
+  //Check for RDT first
+  if (boss.rDT && roll <= boss.rDTChance) {
+    return "rareDropTable";
+  }
+  accumulatedChance = boss.rDTChance; //Offset roll
 
   for (const [table, chance] of Object.entries(tableChances)) {
+    if (table === "rareDropTable") continue;
     accumulatedChance += chance;
+    // console.log(
+    //   `Table: ${table}, Chance: ${chance}, Accumulated: ${accumulatedChance}`
+    // );
     if (roll <= accumulatedChance) {
       if (table === "unique") {
         playUniqueDropSound();
@@ -338,9 +362,7 @@ function getBossDropTable(boss) {
       return table;
     }
   }
-  console.log(
-    "This should return 'other' from dropTables if nothing else hits, because thats the most common table"
-  );
+  //Fallback, should never happen
   return "other";
 }
 
@@ -348,12 +370,9 @@ function rollForBossItem(boss, tableName) {
   let table;
 
   if (tableName === "rareDropTable") {
-    if (
-      !boss.dropTables.rareDropTable ||
-      !boss.dropTables.rareDropTable["sub-tables"]
-    ) {
+    if (!boss.dropTables.rareDropTable) {
       console.error(
-        `Error: rareDropTable or its sub-tables are missing for ${
+        `Error: rareDropTable is missing for ${
           Object.keys(bosses).find((name) => bosses[name] === boss) ||
           "Unknown Boss"
         }`
@@ -361,80 +380,38 @@ function rollForBossItem(boss, tableName) {
 
       return null;
     }
-
-    let roll = Math.random();
-    let accumulatedChance = 0;
-
-    for (const subTable of boss.dropTables.rareDropTable["sub-tables"]) {
-      accumulatedChance += subTable.rarity;
-      if (roll <= accumulatedChance) {
-        console.log(`Rolled into RDT Sub-Table: ${subTable.item}`);
-        return rollForBossItem(boss, subTable.item);
-      }
-    }
-    console.warn("RDT did not hit any sub-tables");
-    return null;
+    return rollForRDTItem(boss.dropTables.rareDropTable);
   } else if (rareDropTable[tableName]) {
     table = rareDropTable[tableName];
     //This is saying if its an internal table, we use it
 
-    console.log(`This is the internal  *${tableName}* table of the RDT`);
+    // console.log(`Rolling on internal RDT table:${tableName} (rollForBossItem)`);
   } else {
     table = boss.dropTables[tableName];
+    // console.log(`Rolling on boss table: ${tableName}`);
     //This is saying, otherwise use the normal drop tables
   }
 
-  //This is for testing and failsafe
-  if (!table || !Array.isArray(table) || table.length === 0) {
-    console.error(
-      `Table "${tableName}" is either missing, not an array, or empty!`,
-      table
-    );
-    return null;
-  }
-
-  let totalWeight = table.reduce((sum, item) => sum + (item.rarity || 0), 0);
-  //This is for testing
-  if (totalWeight === 0) {
-    console.log("Total Weight is 0 for some reason");
-    return null;
-  }
-
-  let roll = Math.random() * totalWeight;
-  let cumulativeWeight = 0;
-  for (const item of table) {
-    cumulativeWeight += item.rarity;
-    if (roll <= cumulativeWeight) {
-      console.log(`Selected item: ${item.item}`);
-
-      if (item.type === "table") {
-        console.log(`Type = Table! Entering sub-table: ${item.item}`);
-        return rollForBossItem(boss, item.item);
-      }
-      return { item: item.item, quantity: item.quantity || 1 };
-    }
-  }
-  console.warn(`No item found in ${tableName}`);
-  return null;
+  return rollTableItems(table, tableName);
 }
 
 function rollForTertiaryDrop(boss) {
   if (!boss.tertiaryDrops || boss.tertiaryDrops.length === 0) return null;
 
   let roll = Math.random();
-  console.log(`Tertiary roll: ${roll}.`);
+  // console.log(`Tertiary roll: ${roll}.`);
 
   //Loop through tertiary items and roll for each INDIVIDUALLY
   for (const item of boss.tertiaryDrops) {
     const roll = Math.random();
     if (roll <= item.rarity) {
-      console.log(`Tertiary roll: ${roll}, and result: ${item.item}`);
+      // console.log(`Tertiary roll: ${roll}, and result: ${item.item}`);
       return { item: item.item, quantity: item.quantity || 1 };
     }
   }
 
   //If no item matches, return null (No drop occurs. THIS SHOULD BE COMMON)
-  console.log("No tertiary drop.");
+  // console.log("No tertiary drop.");
   return null;
 }
 
@@ -446,17 +423,8 @@ let lastBossName = "";
 //This is where we'll store the last boss rolled
 
 function generateBossDrop(boss) {
-  let rolls = 1; //Default to one roll
-
-  //Check for special drop rules
-
-  if (boss.doubleRoll) {
-    rolls = 2;
-  }
-  if (boss.tripleRoll) {
-    rolls = 3;
-  }
-
+  //Condensed roll logic to account for Boss special roll rules, and default to 1 if no rule applies
+  let rolls = boss.doubleRoll ? 2 : boss.tripleRoll ? 3 : 1;
   let drops = [];
   //Roll the appropriate number of times
 
@@ -579,14 +547,131 @@ function slayBoss(event) {
   generateBossDrop(boss);
 }
 
-document.querySelectorAll(".bossSlay").forEach((button) => {
-  button.addEventListener("click", slayBoss);
-});
-
 function playUniqueDropSound() {
   let audio = new Audio("../assets/Unique_sound.ogg");
   audio.play();
 }
+
+//Rare Drop Table Functions
+function calculateRDTProbabilities(rdt) {
+  let tableChances = {};
+  for (const [tableName, items] of Object.entries(rdt)) {
+    if (tableName === "sub-tables") continue;
+    if (Array.isArray(items)) {
+      let tableChance = items.reduce(
+        (sum, item) => sum + (item.rarity || 0),
+        0
+      );
+      tableChances[tableName] = tableChance;
+    }
+  }
+  rdt["sub-tables"].forEach((subTable) => {
+    tableChances[subTable.item] = subTable.rarity;
+  });
+  let totalChance = Object.values(tableChances).reduce(
+    (sum, chance) => sum + chance,
+    0
+  );
+  let tableChancesPercent = {};
+  for (const [table, chance] of Object.entries(tableChances)) {
+    tableChancesPercent[table] = (chance / totalChance) * 100;
+  }
+  //debugging
+  console.log("RDT Probabilities:", tableChancesPercent);
+  return tableChancesPercent;
+}
+
+function rollTableItems(table, tableName) {
+  if (!table || !Array.isArray(table) || table.length === 0) {
+    console.error(
+      `Table "${tableName}" is either missing, not an array or empty!`,
+      table
+    );
+    return null;
+  }
+
+  let totalWeight = table.reduce((sum, item) => sum + (item.rarity || 0), 0);
+  if (totalWeight === 0) {
+    console.error(`Total weight is 0 for table "${tableName}"`);
+    return null;
+  }
+
+  let roll = Math.random() * totalWeight;
+  //debugging
+  console.log(
+    `Rolling in ${tableName} with roll: ${roll.toFixed(
+      4
+    )}, Total Weight: ${totalWeight.toFixed(4)}`
+  );
+  let cumulativeWeight = 0;
+  for (const item of table) {
+    cumulativeWeight += item.rarity;
+    if (roll <= cumulativeWeight) {
+      //Debugging
+      console.log(
+        `Selected item: ${item.item} (Cumulative: ${cumulativeWeight.toFixed(
+          4
+        )})`
+      );
+      if (item.type === "table") {
+        console.log(`Type = Table! Entering sub-table: ${item.item}`);
+        //This is all being tested and can be deleted if required
+        const subResult = rollTableItems(rareDropTable[item.item], item.item);
+        if (subResult) {
+          subResult.tablePath = [tableName, item.item]; //Tracking nested path
+        }
+        return subResult;
+        //Line below works as intended, just commenting out to try fixing tests (Delete lines above up to comment, and uncomment line below)
+
+        // return rollTableItems(rareDropTable[item.item], item.item);
+      }
+      return {
+        item: item.item,
+        quantity: item.quantity || 1,
+        tablePath: [tableName], //Add tablePath for direct items (Testing)
+      };
+    }
+  }
+  console.warn(`No item found in table: "${tableName}"`);
+  return null;
+}
+
+function rollForRDTItem(rdt) {
+  const rdtProbabilities = calculateRDTProbabilities(rdt);
+  let roll = rollRandomNumber(100);
+  //debugging
+  console.log(`Rolling for RDT table with roll: ${roll}`);
+  let accumulatedChance = 0;
+  let selectedTableName = null;
+  let table = null;
+
+  for (const [rdtTable, chance] of Object.entries(rdtProbabilities)) {
+    accumulatedChance += chance;
+    if (roll <= accumulatedChance) {
+      selectedTableName = rdtTable;
+      table = rdt[rdtTable] || rareDropTable[rdtTable];
+      //debugging
+      console.log(
+        `Rolled into RDT, table: ${selectedTableName} (Chance: ${chance.toFixed(
+          2
+        )}%, Accumulated: ${accumulatedChance.toFixed(2)})`
+      );
+      break;
+    }
+  }
+  /*
+  //This is temporary for testing
+  const result = rollTableItems(table, selectedTableName);
+  if (result) {
+    result.tableName = selectedTableName;
+  }
+  //Temporary as well, and commenting out main line
+  return result;
+  */
+  return rollTableItems(table, selectedTableName); //Letting tablePath handle tracking instead of (const result)
+}
+
+//Test Functions
 
 function testTertiaryDropRate(boss, runs = 100) {
   let tertiaryCount = 0;
@@ -607,3 +692,309 @@ function testTertiaryDropRate(boss, runs = 100) {
   );
   console.log(`Drop rate: ${(tertiaryCount / runs) * 100}%`);
 }
+
+//Run below test with testRareDropRate(bosses.bossName, runAmount);, example testRareDropRate(bosses.Zulrah, 1000);
+
+function testRareDropRate(boss, runs = 100) {
+  let rdtCount = 0; // Total RDT hits
+  let uniqueCount = 0; // Total Unique hits
+  let rdtItems = {}; // Track RDT items and their counts
+  let rolls = boss.doubleRoll ? 2 : boss.tripleRoll ? 3 : 1; // Define rolls outside loop
+
+  for (let i = 0; i < runs; i++) {
+    for (let j = 0; j < rolls; j++) {
+      let dropTable = getBossDropTable(boss);
+      let drop = rollForBossItem(boss, dropTable);
+
+      if (drop) {
+        if (dropTable === "rareDropTable") {
+          rdtCount++;
+          let itemKey = `${drop.item} (from ${
+            drop.tablePath ? drop.tablePath.join(" -> ") : "Unknown"
+          })`;
+          rdtItems[itemKey] = (rdtItems[itemKey] || 0) + 1;
+        } else if (dropTable === "unique") {
+          uniqueCount++;
+        }
+      }
+    }
+  }
+
+  // Calculate observed rates without rounding first
+  let observedRDT = (rdtCount / (runs * rolls)) * 100;
+  let expectedRDT = boss.rDTChance * 100;
+  let observedUnique = (uniqueCount / (runs * rolls)) * 100;
+  let expectedUnique = (1 / 256) * 100;
+
+  // Display results with rounding only in the console output
+  console.log(`\nTest Results (${runs} kills):`);
+  console.log("---------------------------------------------");
+  console.log(`Total RDT hits: ${rdtCount}`);
+  console.log(`Observed RDT rate: ${observedRDT.toFixed(4)}%`);
+  console.log(
+    `Expected RDT rate: ${expectedRDT.toFixed(4)}% (based on ${boss.rDTChance})`
+  );
+  console.log(`Total Unique hits: ${uniqueCount}`);
+  console.log(`Observed Unique rate: ${observedUnique.toFixed(4)}%`);
+  console.log(
+    `Expected Unique rate: ${expectedUnique.toFixed(4)}% (1 / 256 per roll)`
+  );
+  console.log("RDT items received:", rdtItems);
+}
+
+function testRDTSubTables(rdt, iterations = 10000) {
+  let results = {
+    "Gem table": { hits: 0, items: {} },
+    "Mega Rare table": { hits: 0, items: {} },
+    other: { hits: 0, items: {} },
+  };
+  let megaFromGem = 0;
+
+  for (let i = 0; i < iterations; i++) {
+    const drop = rollForRDTItem(rdt);
+    if (!drop) continue;
+
+    const tablePath = drop.tablePath || ["other"];
+    const item = drop.item;
+    const initialTable = tablePath[0];
+
+    if (initialTable === "Gem table") {
+      results["Gem table"].hits++;
+      results["Gem table"].items[item] =
+        (results["Gem table"].items[item] || 0) + 1;
+      if (tablePath.includes("Mega Rare table")) {
+        megaFromGem++;
+        results["Mega Rare table"].items[item] =
+          (results["Mega Rare table"].items[item] || 0) + 1;
+      }
+    } else if (initialTable === "Mega Rare table") {
+      results["Mega Rare table"].hits++;
+      results["Mega Rare table"].items[item] =
+        (results["Mega Rare table"].items[item] || 0) + 1;
+    } else {
+      results.other.hits++;
+      results.other.items[item] = (results.other.items[item] || 0) + 1;
+    }
+  }
+
+  // Calculate expected values without rounding
+  let gemExpected = iterations / 6.4;
+  let megaExpected = iterations / 8.533;
+  let expectedMegaFromGem = results["Gem table"].hits / 128;
+
+  // Display results with rounding only at output
+  console.log(`\nRDT Sub-Table Test Results (${iterations} iterations):`);
+  console.log("---------------------------------------------");
+  console.log(
+    `Gem table hits: ${results["Gem table"].hits} (${(
+      (results["Gem table"].hits / iterations) *
+      100
+    ).toFixed(4)}%)`
+  );
+  console.log(
+    `Expected Gem table hits: ~${gemExpected.toFixed(4)} (${(100 / 6.4).toFixed(
+      4
+    )}%)`
+  );
+  console.log("Gem table items:", results["Gem table"].items);
+
+  console.log(
+    `Mega Rare table hits (direct): ${results["Mega Rare table"].hits} (${(
+      (results["Mega Rare table"].hits / iterations) *
+      100
+    ).toFixed(4)}%)`
+  );
+  console.log(
+    `Expected Mega Rare table hits: ~${megaExpected.toFixed(4)} (${(
+      100 / 8.533
+    ).toFixed(4)}%)`
+  );
+  console.log("Mega Rare table items:", results["Mega Rare table"].items);
+
+  console.log(
+    `Other table hits: ${results.other.hits} (${(
+      (results.other.hits / iterations) *
+      100
+    ).toFixed(4)}%)`
+  );
+  console.log("Other table items:", results.other.items);
+
+  console.log(`\nMega Rare table hits from Gem table: ${megaFromGem}`);
+  console.log(
+    `Expected Mega Rare from Gem: ~${expectedMegaFromGem.toFixed(4)} (${(
+      100 / 128
+    ).toFixed(4)}% of Gem hits)`
+  );
+}
+// */
+
+/* OLD COMMENTED OUT FOR TESTING
+
+//Code below is the first test created, but it rounds a lot throughout. 
+//Created updated code above to make test more accurate
+
+function testRareDropRate(boss, runs = 100) {
+  let rdtCount = 0; // Total RDT hits
+  let uniqueCount = 0; // Total Tanzanite Fang hits
+  let rdtItems = {}; // Track RDT items and their counts
+  let rolls = boss.doubleRoll ? 2 : boss.tripleRoll ? 3 : 1; // Define rolls outside loop
+
+  for (let i = 0; i < runs; i++) {
+    for (let j = 0; j < rolls; j++) {
+      let dropTable = getBossDropTable(boss);
+      let drop = rollForBossItem(boss, dropTable);
+      if (drop) {
+        if (dropTable === "rareDropTable") {
+          rdtCount++;
+          let itemKey = `${drop.item} (from ${
+            drop.tablePath ? drop.tablePath.join(" -> ") : "Unknown"
+          })`;
+          rdtItems[itemKey] = (rdtItems[itemKey] || 0) + 1;
+          console.log(
+            `Run ${i + 1}, Roll ${j + 1}: RDT Drop - ${drop.item} x ${
+              drop.quantity
+            } (from ${
+              drop.tablePath ? drop.tablePath.join(" -> ") : "Unknown"
+            })`
+          );
+        } else if (dropTable === "unique") {
+          uniqueCount++;
+          console.log(
+            `Run ${i + 1}, Roll ${j + 1}: Unique Drop - ${drop.item} x ${
+              drop.quantity
+            }`
+          );
+        }
+      }
+    }
+  }
+
+  // Calculate and display results
+  console.log(`\nTest Results (${runs} kills):`);
+  console.log("---------------------------------------------");
+  console.log(`Total RDT hits: ${rdtCount}`);
+  console.log(
+    `Observed RDT rate: ${((rdtCount / (runs * rolls)) * 100).toFixed(2)}%`
+  );
+  console.log(
+    `Expected RDT rate: ${(boss.rDTChance * 100).toFixed(2)}% (based on ${
+      boss.rDTChance
+    })`
+  );
+  console.log(`Total Unique hits: ${uniqueCount}`);
+  console.log(
+    `Observed Unique rate: ${((uniqueCount / (runs * rolls)) * 100).toFixed(
+      2
+    )}%`
+  );
+  console.log(
+    `Expected Unique rate: ${((1 / 256) * 100).toFixed(2)}% (1 / 256 per roll)`
+  );
+  console.log("RDT items received:", rdtItems);
+}
+
+
+
+
+function testRDTSubTables(rdt, iterations = 10000) {
+  // Track results
+  let results = {
+    "Gem table": { hits: 0, items: {} },
+    "Mega Rare table": { hits: 0, items: {} },
+    other: { hits: 0, items: {} },
+  };
+  let megaFromGem = 0;
+
+  // Run iterations
+  for (let i = 0; i < iterations; i++) {
+    const drop = rollForRDTItem(rdt);
+    if (!drop) {
+      console.warn(`Iteration ${i + 1}: No drop returned`);
+      continue;
+    }
+
+    // Determine which table was hit (requires some inference from logs or modification) (We modified rollTableItems to track)
+    const tablePath = drop.tablePath || ["other"];
+    const item = drop.item;
+
+    const initialTable = tablePath[0];
+    if (initialTable === "Gem table") {
+      results["Gem table"].hits++;
+      results["Gem table"].items[item] =
+        (results["Gem table"].items[item] || 0) + 1;
+      if (tablePath.includes("Mega Rare table")) {
+        megaFromGem++;
+        results["Mega Rare table"].items[item] =
+          (results["Mega Rare table"].items[item] || 0) + 1;
+      }
+    } else if (initialTable === "Mega Rare table") {
+      results["Mega Rare table"].hits++;
+      results["Mega Rare table"].items[item] =
+        (results["Mega Rare table"].items[item] || 0) + 1;
+    } else {
+      results.other.hits++;
+      results.other.items[item] = (results.other.items[item] || 0) + 1;
+    }
+  }
+
+  // Analyze results
+  console.log(`\nRDT Sub-Table Test Results (${iterations} iterations):`);
+  console.log("---------------------------------------------");
+
+  // Gem table
+  const gemHits = results["Gem table"].hits;
+  const gemExpected = (1 / 6.4) * iterations; // Expected hits based on rarity
+  console.log(
+    `Gem table hits: ${gemHits} (${((gemHits / iterations) * 100).toFixed(2)}%)`
+  );
+  console.log(
+    `Expected Gem table hits: ~${Math.round(gemExpected)} (${(
+      (1 / 6.4) *
+      100
+    ).toFixed(2)}%)`
+  );
+  console.log("Gem table items:", results["Gem table"].items);
+
+  // Mega Rare table (direct hits from RDT)
+  const megaHits = results["Mega Rare table"].hits;
+  const megaExpected = (1 / 8.533) * iterations;
+  console.log(
+    `Mega Rare table hits (direct): ${megaHits} (${(
+      (megaHits / iterations) *
+      100
+    ).toFixed(2)}%)`
+  );
+  console.log(
+    `Expected Mega Rare table hits: ~${Math.round(megaExpected)} (${(
+      (1 / 8.533) *
+      100
+    ).toFixed(2)}%)`
+  );
+  console.log("Mega Rare table items:", results["Mega Rare table"].items);
+
+  // Other tables
+  console.log(
+    `Other table hits: ${results.other.hits} (${(
+      (results.other.hits / iterations) *
+      100
+    ).toFixed(2)}%)`
+  );
+  console.log("Other table items:", results.other.items);
+
+  // Check nested Mega Rare table from Gem table (requires deeper tracking)
+  console.log(`\nMega Rare table hits from Gem table: ${megaFromGem}`);
+  console.log(
+    `Expected Mega Rare from Gem: ~${Math.round(gemHits * (1 / 128))} (${(
+      (1 / 128) *
+      100
+    ).toFixed(2)}% of Gem hits)`
+  );
+}
+
+*/
+
+//Event Listeners
+
+document.querySelectorAll(".bossSlay").forEach((button) => {
+  button.addEventListener("click", slayBoss);
+});
