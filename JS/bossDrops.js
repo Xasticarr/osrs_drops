@@ -296,14 +296,14 @@ const bosses = {
     tripleRoll: false,
     rDT: true,
     rDTChance: 5 / 220,
-    preRoll: { table: "unique", everyRoll: false },
+    preRoll: { table: "muspah", everyRoll: false },
     tertiaryDrops: [
       { item: "Clue Scroll (Hard)", quantity: 1, rarity: 1 / 30 },
       { item: "Clue Scroll (Elite)", quantity: 1, rarity: 1 / 45 },
       { item: "Muphin", quantity: 1, rarity: 1 / 2500, type: "pet" },
     ],
     dropTables: {
-      unique: [
+      muspah: [
         { item: "Ancient essence", quantity: [540, 599], rarity: 1 / 1.667 },
         { item: "Ancient essence", quantity: [885, 995], rarity: 1 / 4.348 },
         { item: "Ancient essence", quantity: [1970, 2060], rarity: 1 / 10 },
@@ -317,12 +317,42 @@ const bosses = {
         },
       ],
       supplies: [
-        { item: "Shark", quantity: [4, 6], rarity: 2 * (1 / 9) },
-        { item: "Summer pie", quantity: [4, 6], rarity: 2 * (1 / 9) },
-        { item: "Ancient brew(3)", quantity: [1, 2], rarity: 2 * (1 / 9) },
-        { item: "Ranging potion(3)", quantity: [1, 2], rarity: 2 * (1 / 9) },
-        { item: "Super restore(3)", quantity: [1, 2], rarity: 2 * (1 / 9) },
-        { item: "Prayer potion(3)", quantity: [1, 2], rarity: 2 * (1 / 9) },
+        {
+          item: "Shark",
+          quantity: [4, 6],
+          rarity: 1 / 9,
+          group: "Sup 1",
+        },
+        {
+          item: "Summer pie",
+          quantity: [4, 6],
+          rarity: 1 / 9,
+          group: "Sup 1",
+        },
+        {
+          item: "Ancient brew(3)",
+          quantity: [1, 2],
+          rarity: 1 / 9,
+          group: "Sup 2",
+        },
+        {
+          item: "Ranging potion(3)",
+          quantity: [1, 2],
+          rarity: 1 / 9,
+          group: "Sup 2",
+        },
+        {
+          item: "Super restore(3)",
+          quantity: [1, 2],
+          rarity: 1 / 9,
+          group: "Sup 3",
+        },
+        {
+          item: "Prayer potion(3)",
+          quantity: [1, 2],
+          rarity: 1 / 9,
+          group: "Sup 3",
+        },
       ],
       equipment: [
         { item: "Rune kiteshield (noted)", quantity: 3, rarity: 2 * (1 / 22) },
@@ -479,7 +509,138 @@ function getBossDropTable(boss) {
     }
   }
   //Fallback, should never happen
+  console.log("This should not be popping up");
   return "other";
+}
+
+function rollTableItems(table, tableName) {
+  if (!table || !Array.isArray(table) || table.length === 0) {
+    console.error(
+      `Table "${tableName}" is either missing, not an array or empty!`,
+      table
+    );
+    return null;
+  }
+
+  let totalWeight = table.reduce((sum, item) => sum + (item.rarity || 0), 0);
+  if (totalWeight === 0) {
+    console.error(`Total weight is 0 for table "${tableName}"`);
+    return null;
+  }
+
+  let roll = Math.random() * totalWeight;
+  //debugging
+  console.log(
+    `Rolling in ${tableName} with roll: ${roll.toFixed(
+      4
+    )}, Total Weight: ${totalWeight.toFixed(4)}`
+  );
+  let cumulativeWeight = 0;
+  for (const item of table) {
+    cumulativeWeight += item.rarity;
+    if (roll <= cumulativeWeight) {
+      //Debugging
+      console.log(
+        `Selected item: ${item.item} (Cumulative: ${cumulativeWeight.toFixed(
+          4
+        )})`
+      );
+      if (item.type === "table") {
+        console.log(`Type = Table! Entering sub-table: ${item.item}`);
+        //This is all being tested and can be deleted if required
+        const subResult = rollTableItems(rareDropTable[item.item], item.item);
+        if (subResult) {
+          subResult.tablePath = [tableName, item.item]; //Tracking nested path
+        }
+        return subResult;
+        //Line below works as intended, just commenting out to try fixing tests (Delete lines above up to comment, and uncomment line below)
+
+        // return rollTableItems(rareDropTable[item.item], item.item);
+      }
+      return {
+        item: item.item,
+        quantity: item.quantity || 1,
+        tablePath: [tableName], //Add tablePath for direct items (Testing)
+      };
+    }
+  }
+  console.warn(`No item found in table: "${tableName}"`);
+  return null;
+}
+
+function rollGroupedTableItems(table, tableName) {
+  let groupedDrops = [];
+  let groups = {};
+
+  // Organize items by their group
+  table.forEach((item) => {
+    if (item.group) {
+      if (!groups[item.group]) {
+        groups[item.group] = [];
+      }
+      groups[item.group].push(item);
+    }
+  });
+
+  //Roll for one item per group
+  Object.keys(groups).forEach((groupName) => {
+    let groupItems = groups[groupName];
+    let totalWeight = groupItems.reduce(
+      (sum, item) => sum + (item.rarity || 0),
+      0
+    );
+
+    let roll = Math.random() * totalWeight;
+    let cumulativeWeight = 0;
+
+    for (const item of groupItems) {
+      cumulativeWeight += item.rarity;
+      if (roll <= cumulativeWeight) {
+        let finalQuantity = Array.isArray(item.quantity)
+          ? rollItemQuantity(item.quantity[0], item.quantity[1])
+          : item.quantity;
+
+        groupedDrops.push({
+          dropTable: tableName, //Keep track of table name
+          item: item.item,
+          quantity: finalQuantity,
+        });
+        break;
+      }
+    }
+  });
+  return groupedDrops;
+  // for (const item of table) {
+  //   if (!item.group) {
+  //     console.warn(`Item ${item.item} in ${tableName} is missing a group!`);
+  //     continue;
+  //   }
+  //   if (!groupedItems[item.group]) {
+  //     groupedItems[item.group] = [];
+  //   }
+  //   groupedItems[item.group].push(item);
+  // }
+
+  // let finalDrops = [];
+  // for (const group in groupedItems) {
+  //   let selectedItem = rollTableItems(
+  //     groupedItems[group],
+  //     `${tableName} - ${group}`
+  //   );
+  //   if (selectedItem) {
+  //     let finalQuantity = Array.isArray(selectedItem.quantity)
+  //       ? rollItemQuantity(selectedItem.quantity[0], selectedItem.quantity[1])
+  //       : selectedItem.quantity;
+
+  //     finalDrops.push({
+  //       dropTable: tableName,
+  //       item: selectedItem.item,
+  //       quantity: finalQuantity,
+  //     });
+  //   }
+  // }
+
+  // return finalDrops.length > 0 ? finalDrops : null;
 }
 
 function rollForBossItem(boss, tableName) {
@@ -506,6 +667,11 @@ function rollForBossItem(boss, tableName) {
     table = boss.dropTables[tableName];
     // console.log(`Rolling on boss table: ${tableName}`);
     //This is saying, otherwise use the normal drop tables
+  }
+  const hasGroups = table.some((item) => item.group);
+
+  if (hasGroups) {
+    return rollGroupedTableItems(table, tableName);
   }
 
   return rollTableItems(table, tableName);
@@ -542,9 +708,11 @@ function generateBossDrop(boss) {
   //Condensed roll logic to account for Boss special roll rules, and default to 1 if no rule applies
   let rolls = boss.doubleRoll ? 2 : boss.tripleRoll ? 3 : 1;
   let drops = [];
+  let isExclusiveDrop = false; //Track for exclusive items
+
   //Roll the appropriate number of times
 
-  //Setting up guaranteed drops
+  //Setting up guaranteed drops (happen regardless of exclusivity)
 
   if (boss.dropTables.always) {
     boss.dropTables.always.forEach(({ item, quantity }) => {
@@ -559,24 +727,98 @@ function generateBossDrop(boss) {
     });
   }
 
-  //Roll for regular drops
+  let preRolled = false; //Pre-roll happens only once if "everyRoll" is false
+  let uniqueHit = false;
 
-  for (let i = 0; i < rolls; i++) {
-    let dropTable = getBossDropTable(boss);
-    let itemDrop = rollForBossItem(boss, dropTable);
+  // Rolling for Drops
+  // Pre roll logic
+  if (boss.preRoll) {
+    //If everyRoll is true, the pre-roll happens every time. Else once.
+    let shouldPreRoll = boss.preRoll.everyRoll || !preRolled;
 
-    if (itemDrop) {
-      let finalQuantity = Array.isArray(itemDrop.quantity)
-        ? rollItemQuantity(itemDrop.quantity[0], itemDrop.quantity[1])
-        : itemDrop.quantity;
+    if (shouldPreRoll) {
+      //Define chance to hit pre-roll table
+      const preRollTable = boss.dropTables[boss.preRoll.table];
+      const preRollChance = preRollTable.reduce(
+        (sum, item) => sum + (item.rarity || 0),
+        0
+      );
 
-      drops.push({
-        dropTable,
-        item: itemDrop.item,
-        quantity: finalQuantity,
-      });
+      if (Math.random() < preRollChance) {
+        let preDropTable = boss.preRoll.table; //"unique" for Muspah
+
+        //Lines below would be after the equals.
+        //  getBossDropTable({
+        //   dropTables: {
+        //     [boss.preRoll.table]: boss.dropTables[boss.preRoll.table],
+        //   },
+        // });
+
+        let preDrop = rollForBossItem(boss, preDropTable);
+
+        if (preDrop) {
+          //Check if item is exclusive
+          const tableItems = boss.dropTables[preDropTable];
+          const droppedItem = tableItems.find(
+            (item) => item.item === preDrop.item
+          );
+          const isExclusive = droppedItem && droppedItem.exclusive === true;
+          let finalQuantity = Array.isArray(preDrop.quantity)
+            ? rollItemQuantity(preDrop.quantity[0], preDrop.quantity[1])
+            : preDrop.quantity;
+
+          drops.push({
+            dropTable: boss.preRoll.table,
+            item: preDrop.item,
+            quantity: finalQuantity,
+          });
+
+          uniqueHit = true; //We hit something on the pre-rolled table
+          console.log(`Pre-roll hit! Dropped ${preDrop.item}`);
+
+          if (isExclusive) {
+            isExclusiveDrop = true; //Set flag to skip standard rolls
+          }
+        }
+      } else {
+        console.log("Pre-roll missed, proceeding with standard rolls only.");
+      }
+      preRolled = true; //Pre-roll only happens once if "everyRoll" is false
     }
   }
+
+  //Regular drop roll (only if no exclusive drops)
+  if (!isExclusiveDrop) {
+    for (let i = 0; i < rolls; i++) {
+      let dropTable;
+      //Exclude the pre-roll table
+      do {
+        dropTable = getBossDropTable(boss);
+        // console.log(`Pre-Roll occurred, excluding table!`);
+      } while (preRolled && dropTable === boss.preRoll.table); //Exclude pre-roll table
+
+      //Testing new logic above, commenting out current line below
+      // let dropTable = getBossDropTable(boss);
+      let itemDrop = rollForBossItem(boss, dropTable);
+      if (Array.isArray(itemDrop)) {
+        //If it's an array (from grouped drops), push each item separately
+        itemDrop.forEach((drop) => drops.push(drop));
+      } else if (itemDrop) {
+        let finalQuantity = Array.isArray(itemDrop.quantity)
+          ? rollItemQuantity(itemDrop.quantity[0], itemDrop.quantity[1])
+          : itemDrop.quantity;
+
+        drops.push({
+          dropTable,
+          item: itemDrop.item,
+          quantity: finalQuantity,
+        });
+      }
+    }
+  } else {
+    console.log("Exclusive item dropped, skipping standard rolls");
+  }
+
   let tertiaryDrop = rollForTertiaryDrop(boss);
   if (tertiaryDrop) {
     drops.push({
@@ -695,61 +937,6 @@ function calculateRDTProbabilities(rdt) {
   //debugging
   console.log("RDT Probabilities:", tableChancesPercent);
   return tableChancesPercent;
-}
-
-function rollTableItems(table, tableName) {
-  if (!table || !Array.isArray(table) || table.length === 0) {
-    console.error(
-      `Table "${tableName}" is either missing, not an array or empty!`,
-      table
-    );
-    return null;
-  }
-
-  let totalWeight = table.reduce((sum, item) => sum + (item.rarity || 0), 0);
-  if (totalWeight === 0) {
-    console.error(`Total weight is 0 for table "${tableName}"`);
-    return null;
-  }
-
-  let roll = Math.random() * totalWeight;
-  //debugging
-  console.log(
-    `Rolling in ${tableName} with roll: ${roll.toFixed(
-      4
-    )}, Total Weight: ${totalWeight.toFixed(4)}`
-  );
-  let cumulativeWeight = 0;
-  for (const item of table) {
-    cumulativeWeight += item.rarity;
-    if (roll <= cumulativeWeight) {
-      //Debugging
-      console.log(
-        `Selected item: ${item.item} (Cumulative: ${cumulativeWeight.toFixed(
-          4
-        )})`
-      );
-      if (item.type === "table") {
-        console.log(`Type = Table! Entering sub-table: ${item.item}`);
-        //This is all being tested and can be deleted if required
-        const subResult = rollTableItems(rareDropTable[item.item], item.item);
-        if (subResult) {
-          subResult.tablePath = [tableName, item.item]; //Tracking nested path
-        }
-        return subResult;
-        //Line below works as intended, just commenting out to try fixing tests (Delete lines above up to comment, and uncomment line below)
-
-        // return rollTableItems(rareDropTable[item.item], item.item);
-      }
-      return {
-        item: item.item,
-        quantity: item.quantity || 1,
-        tablePath: [tableName], //Add tablePath for direct items (Testing)
-      };
-    }
-  }
-  console.warn(`No item found in table: "${tableName}"`);
-  return null;
 }
 
 function rollForRDTItem(rdt) {
