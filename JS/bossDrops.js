@@ -65,13 +65,13 @@ const bosses = {
     rDTChance: 9 / 248,
     tertiaryDrops: [
       { item: "Clue Scroll (Elite)", quantity: 1, rarity: 1 / 75 },
-      { item: "Jar of Swamp", quantity: 1, rarity: 1 / 3000, chime: true },
+      { item: "Jar of Swamp", quantity: 1, rarity: 1 / 3000, bigChime: true },
       {
         item: "Pet Snakeling",
         quantity: 1,
         rarity: 1 / 4000,
         type: "pet",
-        chime: true, //Will change from normal unique sound
+        bigChime: true,
       },
     ],
     dropTables: {
@@ -186,8 +186,14 @@ const bosses = {
       { item: "Vorkath's Head", quantity: 1, rarity: 1 / 50 },
       { item: "Clue Scroll (Elite)", quantity: 1, rarity: 1 / 65 },
       { item: "Dragonbone Necklace", quantity: 1, rarity: 1 / 1000 },
-      { item: "Jar of Decay", quantity: 1, rarity: 1 / 3000 },
-      { item: "Vorki", quantity: 1, rarity: 1 / 3000, type: "pet" },
+      { item: "Jar of Decay", quantity: 1, rarity: 1 / 3000, bigChime: true },
+      {
+        item: "Vorki",
+        quantity: 1,
+        rarity: 1 / 3000,
+        type: "pet",
+        bigChime: true,
+      },
       { item: "Draconic Visage", quantity: 1, rarity: 1 / 5000, chime: true },
       { item: "Skeletal Visage", quantity: 1, rarity: 1 / 5000, chime: true },
     ],
@@ -326,7 +332,13 @@ const bosses = {
     tertiaryDrops: [
       { item: "Clue Scroll (Hard)", quantity: 1, rarity: 1 / 30 },
       { item: "Clue Scroll (Elite)", quantity: 1, rarity: 1 / 45 },
-      { item: "Muphin", quantity: 1, rarity: 1 / 2500, type: "pet" },
+      {
+        item: "Muphin",
+        quantity: 1,
+        rarity: 1 / 2500,
+        type: "pet",
+        bigChime: true,
+      },
     ],
     dropTables: {
       muspah: [
@@ -733,6 +745,11 @@ function rollForTertiaryDrop(boss) {
       // console.log(`Tertiary roll: ${roll}, and result: ${item.item}`);
       let droppedItem = { item: item.item, quantity: item.quantity || 1 };
 
+      if (item.bigChime) {
+        playLeagueTaskSound();
+        console.log("Jingle Jingle, BIG TERTIARY");
+      }
+
       if (item.chime) {
         playUniqueDropSound();
         console.log("Jingle Jingle, tertiary");
@@ -957,6 +974,12 @@ function slayBoss(event) {
 function playUniqueDropSound() {
   let audio = new Audio("../assets/Unique_sound.ogg");
   audio.volume = 0.6; //Adjusted volume (0.6 = 60%)
+  audio.play();
+}
+
+function playLeagueTaskSound() {
+  let audio = new Audio("../assets/League_task.ogg");
+  audio.volume = 0.6;
   audio.play();
 }
 
