@@ -65,16 +65,42 @@ const bosses = {
     rDTChance: 9 / 248,
     tertiaryDrops: [
       { item: "Clue Scroll (Elite)", quantity: 1, rarity: 1 / 75 },
-      { item: "Jar of Swamp", quantity: 1, rarity: 1 / 3000 },
-      { item: "Pet Snakeling", quantity: 1, rarity: 1 / 4000, type: "pet" },
+      { item: "Jar of Swamp", quantity: 1, rarity: 1 / 3000, chime: true },
+      {
+        item: "Pet Snakeling",
+        quantity: 1,
+        rarity: 1 / 4000,
+        type: "pet",
+        chime: true, //Will change from normal unique sound
+      },
     ],
     dropTables: {
       always: [{ item: "Zulrah's scales", quantity: [100, 299] }],
       unique: [
-        { item: "Tanzanite fang", quantity: 1, rarity: 2 * (1 / 1024) },
-        { item: "Magic fang", quantity: 1, rarity: 2 * (1 / 1024) },
-        { item: "Serpentine visage", quantity: 1, rarity: 2 * (1 / 1024) },
-        { item: "Uncut onyx", quantity: 1, rarity: 2 * (1 / 1024) },
+        {
+          item: "Tanzanite fang",
+          quantity: 1,
+          rarity: 2 * (1 / 1024),
+          chime: true,
+        },
+        {
+          item: "Magic fang",
+          quantity: 1,
+          rarity: 2 * (1 / 1024),
+          chime: true,
+        },
+        {
+          item: "Serpentine visage",
+          quantity: 1,
+          rarity: 2 * (1 / 1024),
+          chime: true,
+        },
+        {
+          item: "Uncut onyx",
+          quantity: 1,
+          rarity: 2 * (1 / 1024),
+          chime: true,
+        },
       ],
       mutagen: [
         { item: "Tanzanite mutagen", quantity: 1, rarity: 2 * (1 / 13106) },
@@ -162,8 +188,8 @@ const bosses = {
       { item: "Dragonbone Necklace", quantity: 1, rarity: 1 / 1000 },
       { item: "Jar of Decay", quantity: 1, rarity: 1 / 3000 },
       { item: "Vorki", quantity: 1, rarity: 1 / 3000, type: "pet" },
-      { item: "Draconic Visage", quantity: 1, rarity: 1 / 5000 },
-      { item: "Skeletal Visage", quantity: 1, rarity: 1 / 5000 },
+      { item: "Draconic Visage", quantity: 1, rarity: 1 / 5000, chime: true },
+      { item: "Skeletal Visage", quantity: 1, rarity: 1 / 5000, chime: true },
     ],
     dropTables: {
       always: [
@@ -314,6 +340,7 @@ const bosses = {
           quantity: 1,
           rarity: 1 / 100,
           exclusive: true,
+          chime: true,
         },
       ],
       supplies: [
@@ -502,9 +529,12 @@ function getBossDropTable(boss) {
     //   `Table: ${table}, Chance: ${chance}, Accumulated: ${accumulatedChance}`
     // );
     if (roll <= accumulatedChance) {
-      if (table === "unique") {
-        playUniqueDropSound();
-      }
+      //Moving unique drop sound to rollForBossItem function.
+      //Tying sound to items and not tables
+
+      // if (table === "unique") {
+      //   playUniqueDropSound();
+      // }
       return table;
     }
   }
@@ -560,6 +590,7 @@ function rollTableItems(table, tableName) {
       return {
         item: item.item,
         quantity: item.quantity || 1,
+        chime: item.chime || false,
         tablePath: [tableName], //Add tablePath for direct items (Testing)
       };
     }
@@ -604,6 +635,7 @@ function rollGroupedTableItems(table, tableName) {
           dropTable: tableName, //Keep track of table name
           item: item.item,
           quantity: finalQuantity,
+          chime: item.chime || false,
         });
         break;
       }
@@ -669,26 +701,43 @@ function rollForBossItem(boss, tableName) {
     //This is saying, otherwise use the normal drop tables
   }
   const hasGroups = table.some((item) => item.group);
+  let droppedItem;
 
   if (hasGroups) {
-    return rollGroupedTableItems(table, tableName);
+    droppedItem = rollGroupedTableItems(table, tableName);
+  } else {
+    droppedItem = rollTableItems(table, tableName);
   }
-
-  return rollTableItems(table, tableName);
+  // console.log("Dropped item:", droppedItem);
+  //If dropped item has the chime property, play the unique drop chime
+  if (Array.isArray(droppedItem)) {
+    droppedItem.forEach((item) => {
+      if (item.chime) {
+        playUniqueDropSound();
+        console.log("Jingle Jingle, but in a group");
+      }
+    });
+  } else if (droppedItem && droppedItem.chime) {
+    playUniqueDropSound();
+    console.log("Jingle Jingle");
+  }
+  return droppedItem;
 }
 
 function rollForTertiaryDrop(boss) {
   if (!boss.tertiaryDrops || boss.tertiaryDrops.length === 0) return null;
-
-  let roll = Math.random();
-  // console.log(`Tertiary roll: ${roll}.`);
-
   //Loop through tertiary items and roll for each INDIVIDUALLY
   for (const item of boss.tertiaryDrops) {
     const roll = Math.random();
     if (roll <= item.rarity) {
       // console.log(`Tertiary roll: ${roll}, and result: ${item.item}`);
-      return { item: item.item, quantity: item.quantity || 1 };
+      let droppedItem = { item: item.item, quantity: item.quantity || 1 };
+
+      if (item.chime) {
+        playUniqueDropSound();
+        console.log("Jingle Jingle, tertiary");
+      }
+      return droppedItem;
     }
   }
 
@@ -907,6 +956,7 @@ function slayBoss(event) {
 
 function playUniqueDropSound() {
   let audio = new Audio("../assets/Unique_sound.ogg");
+  audio.volume = 0.6; //Adjusted volume (0.6 = 60%)
   audio.play();
 }
 
