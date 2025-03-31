@@ -956,19 +956,47 @@ function closeModal(event) {
   modal.style.display = "none";
 }
 
-function openBossSelectionModal() {
-  document.getElementById("bossSelectionModal").style.display = "flex";
+function openBossSelectionModal(callbackFunction, titleText) {
+  const modal = document.getElementById("bossSelectionModal");
+  const modalTitle = modal.querySelector(".modal-header h2");
+
+  // Update title dynamically
+  modalTitle.textContent = titleText;
+
+  modal.style.display = "flex";
+
+  // Remove existing event listeners to prevent duplicate bindings
+  document.querySelectorAll(".bossSlay").forEach((button) => {
+    button.replaceWith(button.cloneNode(true)); //Clone and replace to remove old listeners
+  });
+
+  // Reattach event listeners with the new callback
+  document.querySelectorAll(".bossButton").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      const selectedBoss = event.target.getAttribute("boss-data");
+      callbackFunction(selectedBoss); // Run the passed function
+      closeModal(event);
+    });
+  });
 }
 
-function slayBoss(event) {
-  const selectedBoss = event.target.getAttribute("boss-data");
-  // console.log("Selected Boss:", selectedBoss);
+function slayBoss(selectedBoss) {
   const boss = bosses[selectedBoss];
-  // console.log(boss);
+  // Adjusting this function to work better with adjusted selection modal. Changed from slayBoss(event).
 
-  closeModal(event);
-
+  // const selectedBoss = event.target.getAttribute("boss-data");
+  // // console.log("Selected Boss:", selectedBoss);
   generateBossDrop(boss);
+}
+
+function checkBossItems(selectedBoss) {
+  const boss = bosses[selectedBoss];
+  //function goes here
+}
+
+function checkBossChances(selectedBoss) {
+  const boss = bosses[selectedBoss];
+  //function goes here
 }
 
 function playUniqueDropSound() {
@@ -1371,6 +1399,12 @@ function testRDTSubTables(rdt, iterations = 10000) {
 
 //Event Listeners
 
-document.querySelectorAll(".bossSlay").forEach((button) => {
-  button.addEventListener("click", slayBoss);
-});
+//Moving only event listener into openBossSelectionModal function, because I'm trying to make the modal multipurposed
+
+// document.querySelectorAll(".bossSlay").forEach((button) => {
+//   button.addEventListener("click", (event) => {
+//     const selectedBoss = event.target.getAttribute("boss-data");
+//     callbackFunction(selectedBoss); // Run the passed function
+//     closeModal(event);
+//   });
+// });

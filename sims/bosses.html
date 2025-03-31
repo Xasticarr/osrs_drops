@@ -28,13 +28,22 @@
       </header>
       <main>
         <div class="button_container">
-          <button class="drop_button" onclick="openBossSelectionModal()">
+          <button
+            class="drop_button"
+            onclick="openBossSelectionModal(slayBoss, 'What bos would you like to slay?')"
+          >
             <div class="drop_button_content">Slay a Boss!</div>
           </button>
-          <button class="drop_button" href="#">
+          <button
+            class="drop_button"
+            onclick="openBossSelectionModal(checkBossItems, 'What items can I receive?')"
+          >
             <div class="drop_button_content">Big Pickle!</div>
           </button>
-          <button class="drop_button" href="#">
+          <button
+            class="drop_button"
+            onclick="openBossSelectionModal(checkBossChances, 'What are the drop chances?')"
+          >
             <div class="drop_button_content">I'm So Dry!</div>
           </button>
         </div>
@@ -44,7 +53,7 @@
         <div id="bossSelectionModal" class="modal">
           <div class="modal-content">
             <div class="modal-header">
-              <h2>What boss would you like to slay?</h2>
+              <h2></h2>
               <button class="close-button" onclick="closeModal(event)">
                 X
               </button>
