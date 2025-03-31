@@ -973,13 +973,13 @@ function slayBoss(event) {
 
 function playUniqueDropSound() {
   let audio = new Audio("../assets/Unique_sound.ogg");
-  audio.volume = 0.6; //Adjusted volume (0.6 = 60%)
+  audio.volume = 0.05; //Adjusted volume (0.1 = 10%)
   audio.play();
 }
 
 function playLeagueTaskSound() {
   let audio = new Audio("../assets/League_task.ogg");
-  audio.volume = 0.6;
+  audio.volume = 0.05;
   audio.play();
 }
 
