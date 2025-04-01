@@ -951,6 +951,242 @@ function populateBossDropModal(drops) {
   document.getElementById("bossDropModal").style.display = "flex";
 }
 
+function getBossTablesAndItems(boss) {
+  if (!boss || !boss.dropTables) {
+    console.error("Invalid boss data:", boss);
+    return [];
+  }
+  let tablesAndItems = [];
+
+  // Standard Drop Tables
+  for (let tableName in boss.dropTables) {
+    //Skip Rare Drop Table here
+    if (tableName === "rareDropTable") {
+      continue;
+    }
+    // Adding RDT in separate function
+
+    let tableItems = boss.dropTables[tableName];
+
+    if (!Array.isArray(tableItems)) {
+      console.error(
+        `Unexpected data type for drop table: ${tableName}`,
+        tableItems
+      );
+      continue; // Skip if it's not an array
+    }
+
+    let formattedItems = tableItems.map((item) => {
+      let quantityText =
+        Array.isArray(item.quantity) && item.quantity.length === 2
+          ? `${item.quantity[0]} - ${item.quantity[1]}`
+          : item.quantity !== undefined
+          ? item.quantity
+          : "Unknown";
+
+      return {
+        name: item.item,
+        quantity: quantityText,
+      };
+    });
+
+    tablesAndItems.push({
+      table: tableName,
+      items: formattedItems,
+    });
+  }
+
+  //Add RDT if boss has access
+
+  // if (boss.rDT === true) {
+  //   tablesAndItems.push({
+  //     table: "Rare Drop Table",
+  //     items: rareDropTable.map((item) => ({
+  //       name: item.item,
+  //       quantity: Array.isArray(item.quantity)
+  //         ? `${item.quantity[0]} - ${item.quantity[1]}`
+  //         : item.quantity,
+  //     })),
+  //   });
+  // }
+
+  // Tertiary drops
+  if (Array.isArray(boss.tertiaryDrops) && boss.tertiaryDrops.length > 0) {
+    let tertiaryItems = boss.tertiaryDrops.map((drop) => {
+      let quantityText =
+        Array.isArray(drop.quantity) && drop.quantity.length === 2
+          ? `${drop.quantity[0]} - ${drop.quantity[1]}`
+          : drop.quantity !== undefined
+          ? drop.quantity
+          : "Unknown";
+
+      return {
+        name: drop.item,
+        quantity: quantityText,
+      };
+    });
+
+    tablesAndItems.push({
+      table: "Tertiary",
+      items: tertiaryItems,
+    });
+  }
+
+  return tablesAndItems;
+}
+
+function populateBossItemsModal(boss) {
+  let bossTableContainer = document.querySelector(
+    "#bossItemModal #boss-table-container"
+  );
+  let rdtContainer = document.querySelector("#bossItemModal #rdt-container");
+  let toggleButton = document.querySelector("#rdt-toggle");
+
+  while (bossTableContainer.firstChild) {
+    bossTableContainer.removeChild(bossTableContainer.firstChild);
+  }
+  while (rdtContainer.firstChild) {
+    rdtContainer.removeChild(rdtContainer.firstChild);
+  }
+
+  //Create Boss Tables
+
+  let bossTable = document.createElement("table");
+  bossTable.classList.add("boss-drop-table");
+
+  let bossTableHeader = document.createElement("thead");
+  let bossHeaderRow = document.createElement("tr");
+
+  let headers = ["Drop Table", "Items", "Quantity"];
+  headers.forEach((headerText) => {
+    let headerCell = document.createElement("th");
+    headerCell.textContent = headerText;
+    bossHeaderRow.appendChild(headerCell);
+  });
+
+  bossTableHeader.appendChild(bossHeaderRow);
+  bossTable.appendChild(bossTableHeader);
+
+  let bossTableBody = document.createElement("tbody");
+
+  let rowIndex = 0; //Track alternating rows
+
+  let tablesAndItems = getBossTablesAndItems(boss);
+  tablesAndItems.forEach((tableData) => {
+    let rowSpanCount = tableData.items.length; //Number of items in the table
+    tableData.items.forEach((itemData, index) => {
+      let row = document.createElement("tr");
+
+      //Apply alternating background color using rowIndex
+      if (tableData.table.toLowerCase() === "unique") {
+        row.classList.add("unique-table");
+      }
+      if (rowIndex % 2 === 0) {
+        row.classList.add("even-row"); //Assign class for even rows
+      } else {
+        row.classList.add("odd-row"); //Assign class for odd rows
+      }
+      //Only add drop table name in the first row, then merge the rest
+      if (index === 0) {
+        let tableCell1 = document.createElement("td");
+        tableCell1.textContent = tableData.table.toUpperCase();
+        tableCell1.rowSpan = rowSpanCount; //Span multiple rows
+        tableCell1.style.verticalAlign = "middle"; //Center the text
+        row.appendChild(tableCell1);
+      }
+
+      let tableCell2 = document.createElement("td");
+      tableCell2.textContent = itemData.name;
+      row.appendChild(tableCell2);
+
+      let tableCell3 = document.createElement("td");
+      tableCell3.textContent = itemData.quantity;
+      row.appendChild(tableCell3);
+
+      bossTableBody.appendChild(row);
+    });
+
+    rowIndex++;
+  });
+
+  bossTable.appendChild(bossTableBody);
+  bossTableContainer.appendChild(bossTable);
+
+  //Show RDT separately if boss has access
+
+  if (boss.rDT === true) {
+    let rdtItems = getRareDropTableItems();
+
+    let rdtTable = document.createElement("table");
+    rdtTable.classList.add("rdt-table");
+    let rdtTableHeader = document.createElement("thead");
+    let rdtHeaderRow = document.createElement("tr");
+
+    let rdtHeaders = ["Rare Drop Table", "Items", "Quantity"];
+    rdtHeaders.forEach((headerText) => {
+      let headerCell = document.createElement("th");
+      headerCell.textContent = headerText;
+      rdtHeaderRow.appendChild(headerCell);
+    });
+
+    rdtTableHeader.appendChild(rdtHeaderRow);
+    rdtTable.appendChild(rdtTableHeader);
+
+    let rdtTableBody = document.createElement("tbody");
+
+    let rowIndex = 0;
+
+    rdtItems.forEach((tableData) => {
+      let rowSpanCount = tableData.items.length;
+      tableData.items.forEach((itemData, index) => {
+        let row = document.createElement("tr");
+
+        if (rowIndex % 2 === 0) {
+          row.classList.add("rare-even-row");
+        } else {
+          row.classList.add("rare-odd-row");
+        }
+
+        if (index === 0) {
+          let tableCell1 = document.createElement("td");
+          tableCell1.textContent = tableData.table.toUpperCase();
+          tableCell1.rowSpan = rowSpanCount; //Span multiple rows
+          tableCell1.style.verticalAlign = "middle"; //Center the text
+          row.appendChild(tableCell1);
+        }
+
+        let tableCell2 = document.createElement("td");
+        tableCell2.textContent = itemData.name;
+        row.appendChild(tableCell2);
+
+        let tableCell3 = document.createElement("td");
+        tableCell3.textContent = itemData.quantity;
+        row.appendChild(tableCell3);
+
+        rdtTableBody.appendChild(row);
+      });
+
+      rowIndex++;
+    });
+    rdtTable.appendChild(rdtTableBody);
+    rdtContainer.appendChild(rdtTable);
+
+    if (toggleButton) {
+      toggleButton.style.display = "inline-block";
+      //Reset Toggle State
+      toggleButton.textContent = "View Rare Drop Table";
+      rdtContainer.style.display = "none";
+    }
+  } else {
+    // Hide toggle button if no RDT
+    if (toggleButton) {
+      toggleButton.style.display = "none";
+    }
+  }
+
+  document.getElementById("bossItemModal").style.display = "flex";
+}
+
 function closeModal(event) {
   const modal = event.target.closest(".modal");
   modal.style.display = "none";
@@ -992,6 +1228,7 @@ function slayBoss(selectedBoss) {
 function checkBossItems(selectedBoss) {
   const boss = bosses[selectedBoss];
   //function goes here
+  populateBossItemsModal(boss);
 }
 
 function checkBossChances(selectedBoss) {
@@ -1073,6 +1310,47 @@ function rollForRDTItem(rdt) {
   return result;
   */
   return rollTableItems(table, selectedTableName); //Letting tablePath handle tracking instead of (const result)
+}
+
+function getRareDropTableItems() {
+  let rareTables = {};
+
+  //Loop through main tables
+  for (let category in rareDropTable) {
+    if (category !== "sub-tables") {
+      //Skip sub-tables for now
+      rareTables[category] = rareDropTable[category].map((item) => ({
+        name: item.item,
+        quantity: Array.isArray(item.quantity)
+          ? `${item.quantity[0]} - ${item.quantity[1]}`
+          : item.quantity,
+      }));
+    }
+  }
+
+  //Handle sub-tables
+
+  if (rareDropTable["sub-tables"]) {
+    rareDropTable["sub-tables"].forEach((subTable) => {
+      if (subTable.type === "table") {
+        rareTables[subTable.item] = rareDropTable[subTable.item].map(
+          (item) => ({
+            name: item.item,
+            quantity: Array.isArray(item.quantity)
+              ? `${item.quantity[0]} - ${item.quantity[1]}`
+              : item.quantity,
+          })
+        );
+      }
+    });
+  }
+
+  //Convert rareTables object into an array for easier handling
+
+  return Object.entries(rareTables).map(([table, items]) => ({
+    table,
+    items,
+  }));
 }
 
 //Test Functions
@@ -1398,6 +1676,25 @@ function testRDTSubTables(rdt, iterations = 10000) {
 */
 
 //Event Listeners
+document.addEventListener("DOMContentLoaded", () => {
+  const toggleButton = document.querySelector("#rdt-toggle");
+  const rdtContainer = document.querySelector("#rdt-container");
+
+  if (toggleButton && rdtContainer) {
+    toggleButton.addEventListener("click", () => {
+      if (
+        rdtContainer.style.display === "none" ||
+        rdtContainer.style.display === ""
+      ) {
+        rdtContainer.style.display = "block";
+        toggleButton.textContent = "Hide Rare Drop Table";
+      } else {
+        rdtContainer.style.display = "none";
+        toggleButton.textContent = "View Rare Drop Table";
+      }
+    });
+  }
+});
 
 //Moving only event listener into openBossSelectionModal function, because I'm trying to make the modal multipurposed
 

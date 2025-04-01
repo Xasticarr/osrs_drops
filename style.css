@@ -172,20 +172,62 @@ main {
   font-size: 22px;
 }
 
-#itemModal table {
+#bossItemModal {
+  padding: 20px;
+}
+
+.boss-drop-table {
+  margin-bottom: 20px;
+}
+
+#rdt-container {
+  transition: opacity 0.3 ease;
+}
+
+#rdt-container[style*="display: none"] {
+  opacity: 0;
+}
+
+#rdt-container[style*="display: block"] {
+  opacity: 1;
+}
+
+.rdt-table {
+  margin-top: 10px;
+}
+
+.rdt-toggle-button {
+  /* background: rgb(73, 12, 65); */
+  border-radius: 8px;
+  height: 40px;
+  font-family: RuneScript, sans-serif;
+  font-size: 25px;
+  color: white;
+  background: #0056b3;
+}
+
+.rdt-toggle-button:hover {
+  background-color: #0056b3;
+}
+
+#itemModal table,
+#bossItemModal table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
 }
 
 #itemModal th,
-#itemModal td {
+#bossItemModal th,
+#itemModal td,
+#bossItemModal td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
 }
 
-#itemModal tr {
+#itemModal tr,
+#bossItemModal tr {
   height: 40px;
 }
 
@@ -195,6 +237,27 @@ main {
 
 #itemModal td:nth-child(2) {
   white-space: pre-line;
+}
+
+.even-row {
+  background-color: #3a3a3a;
+}
+
+.odd-row {
+  background-color: #2a2a2a;
+}
+
+.unique-table {
+  background-color: #4b0082 !important;
+  color: white;
+}
+
+.rare-even-row {
+  background-color: rgb(16, 72, 16);
+}
+
+.rare-odd-row {
+  background-color: rgb(46, 80, 46);
 }
 
 .close-button {
