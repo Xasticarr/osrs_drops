@@ -328,7 +328,7 @@ const bosses = {
     tripleRoll: false,
     rDT: true,
     rDTChance: 5 / 220,
-    preRoll: { table: "muspah", everyRoll: false },
+    preRoll: { table: "unique", everyRoll: false },
     tertiaryDrops: [
       { item: "Clue Scroll (Hard)", quantity: 1, rarity: 1 / 30 },
       { item: "Clue Scroll (Elite)", quantity: 1, rarity: 1 / 45 },
@@ -341,7 +341,7 @@ const bosses = {
       },
     ],
     dropTables: {
-      muspah: [
+      unique: [
         { item: "Ancient essence", quantity: [540, 599], rarity: 1 / 1.667 },
         { item: "Ancient essence", quantity: [885, 995], rarity: 1 / 4.348 },
         { item: "Ancient essence", quantity: [1970, 2060], rarity: 1 / 10 },
