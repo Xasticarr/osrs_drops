@@ -957,6 +957,8 @@ function getBossTablesAndItems(boss) {
     return [];
   }
   let tablesAndItems = [];
+  //Attempting to add table chances, item rarities, and rarities within tables
+  const { tableChances, totalChance } = calculateTableProbabilities(boss);
 
   // Standard Drop Tables
   for (let tableName in boss.dropTables) {
@@ -976,6 +978,12 @@ function getBossTablesAndItems(boss) {
       continue; // Skip if it's not an array
     }
 
+    //Calculate total weight for "Rarity in Table"
+    const totalTableWeight = tableItems.reduce(
+      (sum, item) => sum + (item.rarity || 0),
+      0
+    );
+
     let formattedItems = tableItems.map((item) => {
       let quantityText =
         Array.isArray(item.quantity) && item.quantity.length === 2
@@ -984,31 +992,57 @@ function getBossTablesAndItems(boss) {
           ? item.quantity
           : "Unknown";
 
+      //Raw Item Rarity
+      const rawRarity = item.rarity
+        ? `1 / ${(1 / item.rarity).toFixed(3)}`
+        : "N/A";
+
+      //Rarity in Table
+      const rarityInTable =
+        item.rarity && totalTableWeight
+          ? `${((item.rarity / totalTableWeight) * 100).toFixed(2)}%`
+          : "N/A";
+
       return {
         name: item.item,
         quantity: quantityText,
+        //Adding new objects below
+        rawRarity,
+        rarityInTable,
+        //End of new
       };
     });
 
     tablesAndItems.push({
       table: tableName,
       items: formattedItems,
+      //Adding new objects below
+      tableChance: tableChances[tableName]
+        ? `${((tableChances[tableName] / totalChance) * 100).toFixed(2)}%`
+        : "N/A",
     });
+    //End of new
   }
 
-  //Add RDT if boss has access
-
-  // if (boss.rDT === true) {
-  //   tablesAndItems.push({
-  //     table: "Rare Drop Table",
-  //     items: rareDropTable.map((item) => ({
-  //       name: item.item,
-  //       quantity: Array.isArray(item.quantity)
-  //         ? `${item.quantity[0]} - ${item.quantity[1]}`
-  //         : item.quantity,
-  //     })),
-  //   });
-  // }
+  //Handle Rare Drop Table
+  if (boss.rDT === true) {
+    tablesAndItems.push({
+      table: "Rare Drop Table",
+      items: [
+        {
+          name: "RDT Access: Yes",
+          quantity: "N/A",
+          rawRarity: `1 / ${(1 / boss.rDTChance).toFixed(2)}`,
+          rarityInTable: "N/A",
+          tableChance: `${(
+            (tableChances["rareDropTable"] / totalChance) *
+            100
+          ).toFixed(2)}%`,
+        },
+      ],
+      tableChance: `${(boss.rDTChance * 100).toFixed(2)}%`,
+    });
+  }
 
   // Tertiary drops
   if (Array.isArray(boss.tertiaryDrops) && boss.tertiaryDrops.length > 0) {
@@ -1019,16 +1053,25 @@ function getBossTablesAndItems(boss) {
           : drop.quantity !== undefined
           ? drop.quantity
           : "Unknown";
+      //Adding new below
+      const rawRarity = drop.rarity ? `1 / ${1 / drop.rarity}` : "N/A";
+      const rarityInTable = rawRarity; //Tertiary is independent
+      //End of new
 
       return {
         name: drop.item,
         quantity: quantityText,
+        //Adding new below
+        rawRarity,
+        rarityInTable,
+        //End of new
       };
     });
 
     tablesAndItems.push({
       table: "Tertiary",
       items: tertiaryItems,
+      tableChance: "N/A",
     });
   }
 
@@ -1057,7 +1100,14 @@ function populateBossItemsModal(boss) {
   let bossTableHeader = document.createElement("thead");
   let bossHeaderRow = document.createElement("tr");
 
-  let headers = ["Drop Table", "Items", "Quantity"];
+  let headers = [
+    "Drop Table",
+    "Table Chance",
+    "Items",
+    "Quantity",
+    "Rarity in Table",
+    "Item Rarity",
+  ];
   headers.forEach((headerText) => {
     let headerCell = document.createElement("th");
     headerCell.textContent = headerText;
@@ -1093,15 +1143,33 @@ function populateBossItemsModal(boss) {
         tableCell1.rowSpan = rowSpanCount; //Span multiple rows
         tableCell1.style.verticalAlign = "middle"; //Center the text
         row.appendChild(tableCell1);
-      }
 
-      let tableCell2 = document.createElement("td");
-      tableCell2.textContent = itemData.name;
-      row.appendChild(tableCell2);
+        let tableCell2 = document.createElement("td");
+        tableCell2.textContent = tableData.tableChance;
+        tableCell2.rowSpan = rowSpanCount;
+        tableCell2.style.verticalAlign = "middle";
+        row.appendChild(tableCell2);
+      }
+      //Moving this into block above to spread cell
+      // let tableCell2 = document.createElement("td");
+      // tableCell2.textContent = itemData.name;
+      // row.appendChild(tableCell2);
 
       let tableCell3 = document.createElement("td");
-      tableCell3.textContent = itemData.quantity;
+      tableCell3.textContent = itemData.name;
       row.appendChild(tableCell3);
+
+      let tableCell4 = document.createElement("td");
+      tableCell4.textContent = itemData.quantity;
+      row.appendChild(tableCell4);
+
+      let tableCell5 = document.createElement("td");
+      tableCell5.textContent = itemData.rarityInTable;
+      row.appendChild(tableCell5);
+
+      let tableCell6 = document.createElement("td");
+      tableCell6.textContent = itemData.rawRarity;
+      row.appendChild(tableCell6);
 
       bossTableBody.appendChild(row);
     });
@@ -1115,14 +1183,21 @@ function populateBossItemsModal(boss) {
   //Show RDT separately if boss has access
 
   if (boss.rDT === true) {
-    let rdtItems = getRareDropTableItems();
+    let rdtItems = getRareDropTableItemsWithRarities(boss.rDTChance);
 
     let rdtTable = document.createElement("table");
     rdtTable.classList.add("rdt-table");
     let rdtTableHeader = document.createElement("thead");
     let rdtHeaderRow = document.createElement("tr");
 
-    let rdtHeaders = ["Rare Drop Table", "Items", "Quantity"];
+    let rdtHeaders = [
+      "Rare Drop Table",
+      "Table Chance",
+      "Items",
+      "Quantity",
+      "Rarity in Table",
+      "Rarity",
+    ];
     rdtHeaders.forEach((headerText) => {
       let headerCell = document.createElement("th");
       headerCell.textContent = headerText;
@@ -1153,15 +1228,34 @@ function populateBossItemsModal(boss) {
           tableCell1.rowSpan = rowSpanCount; //Span multiple rows
           tableCell1.style.verticalAlign = "middle"; //Center the text
           row.appendChild(tableCell1);
-        }
 
-        let tableCell2 = document.createElement("td");
-        tableCell2.textContent = itemData.name;
-        row.appendChild(tableCell2);
+          let tableCell2 = document.createElement("td");
+          tableCell2.textContent = tableData.tableChance;
+          tableCell2.rowSpan = rowSpanCount;
+          tableCell2.style.verticalAlign = "middle";
+          row.appendChild(tableCell2);
+        }
+        //Moving into block above
+
+        // let tableCell2 = document.createElement("td");
+        // tableCell2.textContent = itemData.name;
+        // row.appendChild(tableCell2);
 
         let tableCell3 = document.createElement("td");
-        tableCell3.textContent = itemData.quantity;
+        tableCell3.textContent = itemData.name;
         row.appendChild(tableCell3);
+
+        let tableCell4 = document.createElement("td");
+        tableCell4.textContent = itemData.quantity;
+        row.appendChild(tableCell4);
+
+        let tableCell5 = document.createElement("td");
+        tableCell5.textContent = itemData.rarityInTable;
+        row.appendChild(tableCell5);
+
+        let tableCell6 = document.createElement("td");
+        tableCell6.textContent = itemData.rawRarity;
+        row.appendChild(tableCell6);
 
         rdtTableBody.appendChild(row);
       });
@@ -1227,7 +1321,7 @@ function slayBoss(selectedBoss) {
 
 function checkBossItems(selectedBoss) {
   const boss = bosses[selectedBoss];
-  //function goes here
+
   populateBossItemsModal(boss);
 }
 
@@ -1268,25 +1362,27 @@ function calculateRDTProbabilities(rdt) {
     (sum, chance) => sum + chance,
     0
   );
-  let tableChancesPercent = {};
-  for (const [table, chance] of Object.entries(tableChances)) {
-    tableChancesPercent[table] = (chance / totalChance) * 100;
-  }
-  //debugging
-  console.log("RDT Probabilities:", tableChancesPercent);
-  return tableChancesPercent;
+
+  return { tableChances, totalChance };
+  // let tableChancesPercent = {};
+  // for (const [table, chance] of Object.entries(tableChances)) {
+  //   tableChancesPercent[table] = (chance / totalChance) * 100;
+  // }
+  // //debugging
+  // console.log("RDT Probabilities:", tableChancesPercent);
+  // return tableChancesPercent;
 }
 
 function rollForRDTItem(rdt) {
-  const rdtProbabilities = calculateRDTProbabilities(rdt);
-  let roll = rollRandomNumber(100);
+  const { tableChances, totalChance } = calculateRDTProbabilities(rdt);
+  let roll = Math.random() * totalChance;
   //debugging
   console.log(`Rolling for RDT table with roll: ${roll}`);
   let accumulatedChance = 0;
   let selectedTableName = null;
   let table = null;
 
-  for (const [rdtTable, chance] of Object.entries(rdtProbabilities)) {
+  for (const [rdtTable, chance] of Object.entries(tableChances)) {
     accumulatedChance += chance;
     if (roll <= accumulatedChance) {
       selectedTableName = rdtTable;
@@ -1312,46 +1408,148 @@ function rollForRDTItem(rdt) {
   return rollTableItems(table, selectedTableName); //Letting tablePath handle tracking instead of (const result)
 }
 
-function getRareDropTableItems() {
-  let rareTables = {};
+function getRareDropTableItemsWithRarities(rdtChance) {
+  let rareTables = [];
+  const { tableChances, totalChance } =
+    calculateRDTProbabilities(rareDropTable);
 
+  const subTableNames = new Set(
+    rareDropTable["sub-tables"].map((subTable) => subTable.item)
+  );
   //Loop through main tables
+
+  //New Below
   for (let category in rareDropTable) {
-    if (category !== "sub-tables") {
-      //Skip sub-tables for now
-      rareTables[category] = rareDropTable[category].map((item) => ({
-        name: item.item,
-        quantity: Array.isArray(item.quantity)
+    if (category === "sub-tables" || subTableNames.has(category)) continue;
+
+    const tableItems = rareDropTable[category];
+    if (Array.isArray(tableItems)) {
+      const totalTableWeight = tableItems.reduce(
+        (sum, item) => sum + (item.rarity || 0),
+        0
+      );
+      let tableChance = (tableChances[category] || 0) / totalChance;
+      let formattedItems = tableItems.map((item) => {
+        const quantityText = Array.isArray(item.quantity)
           ? `${item.quantity[0]} - ${item.quantity[1]}`
-          : item.quantity,
-      }));
+          : item.quantity;
+
+        // //Raw Rarity in RDT (item.rarity)
+        // const rawRarityWithinRDT = item.rarity
+        //   ? `1 / ${(1 / item.rarity).toFixed(2)}`
+        //   : "N/A";
+
+        //Adjusted rarity considering rDTChance and sub-table probabilities
+
+        const adjustedRarity = item.rarity
+          ? `1 / ${(1 / (item.rarity * rdtChance)).toFixed(2)}`
+          : "N/A";
+
+        const rarityInTable =
+          item.rarity && totalTableWeight
+            ? `${((item.rarity / totalTableWeight) * 100).toFixed(2)}%`
+            : "N/A";
+
+        return {
+          name: item.item,
+          quantity: quantityText,
+          rawRarity: adjustedRarity,
+          rarityInTable,
+        };
+      });
+
+      rareTables.push({
+        table: category,
+        tableChance: (tableChance * 100).toFixed(2) + "%",
+        items: formattedItems,
+      });
     }
+    //Commenting out below, to update above
+
+    // if (category !== "sub-tables") {
+    //   //Skip sub-tables for now
+    //   rareTables[category] = rareDropTable[category].map((item) => ({
+    //     name: item.item,
+    //     quantity: Array.isArray(item.quantity)
+    //       ? `${item.quantity[0]} - ${item.quantity[1]}`
+    //       : item.quantity,
+    //   }));
+    // }
   }
 
   //Handle sub-tables
 
-  if (rareDropTable["sub-tables"]) {
-    rareDropTable["sub-tables"].forEach((subTable) => {
-      if (subTable.type === "table") {
-        rareTables[subTable.item] = rareDropTable[subTable.item].map(
-          (item) => ({
-            name: item.item,
-            quantity: Array.isArray(item.quantity)
-              ? `${item.quantity[0]} - ${item.quantity[1]}`
-              : item.quantity,
-          })
-        );
-      }
-    });
-  }
+  //New below
 
-  //Convert rareTables object into an array for easier handling
+  rareDropTable["sub-tables"].forEach((subTable) => {
+    if (subTable.type === "table") {
+      const tableItems = rareDropTable[subTable.item];
+      const totalTableWeight = tableItems.reduce(
+        (sum, item) => sum + (item.rarity || 0),
+        0
+      );
+      let tableChance = (tableChances[subTable.item] || 0) / totalChance;
+      let formattedItems = tableItems.map((item) => {
+        const quantityText = Array.isArray(item.quantity)
+          ? `${item.quantity[0]} - ${item.quantity[1]}`
+          : item.quantity;
 
-  return Object.entries(rareTables).map(([table, items]) => ({
-    table,
-    items,
-  }));
+        // const rawRarityWithinRDT = item.rarity
+        //   ? `1 / ${(1 / item.rarity).toFixed(2)}`
+        //   : "N/A";
+
+        //Adjusted rarity: rDTChance * sub-table chance * item.rarity
+        const adjustedRarity = item.rarity
+          ? `1 / ${(1 / (item.rarity * tableChance * rdtChance)).toFixed(2)}`
+          : "N/A";
+
+        const rarityInTable =
+          item.rarity && totalTableWeight
+            ? `${((item.rarity / totalTableWeight) * 100).toFixed(2)}%`
+            : "N/A";
+
+        return {
+          name: item.item,
+          quantity: quantityText,
+          rawRarity: adjustedRarity,
+          rarityInTable,
+        };
+      });
+
+      rareTables.push({
+        table: subTable.item,
+        tableChance: (tableChance * 100).toFixed(2) + "%",
+        items: formattedItems,
+      });
+    }
+  });
+
+  return rareTables;
 }
+
+//Commenting out below to update above
+// if (rareDropTable["sub-tables"]) {
+//   rareDropTable["sub-tables"].forEach((subTable) => {
+//     if (subTable.type === "table") {
+//       rareTables[subTable.item] = rareDropTable[subTable.item].map(
+//         (item) => ({
+//           name: item.item,
+//           quantity: Array.isArray(item.quantity)
+//             ? `${item.quantity[0]} - ${item.quantity[1]}`
+//             : item.quantity,
+//         })
+//       );
+//     }
+//   });
+// }
+
+// //Convert rareTables object into an array for easier handling
+
+// return Object.entries(rareTables).map(([table, items]) => ({
+//   table,
+//   items,
+// }));
+// }
 
 //Test Functions
 
