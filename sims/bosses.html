@@ -40,11 +40,8 @@
           >
             <div class="drop_button_content">Big Pickle!</div>
           </button>
-          <button
-            class="drop_button"
-            onclick="openBossSelectionModal(checkBossChances, 'What are the drop chances?')"
-          >
-            <div class="drop_button_content">I'm So Dry!</div>
+          <button id="openInventoryBtn" class="drop_button">
+            <div class="drop_button_content">What's in the Bag?</div>
           </button>
         </div>
 
@@ -128,20 +125,24 @@
           </div>
         </div>
         <!--End of bossItemModal-->
-        <div id="bossOddsModal" class="modal">
+        <div id="inventoryModal" class="modal">
           <div class="modal-content">
             <div class="modal-header">
-              <h2>Item Chances</h2>
+              <h2>Inventory</h2>
               <button class="close-button" onclick="closeModal(event)">
                 X
               </button>
             </div>
             <div class="modal-body">
+              <div id="inventoryContent">
+                <!-- Inventory content will go here -->
+                <p>No items have been collected yet.</p>
+              </div>
               <!--Drop results should show up here now -->
             </div>
           </div>
         </div>
-        <!-- End of bossOddsModal -->
+        <!-- End of inventoryModal -->
       </main>
       <footer class="footer">
         <h4><a href="../index.html">Return to Main Menu</a></h4>

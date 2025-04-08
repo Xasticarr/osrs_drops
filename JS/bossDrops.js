@@ -1358,9 +1358,18 @@ function checkBossItems(selectedBoss) {
   populateBossItemsModal(boss);
 }
 
-function checkInventory() {
-  // const boss = bosses[selectedBoss];
-  //function goes here
+function setupInventoryModal() {
+  const openInventoryBtn = document.getElementById("openInventoryBtn");
+  const inventoryModal = document.getElementById("inventoryModal");
+
+  if (!openInventoryBtn || !inventoryModal) {
+    console.error("Inventory modal elements not found.");
+    return;
+  }
+
+  openInventoryBtn.addEventListener("click", () => {
+    inventoryModal.style.display = "flex";
+  });
 }
 
 function playUniqueDropSound() {
@@ -1925,14 +1934,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  setupInventoryModal();
 });
-
-//Moving only event listener into openBossSelectionModal function, because I'm trying to make the modal multipurposed
-
-// document.querySelectorAll(".bossSlay").forEach((button) => {
-//   button.addEventListener("click", (event) => {
-//     const selectedBoss = event.target.getAttribute("boss-data");
-//     callbackFunction(selectedBoss); // Run the passed function
-//     closeModal(event);
-//   });
-// });
