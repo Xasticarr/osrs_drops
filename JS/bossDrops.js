@@ -480,6 +480,7 @@ const bosses = {
 
 function calculateTableProbabilities(boss) {
   let tableChances = {};
+  const rolls = boss.doubleRoll ? 2 : boss.tripleRoll ? 3 : 1;
 
   //Add Rare Drop Table if boss has access
 
@@ -496,9 +497,14 @@ function calculateTableProbabilities(boss) {
     )
       //Added "|| table === "rareDropTable""
       continue;
+
+    if (boss.preRoll && table === boss.preRoll.table) continue;
+
     let tableChance = items.reduce((sum, item) => sum + (item.rarity || 0), 0);
-    tableChances[table] =
-      tableChance / (boss.doubleRoll ? 2 : boss.tripleRoll ? 3 : 1); //Adjusting for amount of rolls
+    tableChances[table] = tableChance / rolls; //Adjusting for amount of rolls
+    // console.log("TableChance 1: ", tableChance, `${table}`);
+    // console.log("TableChances 2: ", tableChances, `${table}`);
+    //I initially commented out the adjusting above, but this provides the correct values PER ROLL, so I brought it back.
   }
   //Adding in rareDropTable chances for calculation
   if (boss.rDT) {
@@ -510,6 +516,8 @@ function calculateTableProbabilities(boss) {
     0
   );
   //Hoping line below fixes skewed drop rates
+  // console.log("TableChances: ", tableChances, "TotalChance: ", totalChance);
+
   return { tableChances, totalChance };
 
   //Rolling as a percent is actually skewing drop rates for Rare Drop Table
@@ -572,21 +580,21 @@ function rollTableItems(table, tableName) {
 
   let roll = Math.random() * totalWeight;
   //debugging
-  console.log(
-    `Rolling in ${tableName} with roll: ${roll.toFixed(
-      4
-    )}, Total Weight: ${totalWeight.toFixed(4)}`
-  );
+  // console.log(
+  //   `Rolling in ${tableName} with roll: ${roll.toFixed(
+  //     4
+  //   )}, Total Weight: ${totalWeight.toFixed(4)}`
+  // );
   let cumulativeWeight = 0;
   for (const item of table) {
     cumulativeWeight += item.rarity;
     if (roll <= cumulativeWeight) {
       //Debugging
-      console.log(
-        `Selected item: ${item.item} (Cumulative: ${cumulativeWeight.toFixed(
-          4
-        )})`
-      );
+      // console.log(
+      //   `Selected item: ${item.item} (Cumulative: ${cumulativeWeight.toFixed(
+      //     4
+      //   )})`
+      // );
       if (item.type === "table") {
         console.log(`Type = Table! Entering sub-table: ${item.item}`);
         //This is all being tested and can be deleted if required
@@ -840,14 +848,14 @@ function generateBossDrop(boss) {
           });
 
           uniqueHit = true; //We hit something on the pre-rolled table
-          console.log(`Pre-roll hit! Dropped ${preDrop.item}`);
+          // console.log(`Pre-roll hit! Dropped ${preDrop.item}`);
 
           if (isExclusive) {
             isExclusiveDrop = true; //Set flag to skip standard rolls
           }
         }
       } else {
-        console.log("Pre-roll missed, proceeding with standard rolls only.");
+        // console.log("Pre-roll missed, proceeding with standard rolls only.");
       }
       preRolled = true; //Pre-roll only happens once if "everyRoll" is false
     }
@@ -959,6 +967,7 @@ function getBossTablesAndItems(boss) {
   let tablesAndItems = [];
   //Attempting to add table chances, item rarities, and rarities within tables
   const { tableChances, totalChance } = calculateTableProbabilities(boss);
+  const rolls = boss.doubleRoll ? 2 : boss.tripleRoll ? 3 : 1;
 
   // Standard Drop Tables
   for (let tableName in boss.dropTables) {
@@ -983,7 +992,7 @@ function getBossTablesAndItems(boss) {
       (sum, item) => sum + (item.rarity || 0),
       0
     );
-
+    // console.log("Total Weights", totalTableWeight);
     let formattedItems = tableItems.map((item) => {
       let quantityText =
         Array.isArray(item.quantity) && item.quantity.length === 2
@@ -994,6 +1003,10 @@ function getBossTablesAndItems(boss) {
 
       //Raw Item Rarity
       const rawRarity = item.rarity
+        ? `${rolls} x (1 / ${((1 / item.rarity) * rolls).toFixed(3)})`
+        : "N/A";
+
+      const perKillRarity = item.rarity
         ? `1 / ${(1 / item.rarity).toFixed(3)}`
         : "N/A";
 
@@ -1007,19 +1020,29 @@ function getBossTablesAndItems(boss) {
         name: item.item,
         quantity: quantityText,
         //Adding new objects below
+        perKillRarity,
         rawRarity,
         rarityInTable,
         //End of new
       };
     });
 
+    //Table chance as percentage per roll, scaled by number of rolls
+    let tableChancePercent =
+      tableChances[tableName] && totalChance
+        ? ((tableChances[tableName] / totalChance) * 100).toFixed(2) + "%"
+        : "N/A";
+
+    // console.log(tableChances[tableName], `${tableName}`);
+
     tablesAndItems.push({
       table: tableName,
       items: formattedItems,
+      tableChance: tableChancePercent,
       //Adding new objects below
-      tableChance: tableChances[tableName]
-        ? `${((tableChances[tableName] / totalChance) * 100).toFixed(2)}%`
-        : "N/A",
+      // tableChance: tableChances[tableName]
+      //   ? `${((tableChances[tableName] / totalChance) * 100).toFixed(2)}%`
+      //   : "N/A",
     });
     //End of new
   }
@@ -1032,7 +1055,9 @@ function getBossTablesAndItems(boss) {
         {
           name: "RDT Access: Yes",
           quantity: "N/A",
-          rawRarity: `1 / ${(1 / boss.rDTChance).toFixed(2)}`,
+          rawRarity: `${rolls} x (1 / ${((1 / boss.rDTChance) * rolls).toFixed(
+            2
+          )}`,
           rarityInTable: "N/A",
           tableChance: `${(
             (tableChances["rareDropTable"] / totalChance) *
@@ -1040,7 +1065,10 @@ function getBossTablesAndItems(boss) {
           ).toFixed(2)}%`,
         },
       ],
-      tableChance: `${(boss.rDTChance * 100).toFixed(2)}%`,
+      tableChance: `${(
+        (tableChances["rareDropTable"] / totalChance) *
+        100
+      ).toFixed(2)}%`,
     });
   }
 
@@ -1106,7 +1134,8 @@ function populateBossItemsModal(boss) {
     "Items",
     "Quantity",
     "Rarity in Table",
-    "Item Rarity",
+    "Per Kill Rarity",
+    "Raw Item Rarity",
   ];
   headers.forEach((headerText) => {
     let headerCell = document.createElement("th");
@@ -1168,8 +1197,12 @@ function populateBossItemsModal(boss) {
       row.appendChild(tableCell5);
 
       let tableCell6 = document.createElement("td");
-      tableCell6.textContent = itemData.rawRarity;
+      tableCell6.textContent = itemData.perKillRarity;
       row.appendChild(tableCell6);
+
+      let tableCell7 = document.createElement("td");
+      tableCell7.textContent = itemData.rawRarity;
+      row.appendChild(tableCell7);
 
       bossTableBody.appendChild(row);
     });
@@ -1325,8 +1358,8 @@ function checkBossItems(selectedBoss) {
   populateBossItemsModal(boss);
 }
 
-function checkBossChances(selectedBoss) {
-  const boss = bosses[selectedBoss];
+function checkInventory() {
+  // const boss = bosses[selectedBoss];
   //function goes here
 }
 
