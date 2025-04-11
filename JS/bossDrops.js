@@ -1034,6 +1034,7 @@ function generateBossDrop(boss) {
   drops.forEach(({ item, quantity, dropTable, tablePath }) => {
     //Collection log setup
     let type = "standard";
+    let rare = false; //Default to false
 
     let fullTable = boss.dropTables[dropTable];
 
@@ -1049,21 +1050,63 @@ function generateBossDrop(boss) {
     const isCLog = dropInfo?.cLog === true;
     const isPet = dropInfo?.type === "pet";
 
+    rare = dropInfo?.rare === true;
+
     if (isCLog && isPet) {
       // Log once for each category
-      InventoryModule.updateInventory(null, bossName, item, quantity, "cLog");
+      InventoryModule.updateInventory(
+        null,
+        bossName,
+        item,
+        quantity,
+        "cLog",
+        null,
+        rare
+      );
 
-      InventoryModule.updateInventory(null, bossName, item, quantity, "pet");
+      InventoryModule.updateInventory(
+        null,
+        bossName,
+        item,
+        quantity,
+        "pet",
+        null,
+        rare
+      );
     } else if (isCLog) {
       type = "cLog";
 
-      InventoryModule.updateInventory(null, bossName, item, quantity, type);
+      InventoryModule.updateInventory(
+        null,
+        bossName,
+        item,
+        quantity,
+        type,
+        null,
+        rare
+      );
     } else if (isPet) {
       type = "pet";
 
-      InventoryModule.updateInventory(null, bossName, item, quantity, type);
+      InventoryModule.updateInventory(
+        null,
+        bossName,
+        item,
+        quantity,
+        type,
+        null,
+        rare
+      );
     } else {
-      InventoryModule.updateInventory(null, bossName, item, quantity, type);
+      InventoryModule.updateInventory(
+        null,
+        bossName,
+        item,
+        quantity,
+        type,
+        null,
+        rare
+      );
     }
   });
 

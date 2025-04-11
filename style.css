@@ -312,6 +312,38 @@ main {
   background-color: #c9302c;
 }
 
+.boss-category {
+  background-color: #141414;
+}
+
+.raid-category {
+  background-color: #460200;
+}
+
+.generic-category {
+  background-color: burlywood;
+}
+
+#inventoryItemsTable tr.rare-item {
+  background-color: rgb(110, 31, 110);
+}
+
+#inventoryItemsTable td.boss-name {
+  font-weight: bold;
+}
+
+.Zulrah {
+  background-color: rgba(3, 147, 20, 0.662);
+}
+
+.Vorkath {
+  background-color: rgba(92, 201, 238, 0.664);
+}
+
+.Muspah {
+  background-color: rgba(199, 79, 199, 0.663);
+}
+
 ul {
   display: flex;
   list-style: none;

@@ -21,7 +21,8 @@ const InventoryModule = (function () {
     itemName,
     quantity,
     type = "standard",
-    killCount = null
+    killCount = null,
+    rare = false //Added for table formatting
   ) {
     if (bossName && !itemName) {
       if (!inventory.bosses[bossName]) {
@@ -62,7 +63,7 @@ const InventoryModule = (function () {
 
     const itemKey = `${itemName}_${category}`;
     if (!inventory.full[category][itemKey]) {
-      inventory.full[category][itemKey] = { name: itemName, quantity: 0 };
+      inventory.full[category][itemKey] = { name: itemName, quantity: 0, rare }; // Storing rare property
     }
     inventory.full[category][itemKey].quantity += quantity;
 
@@ -227,48 +228,132 @@ const InventoryModule = (function () {
     // Create table body
 
     const tbody = document.createElement("tbody");
-    for (let category in inventory.full) {
+
+    // Group and sort items by category (Boss, Raid, Generic)
+    const categories = {};
+    Object.keys(inventory.full).forEach((category) => {
       const [dropSim, name = "N/A"] = category.split(": ");
-      for (let itemKey in inventory.full[category]) {
-        const item = inventory.full[category][itemKey];
-        const row = document.createElement("tr");
-
-        // Drop Sim cell
-        const simCell = document.createElement("td");
-        simCell.textContent = dropSim;
-        row.appendChild(simCell);
-
-        // Boss/Raid name cell
-        const nameCell = document.createElement("td");
-        nameCell.textContent = name;
-        row.appendChild(nameCell);
-
-        // Item cell
-        const itemCell = document.createElement("td");
-        itemCell.textContent = item.name;
-        row.appendChild(itemCell);
-
-        // Total Quantity cell
-        const quantityCell = document.createElement("td");
-        quantityCell.textContent = item.quantity;
-        row.appendChild(quantityCell);
-
-        tbody.appendChild(row);
+      if (!categories[dropSim]) {
+        categories[dropSim] = {};
       }
-      // Commenting out OLD below to try NEW above
-      // const item = inventory.full[itemKey];
-      // const row = document.createElement("tr");
-      // const itemName = document.createElement("td");
+      categories[dropSim][name] = Object.values(inventory.full[category]);
+    });
 
-      // itemName.textContent = item.name;
-      // const itemQuantity = document.createElement("td");
-      // itemQuantity.textContent = item.quantity;
+    //Iterate over category types (Boss, Raid, Generic)
+    Object.keys(categories)
+      .sort()
+      .forEach((dropSim) => {
+        const categoryItems = categories[dropSim];
+        const totalCategoryRows = Object.values(categoryItems).reduce(
+          (sum, items) => sum + items.length,
+          0
+        );
 
-      // row.appendChild(itemName);
-      // row.appendChild(itemQuantity);
-      // document.getElementById("inventoryItemsTable").appendChild(row);
-    }
+        // Iterate over specific bosses/raids within category
+        Object.keys(categoryItems)
+          .sort()
+          .forEach((name, nameIndex) => {
+            const items = categoryItems[name];
+
+            // Sort items: rare items first, then by quantity descending
+            items.sort((a, b) => {
+              if (a.rare && !b.rare) return -1; //Rare items first
+              if (!a.rare && b.rare) return 1;
+              return b.quantity - a.quantity; // Highest quantity first
+            });
+
+            const rowSpanCount = items.length;
+            items.forEach((item, index) => {
+              const row = document.createElement("tr");
+
+              // Apply rare item styling
+              if (item.rare) {
+                row.classList.add("rare-item");
+              }
+
+              // Category column (Only on first row of entire category)
+              if (nameIndex === 0 && index === 0) {
+                const simCell = document.createElement("td");
+                simCell.textContent = dropSim;
+                simCell.rowSpan = totalCategoryRows;
+                simCell.style.verticalAlign = "middle"; //Align to top
+                if (dropSim === "Boss") simCell.classList.add("boss-category");
+                else if (dropSim === "Raid")
+                  simCell.classList.add("raid-category");
+                else if (dropSim == "Generic")
+                  simCell.classList.add("generic-category");
+                row.appendChild(simCell);
+              }
+
+              // Boss/Raid name cell (merged with color)
+              if (index === 0) {
+                const nameCell = document.createElement("td");
+                nameCell.textContent = name;
+                nameCell.rowSpan = rowSpanCount;
+                nameCell.classList.add("boss-name");
+                if (name === "Zulrah") nameCell.classList.add("Zulrah");
+                else if (name === "Vorkath") nameCell.classList.add("Vorkath");
+                else if (name === "Muspah") nameCell.classList.add("Muspah");
+                row.appendChild(nameCell);
+              }
+
+              // Item cell
+              const itemCell = document.createElement("td");
+              itemCell.textContent = item.name;
+              row.appendChild(itemCell);
+
+              // Total Quantity cell
+              const quantityCell = document.createElement("td");
+              quantityCell.textContent = item.quantity;
+              row.appendChild(quantityCell);
+
+              tbody.appendChild(row);
+            });
+          });
+      });
+
     itemsTable.appendChild(tbody);
+
+    //Commeting out old formatting below
+
+    // for (let itemKey in inventory.full[category]) {
+    //   const item = inventory.full[category][itemKey];
+    //   const row = document.createElement("tr");
+
+    //   // Drop Sim cell
+    //   const simCell = document.createElement("td");
+    //   simCell.textContent = dropSim;
+    //   row.appendChild(simCell);
+
+    //   // Boss/Raid name cell
+    //   const nameCell = document.createElement("td");
+    //   nameCell.textContent = name;
+    //   row.appendChild(nameCell);
+
+    //   // Item cell
+    //   const itemCell = document.createElement("td");
+    //   itemCell.textContent = item.name;
+    //   row.appendChild(itemCell);
+
+    //   // Total Quantity cell
+    //   const quantityCell = document.createElement("td");
+    //   quantityCell.textContent = item.quantity;
+    //   row.appendChild(quantityCell);
+
+    //   tbody.appendChild(row);
+    // }
+    // Commenting out OLD below to try NEW above
+    // const item = inventory.full[itemKey];
+    // const row = document.createElement("tr");
+    // const itemName = document.createElement("td");
+
+    // itemName.textContent = item.name;
+    // const itemQuantity = document.createElement("td");
+    // itemQuantity.textContent = item.quantity;
+
+    // row.appendChild(itemName);
+    // row.appendChild(itemQuantity);
+    // document.getElementById("inventoryItemsTable").appendChild(row);
 
     // Populating Boss Kills (from Boss Drop Roller)
 
