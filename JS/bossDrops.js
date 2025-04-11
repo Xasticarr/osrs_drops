@@ -1,5 +1,7 @@
 "use strict";
 
+import { InventoryModule } from "./inventory.js";
+
 function rollRandomNumber(max) {
   return Math.floor(Math.random() * max);
 }
@@ -65,13 +67,22 @@ const bosses = {
     rDTChance: 9 / 248,
     tertiaryDrops: [
       { item: "Clue Scroll (Elite)", quantity: 1, rarity: 1 / 75 },
-      { item: "Jar of Swamp", quantity: 1, rarity: 1 / 3000, bigChime: true },
+      {
+        item: "Jar of Swamp",
+        quantity: 1,
+        rarity: 1 / 3000,
+        bigChime: true,
+        cLog: true,
+        rare: true,
+      },
       {
         item: "Pet Snakeling",
         quantity: 1,
         rarity: 1 / 4000,
         type: "pet",
         bigChime: true,
+        cLog: true,
+        rare: true,
       },
     ],
     dropTables: {
@@ -82,29 +93,51 @@ const bosses = {
           quantity: 1,
           rarity: 2 * (1 / 1024),
           chime: true,
+          cLog: true,
+          rare: true,
         },
         {
           item: "Magic fang",
           quantity: 1,
           rarity: 2 * (1 / 1024),
           chime: true,
+          cLog: true,
+          rare: true,
         },
         {
           item: "Serpentine visage",
           quantity: 1,
           rarity: 2 * (1 / 1024),
           chime: true,
+          cLog: true,
+          rare: true,
         },
         {
           item: "Uncut onyx",
           quantity: 1,
           rarity: 2 * (1 / 1024),
           chime: true,
+          cLog: true,
+          rare: true,
         },
       ],
       mutagen: [
-        { item: "Tanzanite mutagen", quantity: 1, rarity: 2 * (1 / 13106) },
-        { item: "Magma mutagen", quantity: 1, rarity: 2 * (1 / 13106) },
+        {
+          item: "Tanzanite mutagen",
+          quantity: 1,
+          rarity: 2 * (1 / 13106),
+          cLog: true,
+          bigChime: true,
+          rare: true,
+        },
+        {
+          item: "Magma mutagen",
+          quantity: 1,
+          rarity: 2 * (1 / 13106),
+          cLog: true,
+          bigChime: true,
+          rare: true,
+        },
       ],
       equipment: [
         { item: "Battlestaff (noted)", quantity: 10, rarity: 2 * (1 / 24.8) },
@@ -183,19 +216,54 @@ const bosses = {
         quantity: 1,
         rarity: 1 / 10,
       },
-      { item: "Vorkath's Head", quantity: 1, rarity: 1 / 50 },
+      {
+        item: "Vorkath's Head",
+        quantity: 1,
+        rarity: 1 / 50,
+        cLog: true,
+        rare: true,
+      },
       { item: "Clue Scroll (Elite)", quantity: 1, rarity: 1 / 65 },
-      { item: "Dragonbone Necklace", quantity: 1, rarity: 1 / 1000 },
-      { item: "Jar of Decay", quantity: 1, rarity: 1 / 3000, bigChime: true },
+      {
+        item: "Dragonbone Necklace",
+        quantity: 1,
+        rarity: 1 / 1000,
+        cLog: true,
+        rare: true,
+      },
+      {
+        item: "Jar of Decay",
+        quantity: 1,
+        rarity: 1 / 3000,
+        bigChime: true,
+        cLog: true,
+        rare: true,
+      },
       {
         item: "Vorki",
         quantity: 1,
         rarity: 1 / 3000,
         type: "pet",
         bigChime: true,
+        cLog: true,
+        rare: true,
       },
-      { item: "Draconic Visage", quantity: 1, rarity: 1 / 5000, chime: true },
-      { item: "Skeletal Visage", quantity: 1, rarity: 1 / 5000, chime: true },
+      {
+        item: "Draconic Visage",
+        quantity: 1,
+        rarity: 1 / 5000,
+        chime: true,
+        cLog: true,
+        rare: true,
+      },
+      {
+        item: "Skeletal Visage",
+        quantity: 1,
+        rarity: 1 / 5000,
+        chime: true,
+        cLog: true,
+        rare: true,
+      },
     ],
     dropTables: {
       always: [
@@ -338,21 +406,52 @@ const bosses = {
         rarity: 1 / 2500,
         type: "pet",
         bigChime: true,
+        cLog: true,
+        rare: true,
       },
     ],
     dropTables: {
       unique: [
-        { item: "Ancient essence", quantity: [540, 599], rarity: 1 / 1.667 },
-        { item: "Ancient essence", quantity: [885, 995], rarity: 1 / 4.348 },
-        { item: "Ancient essence", quantity: [1970, 2060], rarity: 1 / 10 },
-        { item: "Frozen cache", quantity: 1, rarity: 1 / 25 },
-        { item: "Ancient icon", quantity: 1, rarity: 1 / 50 },
+        {
+          item: "Ancient essence",
+          quantity: [540, 599],
+          rarity: 1 / 1.667,
+          cLog: true,
+        },
+        {
+          item: "Ancient essence",
+          quantity: [885, 995],
+          rarity: 1 / 4.348,
+          cLog: true,
+        },
+        {
+          item: "Ancient essence",
+          quantity: [1970, 2060],
+          rarity: 1 / 10,
+          cLog: true,
+        },
+        {
+          item: "Frozen cache",
+          quantity: 1,
+          rarity: 1 / 25,
+          cLog: true,
+          rare: true,
+        },
+        {
+          item: "Ancient icon",
+          quantity: 1,
+          rarity: 1 / 50,
+          cLog: true,
+          rare: true,
+        },
         {
           item: "Venator shard",
           quantity: 1,
           rarity: 1 / 100,
           exclusive: true,
           chime: true,
+          cLog: true,
+          rare: true,
         },
       ],
       supplies: [
@@ -774,8 +873,13 @@ function rollForTertiaryDrop(boss) {
 //Can implement a SCALING FACTOR, but should not be needed
 
 //Using generate function to set up reroll button in the modal later on
-let lastBossRolled = null;
-let lastBossName = "";
+
+//Had to adjust this because module takes over the global scope
+
+const bossState = {
+  lastBossRolled: null,
+  lastBossName: "",
+};
 //This is where we'll store the last boss rolled
 
 function generateBossDrop(boss) {
@@ -783,6 +887,13 @@ function generateBossDrop(boss) {
   let rolls = boss.doubleRoll ? 2 : boss.tripleRoll ? 3 : 1;
   let drops = [];
   let isExclusiveDrop = false; //Track for exclusive items
+
+  //Increment boss kill count for Inventory Module. New Below
+  const bossName =
+    Object.keys(bosses).find((name) => bosses[name] === boss) || "Unknown Boss";
+  InventoryModule.updateInventory(null, bossName, null, 0);
+
+  //Above added NEW for Inventory Module
 
   //Roll the appropriate number of times
 
@@ -886,6 +997,7 @@ function generateBossDrop(boss) {
           dropTable,
           item: itemDrop.item,
           quantity: finalQuantity,
+          tablePath: itemDrop.tablePath,
         });
       }
     }
@@ -903,10 +1015,68 @@ function generateBossDrop(boss) {
   }
 
   //We're gonna populate the modal here using a separate function
-  lastBossRolled = boss;
-  lastBossName =
-    Object.keys(bosses).find((name) => bosses[name] === boss) || "Unknown Boss";
+  bossState.lastBossRolled = boss;
+  bossState.lastBossName = bossName;
+
   populateBossDropModal(drops);
+
+  //Below doesn't work right. Boss KC is being incremented PER DROP and not PER KILL
+
+  // if (!inventory.bosses[bossName]) {
+  //   inventory.bosses[bossName] = {
+  //     kills: 0,
+  //     drops: {},
+  //   };
+  // }
+
+  // inventory.bosses[bossName].kills += 1;
+  // Updating item types to work with Inventory Module
+  drops.forEach(({ item, quantity, dropTable, tablePath }) => {
+    //Collection log setup
+    let type = "standard";
+
+    let fullTable = boss.dropTables[dropTable];
+
+    //We gotta handle the Rare Drop Table, because of course it doesn't work right.
+
+    if (dropTable === "rareDropTable" && tablePath && tablePath.length > 0) {
+      //Use first table in the path (Specific RDT sub table)
+      const rdtSubTable = tablePath[0];
+      fullTable = rareDropTable[rdtSubTable];
+    }
+    const dropInfo = fullTable?.find((entry) => entry.item === item);
+
+    const isCLog = dropInfo?.cLog === true;
+    const isPet = dropInfo?.type === "pet";
+
+    if (isCLog && isPet) {
+      // Log once for each category
+      InventoryModule.updateInventory(null, bossName, item, quantity, "cLog");
+
+      InventoryModule.updateInventory(null, bossName, item, quantity, "pet");
+    } else if (isCLog) {
+      type = "cLog";
+
+      InventoryModule.updateInventory(null, bossName, item, quantity, type);
+    } else if (isPet) {
+      type = "pet";
+
+      InventoryModule.updateInventory(null, bossName, item, quantity, type);
+    } else {
+      InventoryModule.updateInventory(null, bossName, item, quantity, type);
+    }
+  });
+
+  //Update inventory modal after incrementing kill count
+  // InventoryModule.updateInventoryModal();
+}
+
+function rollAgain() {
+  if (bossState.lastBossRolled) {
+    generateBossDrop(bossState.lastBossRolled);
+  } else {
+    console.error("No boss has been rolled yet!");
+  }
 }
 
 function populateBossDropModal(drops) {
@@ -915,7 +1085,7 @@ function populateBossDropModal(drops) {
   //Clear previous drop content
   bossDropResultText.textContent = "";
 
-  let bossName = lastBossName;
+  let bossName = bossState.lastBossName;
   // console.log(lastBossName);
   let tertiaryDrop = null;
 
@@ -1298,20 +1468,52 @@ function populateBossItemsModal(boss) {
     rdtTable.appendChild(rdtTableBody);
     rdtContainer.appendChild(rdtTable);
 
-    if (toggleButton) {
-      toggleButton.style.display = "inline-block";
-      //Reset Toggle State
-      toggleButton.textContent = "View Rare Drop Table";
-      rdtContainer.style.display = "none";
-    }
+    toggleButton.style.display = "inline-block";
+    toggleButton.textContent = "View Rare Drop Table";
+    rdtContainer.style.display = "none";
+
+    setupRdtToggle();
+
+    //Commenting out OLD below for NEW above
+    // if (toggleButton) {
+    //   toggleButton.style.display = "inline-block";
+    //   //Reset Toggle State
+    //   toggleButton.textContent = "View Rare Drop Table";
+    //   rdtContainer.style.display = "none";
+    // }
   } else {
     // Hide toggle button if no RDT
-    if (toggleButton) {
-      toggleButton.style.display = "none";
-    }
+    toggleButton.style.display = "none";
   }
 
   document.getElementById("bossItemModal").style.display = "flex";
+}
+
+function toggleRDTHandler() {
+  const rdtContainer = document.querySelector("#rdt-container");
+  const toggleButton = document.querySelector("#rdt-toggle");
+  console.log("RDT Toggle Clicked");
+  if (
+    rdtContainer.style.display === "none" ||
+    rdtContainer.style.display === ""
+  ) {
+    rdtContainer.style.display = "block";
+    toggleButton.textContent = "Hide Rare Drop Table";
+  } else {
+    rdtContainer.style.display = "none";
+    toggleButton.textContent = "View Rare Drop Table";
+  }
+}
+
+function setupRdtToggle() {
+  const toggleButton = document.querySelector("#rdt-toggle");
+  const rdtContainer = document.querySelector("#rdt-container");
+
+  if (toggleButton && rdtContainer) {
+    //Remove existing listener to prevent dupes
+    toggleButton.removeEventListener("click", toggleRDTHandler);
+    toggleButton.addEventListener("click", toggleRDTHandler);
+  }
 }
 
 function closeModal(event) {
@@ -1345,10 +1547,7 @@ function openBossSelectionModal(callbackFunction, titleText) {
 
 function slayBoss(selectedBoss) {
   const boss = bosses[selectedBoss];
-  // Adjusting this function to work better with adjusted selection modal. Changed from slayBoss(event).
 
-  // const selectedBoss = event.target.getAttribute("boss-data");
-  // // console.log("Selected Boss:", selectedBoss);
   generateBossDrop(boss);
 }
 
@@ -1915,25 +2114,48 @@ function testRDTSubTables(rdt, iterations = 10000) {
 
 */
 
-//Event Listeners
-document.addEventListener("DOMContentLoaded", () => {
-  const toggleButton = document.querySelector("#rdt-toggle");
-  const rdtContainer = document.querySelector("#rdt-container");
+// ======== Event Listeners ========
 
-  if (toggleButton && rdtContainer) {
-    toggleButton.addEventListener("click", () => {
-      if (
-        rdtContainer.style.display === "none" ||
-        rdtContainer.style.display === ""
-      ) {
-        rdtContainer.style.display = "block";
-        toggleButton.textContent = "Hide Rare Drop Table";
-      } else {
-        rdtContainer.style.display = "none";
-        toggleButton.textContent = "View Rare Drop Table";
-      }
-    });
-  }
+// Rare Drop Table Toggle / Inventory Setup
+document.addEventListener("DOMContentLoaded", () => {
+  //Moved event listeners below into DOMContentLoaded
+  // Boss Selection Modal listeners
+  document.getElementById("slayBossButton").addEventListener("click", () => {
+    openBossSelectionModal(slayBoss, "What boss would you like to slay?");
+  });
+
+  document.getElementById("bossItemsButton").addEventListener("click", () => {
+    openBossSelectionModal(checkBossItems, "What items can I receive?");
+  });
+
+  // Roll Again function listener
+  document
+    .getElementById("rollAgainButton")
+    .addEventListener("click", rollAgain);
+
+  // Close Modal button listener
+  document.querySelectorAll(".close-button").forEach((button) => {
+    button.addEventListener("click", closeModal);
+  });
 
   setupInventoryModal();
 });
+
+// Inventory Reset Button
+
+// Set up within module
+
+// document.addEventListener("DOMContentLoaded", () => {
+//   const resetButton = document.getElementById("resetInventoryButton");
+//   if (resetButton) {
+//     resetButton.addEventListener("click", () => {
+//       if (
+//         confirm(
+//           "Are you sure you want to reset your inventory? This cannot be undone."
+//         )
+//       ) {
+//         InventoryModule.resetInventory();
+//       }
+//     });
+//   }
+// });

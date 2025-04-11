@@ -196,7 +196,8 @@ main {
   margin-top: 10px;
 }
 
-.rdt-toggle-button {
+.rdt-toggle-button,
+.toggle-button {
   /* background: rgb(73, 12, 65); */
   border-radius: 8px;
   height: 40px;
@@ -206,12 +207,14 @@ main {
   background: #0056b3;
 }
 
-.rdt-toggle-button:hover {
+.rdt-toggle-button,
+.toggle-button:hover {
   background-color: #0056b3;
 }
 
 #itemModal table,
-#bossItemModal table {
+#bossItemModal table,
+#inventoryItemsTable {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
@@ -219,13 +222,21 @@ main {
 
 #itemModal th,
 #bossItemModal th,
+#inventoryItemsTable th,
 #itemModal td,
-#bossItemModal td {
+#bossItemModal td,
+#inventoryItemsTable td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
 }
+#inventoryItemsTable th {
+  background-color: rgb(48, 33, 21);
+}
 
+#inventoryItemsTable tr {
+  background-color: rgb(71, 53, 25);
+}
 #itemModal tr,
 #bossItemModal tr {
   height: 40px;
@@ -283,6 +294,22 @@ main {
   font-family: RuneScript, sans-serif;
   font-size: 25px;
   color: gold;
+}
+
+.reset-button {
+  font-family: RuneScript, sans-serif;
+  font-size: 25px;
+  background-color: #460200;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  margin: 10px 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.reset-button:hover {
+  background-color: #c9302c;
 }
 
 ul {

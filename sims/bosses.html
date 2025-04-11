@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <title>Boss Drops</title>
-    <script src="../JS/bossDrops.js" defer></script>
+    <script type="module" src="../JS/bossDrops.js" defer></script>
     <link rel="stylesheet" href="../style.css" />
   </head>
 
@@ -28,16 +28,10 @@
       </header>
       <main>
         <div class="button_container">
-          <button
-            class="drop_button"
-            onclick="openBossSelectionModal(slayBoss, 'What boss would you like to slay?')"
-          >
+          <button class="drop_button" id="slayBossButton">
             <div class="drop_button_content">Slay a Boss!</div>
           </button>
-          <button
-            class="drop_button"
-            onclick="openBossSelectionModal(checkBossItems, 'What items can I receive?')"
-          >
+          <button class="drop_button" id="bossItemsButton">
             <div class="drop_button_content">Big Pickle!</div>
           </button>
           <button id="openInventoryBtn" class="drop_button">
@@ -51,9 +45,7 @@
           <div class="modal-content">
             <div class="modal-header">
               <h2></h2>
-              <button class="close-button" onclick="closeModal(event)">
-                X
-              </button>
+              <button class="close-button" id="closeModal">X</button>
             </div>
             <div class="modal-body">
               <!-- This is where boss buttons go -->
@@ -86,9 +78,7 @@
           <div class="modal-content">
             <div class="modal-header">
               <h2>Drop Results</h2>
-              <button class="close-button" onclick="closeModal(event)">
-                X
-              </button>
+              <button class="close-button" id="closeModal">X</button>
             </div>
             <div class="modal-body">
               <p id="bossDropResultText"></p>
@@ -97,7 +87,6 @@
               <button
                 id="rollAgainButton"
                 class="roll-again-button modal-button"
-                onclick="generateBossDrop(lastBossRolled)"
               >
                 🎲 Run it back? 🎲
               </button>
@@ -109,9 +98,7 @@
           <div class="modal-content">
             <div class="modal-header">
               <h2>Potential Items</h2>
-              <button class="close-button" onclick="closeModal(event)">
-                X
-              </button>
+              <button class="close-button" id="closeModal">X</button>
             </div>
             <div class="modal-body">
               <div id="boss-table-container"></div>
@@ -129,16 +116,37 @@
           <div class="modal-content">
             <div class="modal-header">
               <h2>Inventory</h2>
-              <button class="close-button" onclick="closeModal(event)">
-                X
+              <button id="resetInventoryButton" class="reset-button">
+                Reset Inventory
               </button>
+              <button class="close-button" id="closeModal">X</button>
             </div>
             <div class="modal-body">
+              <!-- Inventory Items Section -->
               <div id="inventoryContent">
                 <!-- Inventory content will go here -->
-                <p>No items have been collected yet.</p>
+
+                <!-- Boss Kills Section -->
+                <h3>You've Slain:</h3>
+                <div id="bossKillsSection">
+                  <!-- JavaScrip will fill this in -->
+                </div>
+
+                <h3>You've Cleared:</h3>
+                <div id="raidKillsSection">
+                  <!-- JavaScrip will fill this in -->
+                </div>
+
+                <!-- Collection Log Section -->
+                <div id="collectionLogSection">
+                  <!-- JavaScript will fill this in -->
+                </div>
+
+                <h3>Your Items</h3>
+                <table id="inventoryItemsTable">
+                  <!-- JavaScript will fill this in -->
+                </table>
               </div>
-              <!--Drop results should show up here now -->
             </div>
           </div>
         </div>
