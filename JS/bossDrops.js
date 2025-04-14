@@ -126,16 +126,16 @@ const bosses = {
           item: "Tanzanite mutagen",
           quantity: 1,
           rarity: 2 * (1 / 13106),
-          cLog: true,
           bigChime: true,
+          cLog: true,
           rare: true,
         },
         {
           item: "Magma mutagen",
           quantity: 1,
           rarity: 2 * (1 / 13106),
-          cLog: true,
           bigChime: true,
+          cLog: true,
           rare: true,
         },
       ],
@@ -228,6 +228,7 @@ const bosses = {
         item: "Dragonbone Necklace",
         quantity: 1,
         rarity: 1 / 1000,
+        chime: true,
         cLog: true,
         rare: true,
       },
@@ -709,6 +710,7 @@ function rollTableItems(table, tableName) {
       return {
         item: item.item,
         quantity: item.quantity || 1,
+        bigChime: item.bigChime || false,
         chime: item.chime || false,
         tablePath: [tableName], //Add tablePath for direct items (Testing)
       };
@@ -839,6 +841,11 @@ function rollForBossItem(boss, tableName) {
   } else if (droppedItem && droppedItem.chime) {
     playUniqueDropSound();
     console.log("Jingle Jingle");
+    console.log(droppedItem.item);
+  } else if (droppedItem && droppedItem.bigChime) {
+    playLeagueTaskSound();
+    console.log("Jingle Jingle: Big Boy Item");
+    console.log(droppedItem.item);
   }
   return droppedItem;
 }
@@ -850,16 +857,18 @@ function rollForTertiaryDrop(boss) {
     const roll = Math.random();
     if (roll <= item.rarity) {
       // console.log(`Tertiary roll: ${roll}, and result: ${item.item}`);
-      let droppedItem = { item: item.item, quantity: item.quantity || 1 };
+      const droppedItem = { item: item.item, quantity: item.quantity || 1 };
 
       if (item.bigChime) {
         playLeagueTaskSound();
         console.log("Jingle Jingle, BIG TERTIARY");
+        console.log(item.item);
       }
 
       if (item.chime) {
         playUniqueDropSound();
         console.log("Jingle Jingle, tertiary");
+        console.log(item.item);
       }
       return droppedItem;
     }
@@ -1036,7 +1045,7 @@ function generateBossDrop(boss) {
     let type = "standard";
     let rare = false; //Default to false
 
-    let fullTable = boss.dropTables[dropTable];
+    let fullTable;
 
     //We gotta handle the Rare Drop Table, because of course it doesn't work right.
 
@@ -1044,7 +1053,12 @@ function generateBossDrop(boss) {
       //Use first table in the path (Specific RDT sub table)
       const rdtSubTable = tablePath[0];
       fullTable = rareDropTable[rdtSubTable];
+    } else if (dropTable === "tertiary") {
+      fullTable = boss.tertiaryDrops;
+    } else {
+      fullTable = boss.dropTables[dropTable];
     }
+
     const dropInfo = fullTable?.find((entry) => entry.item === item);
 
     const isCLog = dropInfo?.cLog === true;
@@ -1054,16 +1068,6 @@ function generateBossDrop(boss) {
 
     if (isCLog && isPet) {
       // Log once for each category
-      InventoryModule.updateInventory(
-        null,
-        bossName,
-        item,
-        quantity,
-        "cLog",
-        null,
-        rare
-      );
-
       InventoryModule.updateInventory(
         null,
         bossName,

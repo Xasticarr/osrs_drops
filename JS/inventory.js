@@ -109,10 +109,10 @@ const InventoryModule = (function () {
     if (type === "cLog" || type === "pet") {
       // Add collection log for all types (generic, bosses, raid)
       const source = bossName
-        ? `Boss: ${bossName}`
+        ? `(Boss) ${bossName}`
         : raidName
-        ? `Raid: ${raidName}`
-        : "generic"; //Determine where item came from
+        ? `(Raid) ${raidName}`
+        : "(Generic)"; //Determine where item came from
 
       //Log collection log items and pets
       if (!inventory.collectionLog.uniqueItems[source]) {
