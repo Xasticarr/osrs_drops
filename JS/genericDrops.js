@@ -1,5 +1,7 @@
 "use strict";
 
+import { InventoryModule } from "./inventory.js";
+
 function rollRandomNumber(max) {
   return Math.floor(Math.random() * max) + 1;
 }
@@ -60,20 +62,20 @@ const dropTables = {
     { item: "Rune Scimitar", weight: 175 },
   ],
   dragon: [
-    { item: "Dragon Chainbody", weight: 145 },
-    { item: "Dragon Platelegs", weight: 145 },
-    { item: "Dragon Boots", weight: 180 },
-    { item: "Dragon Defender", weight: 175 },
-    { item: "Dragon Med Helm", weight: 180 },
-    { item: "Dragon Scimitar", weight: 175 },
+    { item: "Dragon Chainbody", weight: 145, rare: true, cLog: true },
+    { item: "Dragon Platelegs", weight: 145, rare: true },
+    { item: "Dragon Boots", weight: 180, rare: true, cLog: true },
+    { item: "Dragon Defender", weight: 175, rare: true, cLog: true },
+    { item: "Dragon Med Helm", weight: 180, rare: true },
+    { item: "Dragon Scimitar", weight: 175, rare: true },
   ],
   rare: [
-    { item: "Neitiznot Faceguard", weight: 180 },
-    { item: "Dragon Warhammer", weight: 175 },
-    { item: "Abyssal Whip", weight: 175 },
-    { item: "Primordial Boots", weight: 180 },
-    { item: "Bandos Chestplate", weight: 145 },
-    { item: "Justiciar Legguards", weight: 145 },
+    { item: "Neitiznot Faceguard", weight: 180, rare: true, cLog: true },
+    { item: "Dragon Warhammer", weight: 175, rare: true, cLog: true },
+    { item: "Abyssal Whip", weight: 175, rare: true, cLog: true },
+    { item: "Primordial Boots", weight: 180, rare: true, cLog: true },
+    { item: "Bandos Chestplate", weight: 145, rare: true, cLog: true },
+    { item: "Justiciar Legguards", weight: 145, rare: true, cLog: true },
   ],
 };
 
@@ -123,7 +125,11 @@ function rollForItem(tableName) {
   for (let item of table) {
     cumulativeWeight += item.weight;
     if (roll <= cumulativeWeight) {
-      return item.item;
+      return {
+        item: item.item,
+        rare: item.rare || false,
+        cLog: item.cLog || false,
+      };
     }
   }
 }
@@ -169,10 +175,23 @@ function generateDrop() {
 
 //This is where I'll clean up the code, and integrate the custom modal I set up so it will all hopefully look nicer.
 function generateDrop() {
-  let dropTable = getDropTable();
-  // console.log(`You hit the ${dropTable} drop table!`);
-  let itemDrop = rollForItem(dropTable);
-  // console.log(`You looted: ${itemDrop}!`);
+  InventoryModule.updateInventory();
+
+  const dropTable = getDropTable();
+
+  const { item, rare, cLog } = rollForItem(dropTable);
+
+  let type = cLog ? "cLog" : "standard";
+
+  InventoryModule.updateInventory(
+    null, //raidName
+    null, //bossName
+    item,
+    1, //quantity
+    type, //type
+    null, //killCount
+    rare //rare flag
+  );
 
   //Get the Drop result container
   let dropResultText = document.getElementById("dropResultText");
@@ -182,12 +201,12 @@ function generateDrop() {
   let dropTableText = document.createElement("p");
   dropTableText.textContent = `You hit the ${dropTable.toUpperCase()} drop table!`;
 
-  let itemDropText = document.createElement("p");
-  itemDropText.textContent = `You received: ${itemDrop}!`;
+  let itemText = document.createElement("p");
+  itemText.textContent = `You received: ${item}!`;
 
   //This should append them with no issues
   dropResultText.appendChild(dropTableText);
-  dropResultText.appendChild(itemDropText);
+  dropResultText.appendChild(itemText);
 
   //This SHOULD make the modal appear
   document.getElementById("dropModal").style.display = "flex";
@@ -202,170 +221,162 @@ function closeModal(event) {
 
 function getAllDropTablesAndItems() {
   let tablesAndItems = [];
-  for (let tableName in dropTables) {
-    let tableItems = dropTables[tableName].map((item) => item.item);
-    tablesAndItems.push({
-      table: tableName,
-      items: tableItems,
-    });
-  }
-  return tablesAndItems;
-}
-
-function populateItemsModal() {
-  let tablesAndItems = getAllDropTablesAndItems();
-  let modalContent = document.querySelector("#itemModal .modal-body");
-
-  while (modalContent.firstChild) {
-    modalContent.removeChild(modalContent.firstChild);
-  }
-
-  let table = document.createElement("table");
-  let tableHeader = document.createElement("thead");
-  let headerRow = document.createElement("tr");
-
-  let headerCell1 = document.createElement("th");
-  headerCell1.textContent = "Drop Table";
-  headerRow.appendChild(headerCell1);
-
-  let headerCell2 = document.createElement("th");
-  headerCell2.textContent = "Items";
-  headerRow.appendChild(headerCell2);
-
-  tableHeader.appendChild(headerRow);
-  table.appendChild(tableHeader);
-
-  let tableBody = document.createElement("tbody");
-
-  tablesAndItems.forEach((tableData) => {
-    let row = document.createElement("tr");
-
-    let tableCell1 = document.createElement("td");
-    tableCell1.textContent = tableData.table.toUpperCase();
-    row.appendChild(tableCell1);
-
-    let tableCell2 = document.createElement("td");
-    tableCell2.textContent = tableData.items.join(", ");
-    row.appendChild(tableCell2);
-
-    tableBody.appendChild(row);
-  });
-
-  table.appendChild(tableBody);
-  modalContent.appendChild(table);
-
-  document.getElementById("itemModal").style.display = "flex";
-}
-
-// console.log(getAllDropTablesAndItems()); //This generates an array. Might want to display in a table?
-
-function getOddsOfRolling() {
-  let odds = [];
-
-  //First need table odds
   let totalTableChance = tableChances.reduce(
     (sum, table) => sum + table.chance,
     0
   );
 
-  tableChances.forEach((table) => {
-    let tableOdds = {
-      table: table.name,
-      chance: (table.chance / totalTableChance) * 100, //Get table chance as a percentage
-      items: [],
-    };
-
-    //Now we need odds for each item in the table
-    let tableItems = dropTables[table.name];
+  for (let tableName in dropTables) {
+    let tableItems = dropTables[tableName];
     let totalItemWeight = tableItems.reduce(
       (sum, item) => sum + item.weight,
       0
     );
 
-    tableItems.forEach((item) => {
-      let itemChance = (item.weight / totalItemWeight) * 100;
-      let cumulativeItemChance = (table.chance / totalTableChance) * itemChance;
+    let tableChanceData = tableChances.find((t) => t.name === tableName);
+    let tableChancePercent = tableChanceData
+      ? ((tableChanceData.chance / totalTableChance) * 100).toFixed(2) + "%"
+      : "N/A";
 
-      let itemOdds = {
-        item: item.item,
-        chance: itemChance ? itemChance.toFixed(2) : "0.00", //Individual Chance In Table
-        cumulativeChance: cumulativeItemChance
-          ? cumulativeItemChance.toFixed(3)
-          : "0.000", //Cumulative (effective) chance to get this item per roll
+    let formattedItems = tableItems.map((item) => {
+      let itemChance = ((item.weight / totalItemWeight) * 100).toFixed(2);
+      let cumulativeChance = (
+        (item.weight / totalItemWeight) *
+        (tableChanceData ? tableChanceData.chance / totalTableChance : 0) *
+        100
+      ).toFixed(3);
+
+      return {
+        name: item.item,
+        itemChance: itemChance + "%",
+        cumulativeChance: cumulativeChance + "%",
+        rarityInTable: itemChance + "%", //This can be removed
+        rawRarity: item.weight
+          ? `1 / ${(totalItemWeight / item.weight).toFixed(2)}`
+          : "N/A",
       };
-      tableOdds.items.push(itemOdds);
     });
-    odds.push(tableOdds);
-  });
-  return odds;
+
+    tablesAndItems.push({
+      table: tableName,
+      items: formattedItems,
+      tableChance: tableChancePercent,
+    });
+  }
+  return tablesAndItems;
 }
 
-// console.log(getOddsOfRolling());
+function populateGenericItemsModal() {
+  let tablesAndItems = getAllDropTablesAndItems();
+  let tableContainer = document.querySelector("#genericItemModal .modal-body");
 
-function populateCumulativeOddsModal() {
-  let odds = getOddsOfRolling();
-  let modalContent = document.querySelector("#tableModal .modal-body");
-
-  while (modalContent.firstChild) {
-    modalContent.removeChild(modalContent.firstChild);
+  while (tableContainer.firstChild) {
+    tableContainer.removeChild(tableContainer.firstChild);
   }
-  //Create a table for a nice display
 
   let table = document.createElement("table");
+  table.classList.add("generic-drop-table");
+
   let tableHeader = document.createElement("thead");
   let headerRow = document.createElement("tr");
 
-  let headerCell1 = document.createElement("th");
-  headerCell1.textContent = "Drop Table";
-  headerRow.appendChild(headerCell1);
-
-  let headerCell2 = document.createElement("th");
-  headerCell2.textContent = "Item";
-  headerRow.appendChild(headerCell2);
-
-  let headerCell3 = document.createElement("th");
-  headerCell3.textContent = "Item Chance (%)";
-  headerRow.appendChild(headerCell3);
-
-  let headerCell4 = document.createElement("th");
-  headerCell4.textContent = "Cumulative Item Chance (%)";
-  headerRow.appendChild(headerCell4);
+  let headers = [
+    "Drop Table",
+    "Table Chance",
+    "Item",
+    "Rarity In Table",
+    "Chance Per Roll",
+    "Item Rarity",
+  ];
+  headers.forEach((headerText) => {
+    let headerCell = document.createElement("th");
+    headerCell.textContent = headerText;
+    headerRow.appendChild(headerCell);
+  });
 
   tableHeader.appendChild(headerRow);
   table.appendChild(tableHeader);
 
-  //Add Rows
-
   let tableBody = document.createElement("tbody");
+  let rowIndex = 0;
 
-  odds.forEach((tableData) => {
-    tableData.items.forEach((item) => {
+  tablesAndItems.forEach((tableData) => {
+    let rowSpanCount = tableData.items.length;
+    tableData.items.forEach((itemData, index) => {
       let row = document.createElement("tr");
 
-      let tableCell1 = document.createElement("td");
-      tableCell1.textContent = tableData.table.toUpperCase();
-      row.appendChild(tableCell1);
+      if (tableData.table.toLowerCase() === "rare") {
+        row.classList.add("unique-table");
+      }
+      if (rowIndex % 2 === 0) {
+        row.classList.add("even-row");
+      } else {
+        row.classList.add("odd-row");
+      }
 
-      let tableCell2 = document.createElement("td");
-      tableCell2.textContent = item.item;
-      row.appendChild(tableCell2);
+      if (index === 0) {
+        let tableCell1 = document.createElement("td");
+        tableCell1.textContent = tableData.table.toUpperCase();
+        tableCell1.rowSpan = rowSpanCount;
+        tableCell1.style.verticalAlign = "middle";
+        row.appendChild(tableCell1);
+
+        let tableCell2 = document.createElement("td");
+        tableCell2.textContent = tableData.tableChance;
+        tableCell2.rowSpan = rowSpanCount;
+        tableCell2.style.verticalAlign = "middle";
+        row.appendChild(tableCell2);
+      }
 
       let tableCell3 = document.createElement("td");
-      tableCell3.textContent = item.chance;
+      tableCell3.textContent = itemData.name;
       row.appendChild(tableCell3);
 
       let tableCell4 = document.createElement("td");
-      tableCell4.textContent = item.cumulativeChance;
+      tableCell4.textContent = itemData.rarityInTable;
       row.appendChild(tableCell4);
+
+      let tableCell5 = document.createElement("td");
+      tableCell5.textContent = itemData.cumulativeChance;
+      row.appendChild(tableCell5);
+
+      let tableCell6 = document.createElement("td");
+      tableCell6.textContent = itemData.rawRarity;
+      row.appendChild(tableCell6);
 
       tableBody.appendChild(row);
     });
+
+    rowIndex++;
   });
 
   table.appendChild(tableBody);
-  modalContent.appendChild(table);
+  tableContainer.appendChild(table);
 
-  //Pop the Modal Up
-
-  document.getElementById("tableModal").style.display = "flex";
+  document.getElementById("genericItemModal").style.display = "flex";
 }
+
+// Event Listeners
+
+document.addEventListener("DOMContentLoaded", () => {
+  document
+    .getElementById("rollDropButton")
+    .addEventListener("click", generateDrop);
+
+  document
+    .getElementById("rollAgainButton")
+    .addEventListener("click", generateDrop);
+
+  document
+    .getElementById("itemsButton")
+    .addEventListener("click", populateGenericItemsModal);
+
+  document.getElementById("openInventoryBtn").addEventListener("click", () => {
+    InventoryModule.updateInventoryModal();
+    document.getElementById("inventoryModal").style.display = "flex";
+  });
+
+  document.querySelectorAll(".close-button").forEach((button) => {
+    button.addEventListener("click", closeModal);
+  });
+});

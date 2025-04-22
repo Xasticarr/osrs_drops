@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <title>Generic Drop Roller</title>
-    <script src="../JS/genericDrops.js"></script>
+    <script type="module" src="../JS/genericDrops.js" defer></script>
     <link rel="stylesheet" href="../style.css" />
   </head>
 
@@ -28,14 +28,14 @@
       </header>
       <main>
         <div class="button_container">
-          <button class="drop_button" onclick="generateDrop()">
+          <button class="drop_button" id="rollDropButton">
             <div class="drop_button_content">Roll a Drop!</div>
           </button>
-          <button class="drop_button" onclick="populateItemsModal()">
+          <button class="drop_button" id="itemsButton">
             <div class="drop_button_content">What Can I Get?</div>
           </button>
-          <button class="drop_button" onclick="populateCumulativeOddsModal()">
-            <div class="drop_button_content">What Are The Odds?</div>
+          <button class="drop_button" id="openInventoryBtn">
+            <div class="drop_button_content">Check Inventory</div>
           </button>
         </div>
 
@@ -43,9 +43,7 @@
           <div class="modal-content">
             <div class="modal-header">
               <h2>Drop Results</h2>
-              <button class="close-button" onclick="closeModal(event)">
-                X
-              </button>
+              <button class="close-button">X</button>
             </div>
             <div class="modal-body">
               <p id="dropResultText">
@@ -53,39 +51,47 @@
               </p>
             </div>
             <div class="modal-footer">
-              <button class="modal-button" onclick="generateDrop()">
+              <button class="modal-button" id="rollAgainButton">
                 🎲 Roll Again 🎲
               </button>
             </div>
           </div>
         </div>
         <!--End of First Modal-->
-        <div id="itemModal" class="modal">
+        <div id="genericItemModal" class="modal">
           <div class="modal-content">
             <div class="modal-header">
               <h2>Potential Items</h2>
-              <button class="close-button" onclick="closeModal(event)">
-                X
-              </button>
+              <button class="close-button">X</button>
             </div>
             <div class="modal-body">
-              <p id="potentialItemText">
-                <!--Item results should show up here now -->
-              </p>
+              <!-- Drop tables and odds will appear here -->
             </div>
           </div>
         </div>
         <!--End of Second Modal-->
-        <div id="tableModal" class="modal">
+        <div id="inventoryModal" class="modal">
           <div class="modal-content">
             <div class="modal-header">
-              <h2>Table Chances</h2>
-              <button class="close-button" onclick="closeModal(event)">
-                X
+              <h2>Inventory</h2>
+              <button id="resetInventoryButton" class="reset-button">
+                Reset Inventory
               </button>
+
+              <button class="close-button">X</button>
             </div>
             <div class="modal-body">
-              <!--Drop results should show up here now -->
+              <div id="inventoryContent">
+                <h3>Generic Rolls:</h3>
+                <div id="genericRollsSection"></div>
+                <h3>Boss Kills:</h3>
+                <div id="bossKillsSection"></div>
+                <h3>Raid Clears:</h3>
+                <div id="raidKillsSection"></div>
+                <div id="collectionLogSection"></div>
+                <h3>Your Items</h3>
+                <table id="inventoryItemsTable"></table>
+              </div>
             </div>
           </div>
         </div>

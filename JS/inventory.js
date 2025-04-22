@@ -5,7 +5,7 @@ const InventoryModule = (function () {
   // ========== Internal Inventory Data ==========
   let inventory = {
     full: {},
-    generic: {},
+    generic: { kills: 0 },
     bosses: {}, //Example: { Zulrah: { kills: x, drops: { " Serp Visage": y}}} Where x and y are quantity values
     raids: {},
     collectionLog: {
@@ -18,8 +18,8 @@ const InventoryModule = (function () {
   function updateInventory(
     raidName = null,
     bossName = null,
-    itemName,
-    quantity,
+    itemName = null,
+    quantity = 0,
     type = "standard",
     killCount = null,
     rare = false //Added for table formatting
@@ -42,6 +42,16 @@ const InventoryModule = (function () {
       saveInventoryToStorage();
       updateInventoryModal();
       return; // Exit early after handling kill
+    }
+
+    if (!raidName && !bossName && itemName === null) {
+      if (!inventory.generic) {
+        inventory.generic = { kills: 0 };
+      }
+      inventory.generic.kills += 1;
+      saveInventoryToStorage();
+      updateInventoryModal();
+      return;
     }
 
     //Determine the category based on the source
@@ -67,44 +77,6 @@ const InventoryModule = (function () {
     }
     inventory.full[category][itemKey].quantity += quantity;
 
-    // Condensed Boss Drop / Raid Drop logic below, into code above.
-
-    // // Boss Drop Roller
-    // if (bossName) {
-    //   inventory.bosses[bossName] = inventory.bosses[bossName] || {
-    //     kills: 0,
-    //     drops: {},
-    //   };
-    //   // inventory.bosses[bossName].kills += 1;
-
-    //   const itemKey = `${itemName}_${bossName}`;
-    //   if (!inventory.bosses[bossName].drops[itemKey]) {
-    //     inventory.bosses[bossName].drops[itemKey] = {
-    //       name: itemName,
-    //       quantity: 0,
-    //     };
-    //   }
-    //   inventory.bosses[bossName].drops[itemKey].quantity += quantity;
-    // }
-
-    // // Raid Drop Roller
-    // if (raidName) {
-    //   inventory.raids[raidName] = inventory.raids[raidName] || {
-    //     kills: 0,
-    //     drops: {},
-    //   };
-    //   // inventory.raids[raidName].kills += 1;
-
-    //   const itemKey = `${itemName}_${raidName}`;
-    //   if (!inventory.raids[raidName].drops[itemKey]) {
-    //     inventory.raids[raidName].drops[itemKey] = {
-    //       name: itemName,
-    //       quantity: 0,
-    //     };
-    //   }
-    //   inventory.raids[raidName].drops[itemKey].quantity += quantity;
-    // }
-
     // Collection Log and Pet Tracking
     if (type === "cLog" || type === "pet") {
       // Add collection log for all types (generic, bosses, raid)
@@ -112,7 +84,7 @@ const InventoryModule = (function () {
         ? `(Boss) ${bossName}`
         : raidName
         ? `(Raid) ${raidName}`
-        : "(Generic)"; //Determine where item came from
+        : "Generic"; //Determine where item came from
 
       //Log collection log items and pets
       if (!inventory.collectionLog.uniqueItems[source]) {
@@ -123,19 +95,21 @@ const InventoryModule = (function () {
         (entry) => entry.item === itemName
       );
 
+      const loggedKill =
+        killCount ??
+        (bossName
+          ? inventory.bosses[bossName].kills
+          : raidName
+          ? inventory.raids[raidName].kills
+          : inventory.generic.kills);
+
       if (alreadyLogged) {
         alreadyLogged.quantity = (alreadyLogged.quantity || 1) + quantity;
       } else {
         inventory.collectionLog.uniqueItems[source].push({
           item: itemName,
           type,
-          kill:
-            killCount ??
-            (bossName
-              ? inventory.bosses[bossName].kills
-              : raidName
-              ? inventory.raids[raidName].kills
-              : 0),
+          kill: loggedKill,
           quantity: quantity,
         });
       }
@@ -151,13 +125,7 @@ const InventoryModule = (function () {
         } else {
           inventory.collectionLog.pets.push({
             name: itemName,
-            killNumber:
-              killCount ??
-              (bossName
-                ? inventory.bosses[bossName].kills
-                : raidName
-                ? inventory.raids[raidName].kills
-                : 0),
+            killNumber: loggedKill,
             quantity: quantity,
           });
         }
@@ -186,7 +154,7 @@ const InventoryModule = (function () {
   function resetInventory() {
     inventory = {
       full: {},
-      generic: {},
+      generic: { kills: 0 },
       bosses: {},
       raids: {},
       collectionLog: {
@@ -205,6 +173,7 @@ const InventoryModule = (function () {
   // ========== Modal Update Function ==========
   function updateInventoryModal() {
     //Clear existing content
+    clearSectionContent("genericRollsSection");
     clearSectionContent("inventoryItemsTable");
     clearSectionContent("bossKillsSection");
     clearSectionContent("raidKillsSection");
@@ -294,6 +263,7 @@ const InventoryModule = (function () {
                 if (name === "Zulrah") nameCell.classList.add("Zulrah");
                 else if (name === "Vorkath") nameCell.classList.add("Vorkath");
                 else if (name === "Muspah") nameCell.classList.add("Muspah");
+                else if (name === "N/A") nameCell.classList.add("Generic");
                 row.appendChild(nameCell);
               }
 
@@ -314,46 +284,12 @@ const InventoryModule = (function () {
 
     itemsTable.appendChild(tbody);
 
-    //Commeting out old formatting below
-
-    // for (let itemKey in inventory.full[category]) {
-    //   const item = inventory.full[category][itemKey];
-    //   const row = document.createElement("tr");
-
-    //   // Drop Sim cell
-    //   const simCell = document.createElement("td");
-    //   simCell.textContent = dropSim;
-    //   row.appendChild(simCell);
-
-    //   // Boss/Raid name cell
-    //   const nameCell = document.createElement("td");
-    //   nameCell.textContent = name;
-    //   row.appendChild(nameCell);
-
-    //   // Item cell
-    //   const itemCell = document.createElement("td");
-    //   itemCell.textContent = item.name;
-    //   row.appendChild(itemCell);
-
-    //   // Total Quantity cell
-    //   const quantityCell = document.createElement("td");
-    //   quantityCell.textContent = item.quantity;
-    //   row.appendChild(quantityCell);
-
-    //   tbody.appendChild(row);
-    // }
-    // Commenting out OLD below to try NEW above
-    // const item = inventory.full[itemKey];
-    // const row = document.createElement("tr");
-    // const itemName = document.createElement("td");
-
-    // itemName.textContent = item.name;
-    // const itemQuantity = document.createElement("td");
-    // itemQuantity.textContent = item.quantity;
-
-    // row.appendChild(itemName);
-    // row.appendChild(itemQuantity);
-    // document.getElementById("inventoryItemsTable").appendChild(row);
+    //Populating Generic Rolls
+    if (inventory.generic.kills > 0) {
+      const genericRow = document.createElement("div");
+      genericRow.textContent = `Generic Drops: ${inventory.generic.kills}`;
+      document.getElementById("genericRollsSection").appendChild(genericRow);
+    }
 
     // Populating Boss Kills (from Boss Drop Roller)
 
@@ -402,26 +338,6 @@ const InventoryModule = (function () {
     }
     logContainer.appendChild(logContent);
     document.getElementById("collectionLogSection").appendChild(logContainer);
-    //Commenting out OLD below to try NEW above
-
-    // for (let itemKey in inventory.collectionLog.uniqueItems) {
-    // const logSection = document.createElement("div");
-    // const itemHeader = document.createElement("h4");
-    // itemHeader.textContent = `${itemKey}:`;
-
-    // const logList = document.createElement("ul");
-    // inventory.collectionLog.uniqueItems[itemKey].forEach((entry) => {
-    //   const logItem = document.createElement("li");
-    //   logItem.textContent = `${entry.item} - ${
-    //     entry.type === "pet" ? "Pet" : "Unique"
-    //   } (Kill #${entry.kill}, Total: ${entry.quantity ?? 1})`;
-    //   logList.appendChild(logItem);
-    // });
-
-    // logSection.appendChild(itemHeader);
-    // logSection.appendChild(logList);
-    // document.getElementById("collectionLogSection").appendChild(logSection);
-    // }
 
     // Populating Pets (in a separate section)
 
@@ -493,21 +409,6 @@ const InventoryModule = (function () {
       }
     }
   }
-  //Commenting out OLD below to try NEW above
-
-  // const petsSection = document.createElement("div");
-  // petsSection.classList.add("pets-section");
-  // const petsHeader = document.createElement("h4");
-  // petsHeader.textContent = "Pet Collection";
-  // petsSection.appendChild(petsHeader);
-
-  // inventory.collectionLog.pets.forEach((pet) => {
-  //   const petItem = document.createElement("p");
-  //   petItem.textContent = `${pet.name} (First obtained on kill #${pet.killNumber}, Total Found: ${pet.quantity})`;
-  //   petsSection.appendChild(petItem);
-  // });
-
-  // window.scrollTo({ top: 0, behavior: "smooth" });
 
   // Utility function to clear a section (if needed)
   function clearSectionContent(sectionId) {

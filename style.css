@@ -212,7 +212,7 @@ main {
   background-color: #0056b3;
 }
 
-#itemModal table,
+#genericItemModal table,
 #bossItemModal table,
 #inventoryItemsTable {
   width: 100%;
@@ -220,10 +220,10 @@ main {
   margin-top: 10px;
 }
 
-#itemModal th,
+#genericItemModal th,
 #bossItemModal th,
 #inventoryItemsTable th,
-#itemModal td,
+#genericItemModal td,
 #bossItemModal td,
 #inventoryItemsTable td {
   border: 1px solid #ddd;
@@ -237,16 +237,16 @@ main {
 #inventoryItemsTable tr {
   background-color: rgb(71, 53, 25);
 }
-#itemModal tr,
+#genericItemModal tr,
 #bossItemModal tr {
   height: 40px;
 }
 
-#itemModal tr:nth-child(even) {
+#genericItemModal tr:nth-child(even) {
   background-color: #3a3a3a;
 }
 
-#itemModal td:nth-child(2) {
+#genericItemModal td:nth-child(2) {
   white-space: pre-line;
 }
 
@@ -321,7 +321,7 @@ main {
 }
 
 .generic-category {
-  background-color: burlywood;
+  background-color: rgb(106, 106, 106);
 }
 
 #inventoryItemsTable tr.rare-item {
@@ -342,6 +342,10 @@ main {
 
 .Muspah {
   background-color: rgba(199, 79, 199, 0.663);
+}
+
+.Generic {
+  background-color: rgb(58, 37, 16);
 }
 
 ul {
