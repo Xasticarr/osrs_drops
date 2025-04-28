@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <title>Raid Drop Roller</title>
-    <script src="../drops.js"></script>
+    <script type="module" src="../JS/raidDrops.js" defer></script>
     <link rel="stylesheet" href="../style.css" />
   </head>
 
@@ -28,16 +28,117 @@
       </header>
       <main>
         <div class="button_container">
-          <button class="drop_button" href="#">
-            <div class="drop_button_content">Roll a Drop!</div>
+          <button class="drop_button" id="runRaidButton">
+            <div class="drop_button_content">Send a Raid!</div>
           </button>
-          <button class="drop_button" href="#">
-            <div class="drop_button_content">Pls Carry Me!</div>
+          <button class="drop_button" id="raidItemsButton">
+            <div class="drop_button_content">Big Pickle!</div>
           </button>
-          <button class="drop_button" href="#">
-            <div class="drop_button_content">Never Purple!</div>
+          <button id="openInventoryBtn" class="drop_button">
+            <div class="drop_button_content">What's the Split?</div>
           </button>
         </div>
+
+        <!-- raid Selection Modal -->
+
+        <div id="raidSelectionModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2></h2>
+              <button class="close-button" id="closeModal">X</button>
+            </div>
+            <div class="modal-body">
+              <!-- This is where raid buttons go -->
+              <button class="raidButton modal-button" raid-data="Chambers">
+                🐉🐉Chambers of Xeric🐉🐉
+              </button>
+              <button class="raidButton modal-button" raid-data="Theatre">
+                🩸🩸Theatre of Blood🩸🩸
+              </button>
+              <button class="raidButton modal-button" raid-data="Tombs">
+                🐪🐪Tombs of Amascut🐪🐪
+              </button>
+              <!-- Add  more buttons for more raids later -->
+            </div>
+          </div>
+        </div>
+
+        <!-- raid Drop Modal (for results) -->
+
+        <div id="raidDropModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Drop Results</h2>
+              <button class="close-button" id="closeModal">X</button>
+            </div>
+            <div class="modal-body">
+              <p id="raidDropResultText"></p>
+            </div>
+            <div class="modal-footer">
+              <button
+                id="rollAgainButton"
+                class="roll-again-button modal-button"
+              >
+                🎲 Run it back? 🎲
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- End of raidDropModal -->
+        <div id="raidItemModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Potential Items</h2>
+              <button class="close-button" id="closeModal">X</button>
+            </div>
+            <div class="modal-body">
+              <div id="raid-table-container"></div>
+            </div>
+          </div>
+        </div>
+        <!--End of raidItemModal-->
+        <div id="inventoryModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Inventory</h2>
+              <button id="resetInventoryButton" class="reset-button">
+                Reset Inventory
+              </button>
+              <button class="close-button" id="closeModal">X</button>
+            </div>
+            <div class="modal-body">
+              <!-- Inventory Items Section -->
+              <div id="inventoryContent">
+                <!-- Inventory content will go here -->
+                <!-- Generic Rolls Section -->
+                <h3>Generic Rolls:</h3>
+                <div id="genericRollsSection"></div>
+
+                <!-- Boss Kills Section -->
+                <h3>Boss Kills:</h3>
+                <div id="bossKillsSection">
+                  <!-- JavaScrip will fill this in -->
+                </div>
+
+                <h3>Raid Clears:</h3>
+                <div id="raidKillsSection">
+                  <!-- JavaScrip will fill this in -->
+                </div>
+
+                <!-- Collection Log Section -->
+                <div id="collectionLogSection">
+                  <!-- JavaScript will fill this in -->
+                </div>
+
+                <h3>Your Items</h3>
+                <table id="inventoryItemsTable">
+                  <!-- JavaScript will fill this in -->
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End of inventoryModal -->
       </main>
       <footer class="footer">
         <h4><a href="../index.html">Return to Main Menu</a></h4>
