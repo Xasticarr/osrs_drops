@@ -1,6 +1,6 @@
 "use strict";
 
-import { InventoryModule } from "./inventory.js";
+import { InventoryModule } from "../modules/models/Inventory.js";
 
 function rollRandomNumber(max) {
   return Math.floor(Math.random() * max) + 1;

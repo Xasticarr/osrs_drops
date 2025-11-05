@@ -1,6 +1,6 @@
 "use strict";
 
-import { InventoryModule } from "./inventory.js";
+import { InventoryModule } from "../modules/models/Inventory.js";
 
 // Event Listeners
 document.addEventListener("DOMContentLoaded", () => {

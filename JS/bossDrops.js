@@ -1,6 +1,6 @@
 "use strict";
 
-import { InventoryModule } from "./inventory.js";
+import { InventoryModule } from "../modules/models/Inventory.js";
 import { AllBosses } from "../modules/data/bosses/index.js";
 import { DropTable } from "../modules/models/DropTable.js";
 import { RareDropTable } from "../modules/data/rareDropTable.js";
