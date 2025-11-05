@@ -1,6 +1,9 @@
 "use strict";
 
 import { InventoryModule } from "./inventory.js";
+import { AllBosses } from "../modules/data/bosses/index.js";
+import { DropTable } from "../modules/models/DropTable.js";
+import { RareDropTable } from "../modules/data/rareDropTable.js";
 
 function rollRandomNumber(max) {
   return Math.floor(Math.random() * max);
@@ -10,573 +13,19 @@ function rollItemQuantity(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-const rareDropTable = {
-  "rare ammo": [
-    { item: "Nature rune", quantity: 67, rarity: 1 / 42.67 },
-    { item: "Adamant javelin", quantity: 20, rarity: 1 / 64 },
-    { item: "Death rune", quantity: 45, rarity: 1 / 64 },
-    { item: "Law rune", quantity: 45, rarity: 1 / 64 },
-    { item: "Rune arrow", quantity: 42, rarity: 1 / 64 },
-    { item: "Steel arrow", quantity: 150, rarity: 1 / 64 },
-  ],
-  "rare equipment": [
-    { item: "Rune 2h sword", quantity: 1, rarity: 1 / 42.67 },
-    { item: "Rune battleaxe", quantity: 1, rarity: 1 / 42.67 },
-    { item: "Rune sq shield", quantity: 1, rarity: 1 / 64 },
-    { item: "Dragon med helm", quantity: 1, rarity: 1 / 128 },
-    { item: "Rune kiteshield", quantity: 1, rarity: 1 / 128 },
-  ],
-  "rare other": [
-    { item: "Coins", quantity: 3000, rarity: 1 / 6.095 },
-    { item: "Loop half of key", quantity: 1, rarity: 1 / 6.4 },
-    { item: "Tooth half of key", quantity: 1, rarity: 1 / 6.4 },
-    { item: "Runite bar", quantity: 1, rarity: 1 / 25.6 },
-    { item: "Dragonstone", quantity: 1, rarity: 1 / 64 },
-    { item: "Silver ore (noted)", quantity: 100, rarity: 1 / 64 },
-  ],
-  "sub-tables": [
-    { item: "Gem table", quantity: 1, rarity: 1 / 6.4, type: "table" },
-    { item: "Mega Rare table", quantity: 1, rarity: 1 / 8.533, type: "table" },
-  ],
-  "Gem table": [
-    { item: "Nothing", quantity: 1, rarity: 1 / 2.032 },
-    { item: "Uncut sapphire", quantity: 1, rarity: 1 / 4 },
-    { item: "Uncut emerald", quantity: 1, rarity: 1 / 8 },
-    { item: "Uncut ruby", quantity: 1, rarity: 1 / 16 },
-    { item: "Chaos talisman", quantity: 1, rarity: 1 / 42.67 },
-    { item: "Nature talisman", quantity: 1, rarity: 1 / 42.67 },
-    { item: "Uncut diamond", quantity: 1, rarity: 1 / 64 },
-    { item: "Rune javelin", quantity: 1, rarity: 1 / 128 },
-    { item: "Loop half of key", quantity: 1, rarity: 1 / 128 },
-    { item: "Tooth half of key", quantity: 1, rarity: 1 / 128 },
-    { item: "Mega Rare table", quantity: 1, rarity: 1 / 128, type: "table" },
-  ],
-  "Mega Rare table": [
-    { item: "Nothing (Mega Rare)", quantity: 1, rarity: 1 / 1.133 },
-    { item: "Rune spear", quantity: 1, rarity: 1 / 16 },
-    { item: "Shield left half", quantity: 1, rarity: 1 / 32 },
-    { item: "Dragon spear", quantity: 1, rarity: 1 / 42.67 },
-  ],
-};
+Object.keys(AllBosses).forEach((bossName) => {
+  const boss = AllBosses[bossName];
+});
 
-const bosses = {
-  Zulrah: {
-    doubleRoll: true,
-    tripleRoll: false,
-    rDT: true,
-    rDTChance: 9 / 248,
-    tertiaryDrops: [
-      { item: "Clue Scroll (Elite)", quantity: 1, rarity: 1 / 75 },
-      {
-        item: "Jar of Swamp",
-        quantity: 1,
-        rarity: 1 / 3000,
-        bigChime: true,
-        cLog: true,
-        rare: true,
-      },
-      {
-        item: "Pet Snakeling",
-        quantity: 1,
-        rarity: 1 / 4000,
-        type: "pet",
-        bigChime: true,
-        cLog: true,
-        rare: true,
-      },
-    ],
-    dropTables: {
-      always: [{ item: "Zulrah's scales", quantity: [100, 299] }],
-      unique: [
-        {
-          item: "Tanzanite fang",
-          quantity: 1,
-          rarity: 2 * (1 / 1024),
-          chime: true,
-          cLog: true,
-          rare: true,
-        },
-        {
-          item: "Magic fang",
-          quantity: 1,
-          rarity: 2 * (1 / 1024),
-          chime: true,
-          cLog: true,
-          rare: true,
-        },
-        {
-          item: "Serpentine visage",
-          quantity: 1,
-          rarity: 2 * (1 / 1024),
-          chime: true,
-          cLog: true,
-          rare: true,
-        },
-        {
-          item: "Uncut onyx",
-          quantity: 1,
-          rarity: 2 * (1 / 1024),
-          chime: true,
-          cLog: true,
-          rare: true,
-        },
-      ],
-      mutagen: [
-        {
-          item: "Tanzanite mutagen",
-          quantity: 1,
-          rarity: 2 * (1 / 13106),
-          bigChime: true,
-          cLog: true,
-          rare: true,
-        },
-        {
-          item: "Magma mutagen",
-          quantity: 1,
-          rarity: 2 * (1 / 13106),
-          bigChime: true,
-          cLog: true,
-          rare: true,
-        },
-      ],
-      equipment: [
-        { item: "Battlestaff (noted)", quantity: 10, rarity: 2 * (1 / 24.8) },
-        { item: "Dragon med helm", quantity: 1, rarity: 2 * (1 / 124) },
-        { item: "Dragon halberd", quantity: 1, rarity: 2 * (1 / 124) },
-      ],
-      runes: [
-        { item: "Death rune", quantity: 300, rarity: 2 * (1 / 20.67) },
-        { item: "Law rune", quantity: 200, rarity: 2 * (1 / 20.67) },
-        { item: "Chaos rune", quantity: 500, rarity: 2 * (1 / 20.67) },
-      ],
-      herbs: [
-        { item: "Snapdragon (noted)", quantity: 10, rarity: 2 * (1 / 124) },
-        { item: "Dwarf weed (noted)", quantity: 30, rarity: 2 * (1 / 124) },
-        { item: "Toadflax (noted)", quantity: 25, rarity: 2 * (1 / 124) },
-        { item: "Torstol (noted)", quantity: 10, rarity: 2 * (1 / 124) },
-      ],
-      seeds: [
-        { item: "Palm tree seed", quantity: 1, rarity: 2 * (1 / 41.33) },
-        { item: "Papaya tree seed", quantity: 1, rarity: 2 * (1 / 41.33) },
-        { item: "Calquat tree seed", quantity: 1, rarity: 2 * (1 / 41.33) },
-        { item: "Magic seed", quantity: 1, rarity: 2 * (1 / 62) },
-        { item: "Toadflax seed", quantity: 1, rarity: 2 * (1 / 124) },
-        { item: "Snapdragon seed", quantity: 1, rarity: 2 * (1 / 124) },
-        { item: "Dwarf weed seed", quantity: 1, rarity: 2 * (1 / 124) },
-        { item: "Torstol seed", quantity: 1, rarity: 2 * (1 / 124) },
-        { item: "Spirit seed", quantity: 1, rarity: 2 * (1 / 248) },
-      ],
-      resources: [
-        { item: "Snakeskin (noted)", quantity: 35, rarity: 2 * (1 / 22.55) },
-        { item: "Runite ore (noted)", quantity: 2, rarity: 2 * (1 / 22.55) },
-        {
-          item: "Pure essence (noted)",
-          quantity: 1500,
-          rarity: 2 * (1 / 24.8),
-        },
-        { item: "Flax (noted)", quantity: 1000, rarity: 2 * (1 / 24.8) },
-        { item: "Yew logs (noted)", quantity: 35, rarity: 2 * (1 / 24.8) },
-        {
-          item: "Adamantite bar (noted)",
-          quantity: 20,
-          rarity: 2 * (1 / 31),
-        },
-        { item: "Coal (noted)", quantity: 200, rarity: 2 * (1 / 31) },
-        { item: "Dragon bones (noted)", quantity: 12, rarity: 2 * (1 / 31) },
-        {
-          item: "Mahogany logs (noted)",
-          quantity: 50,
-          rarity: 2 * (1 / 31),
-        },
-      ],
-      other: [
-        { item: "Zul-Andra teleport", quantity: 4, rarity: 2 * (1 / 16.53) },
-        { item: "Manta ray (noted)", quantity: 35, rarity: 2 * (1 / 20.67) },
-        { item: "Antidote++ (noted)", quantity: 10, rarity: 2 * (1 / 20.67) },
-        {
-          item: "Dragonstone bolt tips",
-          quantity: 12,
-          rarity: 2 * (1 / 20.67),
-        },
-        { item: "Grapes (noted)", quantity: 250, rarity: 2 * (1 / 20.67) },
-        { item: "Coconut (noted)", quantity: 20, rarity: 2 * (1 / 20.67) },
-        { item: "Swamp tar", quantity: 1000, rarity: 2 * (1 / 20.67) },
-        { item: "Zulrah's scales", quantity: 500, rarity: 2 * (1 / 20.67) },
-      ],
-    },
-  }, //Zulrah ends here
-  Vorkath: {
-    doubleRoll: true,
-    tripleRoll: false,
-    rDT: true,
-    rDTChance: 5 / 150,
-    tertiaryDrops: [
-      {
-        item: "Scaly blue dragonhide",
-        quantity: 1,
-        rarity: 1 / 10,
-      },
-      {
-        item: "Vorkath's Head",
-        quantity: 1,
-        rarity: 1 / 50,
-        cLog: true,
-        rare: true,
-      },
-      { item: "Clue Scroll (Elite)", quantity: 1, rarity: 1 / 65 },
-      {
-        item: "Dragonbone Necklace",
-        quantity: 1,
-        rarity: 1 / 1000,
-        chime: true,
-        cLog: true,
-        rare: true,
-      },
-      {
-        item: "Jar of Decay",
-        quantity: 1,
-        rarity: 1 / 3000,
-        bigChime: true,
-        cLog: true,
-        rare: true,
-      },
-      {
-        item: "Vorki",
-        quantity: 1,
-        rarity: 1 / 3000,
-        type: "pet",
-        bigChime: true,
-        cLog: true,
-        rare: true,
-      },
-      {
-        item: "Draconic Visage",
-        quantity: 1,
-        rarity: 1 / 5000,
-        chime: true,
-        cLog: true,
-        rare: true,
-      },
-      {
-        item: "Skeletal Visage",
-        quantity: 1,
-        rarity: 1 / 5000,
-        chime: true,
-        cLog: true,
-        rare: true,
-      },
-    ],
-    dropTables: {
-      always: [
-        { item: "Superior dragon bones", quantity: 2 },
-        { item: "Blue dragonhide", quantity: 2 },
-      ],
-      equipment: [
-        { item: "Rune longsword", quantity: [2, 3], rarity: 2 * (1 / 30) },
-        { item: "Rune kiteshield", quantity: [2, 3], rarity: 2 * (1 / 30) },
-        {
-          item: "Battlestaff (noted)",
-          quantity: [5, 15],
-          rarity: 2 * (1 / 37.5),
-        },
-        { item: "Dragon battleaxe", quantity: 1, rarity: 2 * (1 / 75) },
-        { item: "Dragon longsword", quantity: 1, rarity: 2 * (1 / 75) },
-        { item: "Dragon platelegs", quantity: 1, rarity: 2 * (1 / 75) },
-        { item: "Dragon plateskirt", quantity: 1, rarity: 2 * (1 / 75) },
-      ],
-      runes: [
-        { item: "Chaos rune", quantity: [650, 1000], rarity: 2 * (1 / 25) },
-        { item: "Death rune", quantity: [300, 500], rarity: 2 * (1 / 25) },
-        { item: "Wrath rune", quantity: [30, 60], rarity: 2 * (1 / 50) },
-      ],
-      dragonhide: [
-        {
-          item: "Blue dragonhide (noted)",
-          quantity: [25, 30],
-          rarity: 2 * (1 / 18.75),
-        },
-        {
-          item: "Green dragonhide (noted)",
-          quantity: [25, 30],
-          rarity: 2 * (1 / 21.43),
-        },
-        {
-          item: "Red dragonhide (noted)",
-          quantity: [20, 25],
-          rarity: 2 * (1 / 21.43),
-        },
-        {
-          item: "Black dragonhide (noted)",
-          quantity: [15, 25],
-          rarity: 2 * (1 / 21.43),
-        },
-      ],
-      fletching: [
-        {
-          item: "Dragon bolts (unf)",
-          quantity: [50, 100],
-          rarity: 2 * (1 / 18.75),
-        },
-        { item: "Dragon dart tip", quantity: [10, 50], rarity: 2 * (1 / 25) },
-        {
-          item: "Dragonstone bolt tips",
-          quantity: [11, 25],
-          rarity: 2 * (1 / 30),
-        },
-        { item: "Onyx bolt tips", quantity: [5, 10], rarity: 2 * (1 / 37.5) },
-        { item: "Rune dart tip", quantity: [75, 100], rarity: 2 * (1 / 50) },
-        { item: "Dragon arrowtips", quantity: [25, 50], rarity: 2 * (1 / 50) },
-        {
-          item: "Diamond bolt tips",
-          quantity: [25, 30],
-          rarity: 2 * (1 / 111),
-        },
-        {
-          item: "Emerald bolt tips",
-          quantity: [25, 30],
-          rarity: 2 * (1 / 138.8),
-        },
-        { item: "Ruby bolt tips", quantity: [25, 30], rarity: 2 * (1 / 138.8) },
-        {
-          item: "Dragonstone bolt tips",
-          quantity: [25, 30],
-          rarity: 2 * (1 / 185),
-        },
-        { item: "Onyx bolt tips", quantity: [25, 30], rarity: 2 * (1 / 370) },
-        {
-          item: "Sapphire bolt tips",
-          quantity: [25, 30],
-          rarity: 2 * (1 / 555),
-        },
-      ],
-      seeds: [
-        { item: "Snapdragon seed", quantity: 1, rarity: 2 * (1 / 112.3) },
-        { item: "Torstol seed", quantity: 1, rarity: 2 * (1 / 118.7) },
-        { item: "Ranarr seed", quantity: 1, rarity: 2 * (1 / 416.7) },
-        { item: "Watermelon seed", quantity: 15, rarity: 2 * (1 / 595.2) },
-        { item: "Willow seed", quantity: 1, rarity: 2 * (1 / 625) },
-        { item: "Mahogany seed", quantity: 1, rarity: 2 * (1 / 694.4) },
-        { item: "Maple seed", quantity: 1, rarity: 2 * (1 / 694.4) },
-        { item: "Teak seed", quantity: 1, rarity: 2 * (1 / 694.4) },
-        { item: "Yew seed", quantity: 1, rarity: 2 * (1 / 694.4) },
-        { item: "Papaya tree seed", quantity: 1, rarity: 2 * (1 / 892.9) },
-        { item: "Magic seed", quantity: 1, rarity: 2 * (1 / 1136) },
-        { item: "Palm tree seed", quantity: 1, rarity: 2 * (1 / 1250) },
-        { item: "Spirit seed", quantity: 1, rarity: 2 * (1 / 1562) },
-        { item: "Dragonfruit tree seed", quantity: 1, rarity: 2 * (1 / 2083) },
-        { item: "Celastrus seed", quantity: 1, rarity: 2 * (1 / 3125) },
-        { item: "Redwood tree seed", quantity: 1, rarity: 2 * (1 / 3125) },
-      ],
-      other: [
-        {
-          item: "Adamantite ore (noted)",
-          quantity: [10, 30],
-          rarity: 2 * (1 / 21.43),
-        },
-        { item: "Coins", quantity: [20000, 81000], rarity: 2 * (1 / 30) },
-        { item: "Grapes (noted)", quantity: [250, 300], rarity: 2 * (1 / 30) },
-        { item: "Magic logs (noted)", quantity: 50, rarity: 2 * (1 / 30) },
-        {
-          item: "Manta ray (noted)",
-          quantity: [35, 55],
-          rarity: 2 * (1 / 37.5),
-        },
-        {
-          item: "Dragon bones (noted)",
-          quantity: [15, 20],
-          rarity: 2 * (1 / 37.5),
-        },
-        { item: "Diamond (noted)", quantity: [10, 20], rarity: 2 * (1 / 37.5) },
-        { item: "Dragonstone (noted)", quantity: [2, 3], rarity: 2 * (1 / 50) },
-        { item: "Wrath talisman", quantity: 1, rarity: 2 * (1 / 50) },
-      ],
-    },
-  }, //Vorkath ends here
-  Muspah: {
-    doubleRoll: true,
-    tripleRoll: false,
-    rDT: true,
-    rDTChance: 5 / 220,
-    preRoll: { table: "unique", everyRoll: false },
-    tertiaryDrops: [
-      { item: "Clue Scroll (Hard)", quantity: 1, rarity: 1 / 30 },
-      { item: "Clue Scroll (Elite)", quantity: 1, rarity: 1 / 45 },
-      {
-        item: "Muphin",
-        quantity: 1,
-        rarity: 1 / 2500,
-        type: "pet",
-        bigChime: true,
-        cLog: true,
-        rare: true,
-      },
-    ],
-    dropTables: {
-      unique: [
-        {
-          item: "Ancient essence",
-          quantity: [540, 599],
-          rarity: 1 / 1.667,
-          cLog: true,
-        },
-        {
-          item: "Ancient essence",
-          quantity: [885, 995],
-          rarity: 1 / 4.348,
-          cLog: true,
-        },
-        {
-          item: "Ancient essence",
-          quantity: [1970, 2060],
-          rarity: 1 / 10,
-          cLog: true,
-        },
-        {
-          item: "Frozen cache",
-          quantity: 1,
-          rarity: 1 / 25,
-          cLog: true,
-          rare: true,
-        },
-        {
-          item: "Ancient icon",
-          quantity: 1,
-          rarity: 1 / 50,
-          cLog: true,
-          rare: true,
-        },
-        {
-          item: "Venator shard",
-          quantity: 1,
-          rarity: 1 / 100,
-          exclusive: true,
-          chime: true,
-          cLog: true,
-          rare: true,
-        },
-      ],
-      supplies: [
-        {
-          item: "Shark",
-          quantity: [4, 6],
-          rarity: 1 / 9,
-          group: "Sup 1",
-        },
-        {
-          item: "Summer pie",
-          quantity: [4, 6],
-          rarity: 1 / 9,
-          group: "Sup 1",
-        },
-        {
-          item: "Ancient brew(3)",
-          quantity: [1, 2],
-          rarity: 1 / 9,
-          group: "Sup 2",
-        },
-        {
-          item: "Ranging potion(3)",
-          quantity: [1, 2],
-          rarity: 1 / 9,
-          group: "Sup 2",
-        },
-        {
-          item: "Super restore(3)",
-          quantity: [1, 2],
-          rarity: 1 / 9,
-          group: "Sup 3",
-        },
-        {
-          item: "Prayer potion(3)",
-          quantity: [1, 2],
-          rarity: 1 / 9,
-          group: "Sup 3",
-        },
-      ],
-      equipment: [
-        { item: "Rune kiteshield (noted)", quantity: 3, rarity: 2 * (1 / 22) },
-        { item: "Dragon plateskirt", quantity: 1, rarity: 2 * (1 / 44) },
-        { item: "Rune platelegs (noted)", quantity: 3, rarity: 2 * (1 / 44) },
-        { item: "Black d'hide body", quantity: 1, rarity: 2 * (1 / 44) },
-        { item: "Dragon platelegs", quantity: 2, rarity: 2 * (1 / 55) },
-        { item: "Rune sword", quantity: 1, rarity: 2 * (1 / 220) },
-      ],
-      ammo: [
-        { item: "Law rune", quantity: 146, rarity: 2 * (1 / 22) },
-        { item: "Soul rune", quantity: 466, rarity: 2 * (1 / 22) },
-        { item: "Death rune", quantity: 428, rarity: 2 * (1 / 22) },
-        { item: "Smoke rune", quantity: 314, rarity: 2 * (1 / 22) },
-        { item: "Chaos rune", quantity: 480, rarity: 2 * (1 / 44) },
-        { item: "Fire rune", quantity: 1964, rarity: 2 * (1 / 44) },
-        { item: "Cannonball", quantity: 670, rarity: 2 * (1 / 44) },
-      ],
-      herbs: [
-        {
-          item: "Grimy toadflax (noted)",
-          quantity: 55,
-          rarity: 2 * (1 / 73.33),
-        },
-        { item: "Grimy kwuarm (noted)", quantity: 6, rarity: 2 * (1 / 140.8) },
-        { item: "Grimy cadantine (noted)", quantity: 6, rarity: 2 * (1 / 176) },
-        {
-          item: "Grimy dwarf weed (noted)",
-          quantity: 6,
-          rarity: 2 * (1 / 176),
-        },
-        {
-          item: "Grimy lantadyme (noted)",
-          quantity: 6,
-          rarity: 2 * (1 / 234.7),
-        },
-      ],
-      seeds: [
-        { item: "Yew seed", quantity: 2, rarity: 2 * (1 / 44) },
-        { item: "Torstol seed", quantity: 4, rarity: 2 * (1 / 44) },
-        { item: "Palm tree seed", quantity: 2, rarity: 2 * (1 / 44) },
-        { item: "Ranarr seed", quantity: 3, rarity: 2 * (1 / 44) },
-        { item: "Snapdragon seed", quantity: 5, rarity: 2 * (1 / 55) },
-        { item: "Ranarr seed", quantity: 8, rarity: 2 * (1 / 73.33) },
-        { item: "Spirit seed", quantity: 1, rarity: 2 * (1 / 110) },
-        { item: "Ranarr seed", quantity: 3, rarity: 2 * (1 / 366.7) },
-        { item: "Snapdragon seed", quantity: 3, rarity: 2 * (1 / 392.9) },
-        { item: "Torstol seed", quantity: 3, rarity: 2 * (1 / 500) },
-        { item: "Watermelon seed", quantity: 49, rarity: 2 * (1 / 523.8) },
-        { item: "Willow seed", quantity: 3, rarity: 2 * (1 / 550) },
-        { item: "Mahogany seed", quantity: 3, rarity: 2 * (1 / 611.1) },
-        { item: "Maple seed", quantity: 3, rarity: 2 * (1 / 611.1) },
-        { item: "Teak seed", quantity: 3, rarity: 2 * (1 / 611.1) },
-        { item: "Yew seed", quantity: 3, rarity: 2 * (1 / 611.1) },
-        { item: "Papaya tree seed", quantity: 3, rarity: 2 * (1 / 785.7) },
-        { item: "Magic seed", quantity: 3, rarity: 2 * (1 / 1000) },
-        { item: "Palm tree seed", quantity: 3, rarity: 2 * (1 / 1100) },
-        { item: "Spirit seed", quantity: 3, rarity: 2 * (1 / 1375) },
-        { item: "Dragonfruit tree seed", quantity: 3, rarity: 2 * (1 / 1833) },
-        { item: "Celastrus seed", quantity: 3, rarity: 2 * (1 / 2750) },
-        { item: "Redwood tree seed", quantity: 3, rarity: 2 * (1 / 2750) },
-      ],
-      resources: [
-        { item: "Adamantite ore (noted)", quantity: 22, rarity: 2 * (1 / 22) },
-        { item: "Gold ore (noted)", quantity: 180, rarity: 2 * (1 / 22) },
-        { item: "Teak plank (noted)", quantity: 22, rarity: 2 * (1 / 22) },
-        { item: "Molten glass (noted)", quantity: 89, rarity: 2 * (1 / 22) },
-        { item: "Pure essence (noted)", quantity: 2314, rarity: 2 * (1 / 44) },
-        { item: "Coal (noted)", quantity: 163, rarity: 2 * (1 / 44) },
-        { item: "Runite ore (noted)", quantity: 18, rarity: 2 * (1 / 73.33) },
-        { item: "Silver ore (noted)", quantity: 101, rarity: 2 * (1 / 110) },
-      ],
-      other: [
-        { item: "Manta ray (noted)", quantity: 28, rarity: 2 * (1 / 22) },
-        { item: "Water orb (noted)", quantity: 21, rarity: 2 * (1 / 22) },
-        { item: "Dragon bolts (unf)", quantity: 89, rarity: 2 * (1 / 22) },
-        {
-          item: "Limpwurt root (noted)",
-          quantity: 21,
-          rarity: 2 * (1 / 73.33),
-        },
-      ],
-    },
-  }, //Muspah ends here
-};
+function getItems(table) {
+  if (!table) return [];
+  if (Array.isArray(table)) return table;
+  return Array.isArray(table.items) ? table.items : [];
+}
+
+// function getItems(table) {
+//   return Array.isArray(table) ? table : table?.items;
+// }
 
 function calculateTableProbabilities(boss) {
   let tableChances = {};
@@ -585,28 +34,30 @@ function calculateTableProbabilities(boss) {
   //Add Rare Drop Table if boss has access
 
   if (boss.rDT && !boss.dropTables.rareDropTable) {
-    boss.dropTables.rareDropTable = rareDropTable;
+    boss.dropTables.rareDropTable = RareDropTable;
     console.log("Adding Rare Drop Table to boss!");
   }
 
   for (const [table, items] of Object.entries(boss.dropTables)) {
+    const tableItems = getItems(items);
+
     if (
       table === "always" ||
-      !Array.isArray(items) ||
-      table === "rareDropTable"
-    )
-      //Added "|| table === "rareDropTable""
+      !Array.isArray(tableItems) ||
+      table === RareDropTable
+    ) {
       continue;
-
+    }
     if (boss.preRoll && table === boss.preRoll.table) continue;
 
-    let tableChance = items.reduce((sum, item) => sum + (item.rarity || 0), 0);
+    let tableChance = tableItems.reduce(
+      (sum, item) => sum + (item.rarity || 0),
+      0
+    );
     tableChances[table] = tableChance / rolls; //Adjusting for amount of rolls
-    // console.log("TableChance 1: ", tableChance, `${table}`);
-    // console.log("TableChances 2: ", tableChances, `${table}`);
-    //I initially commented out the adjusting above, but this provides the correct values PER ROLL, so I brought it back.
   }
-  //Adding in rareDropTable chances for calculation
+
+  //Adding in RareDropTable chances for calculation
   if (boss.rDT) {
     tableChances["rareDropTable"] = boss.rDTChance;
   }
@@ -615,56 +66,56 @@ function calculateTableProbabilities(boss) {
     (sum, chance) => sum + chance,
     0
   );
-  //Hoping line below fixes skewed drop rates
-  // console.log("TableChances: ", tableChances, "TotalChance: ", totalChance);
 
   return { tableChances, totalChance };
-
-  //Rolling as a percent is actually skewing drop rates for Rare Drop Table
-  //Normalizing to 100% was the issue, will try returning raw chances and total
-
-  // let tableChancesPercent = {};
-  // for (const [table, chance] of Object.entries(tableChances)) {
-  //   tableChancesPercent[table] = (chance / totalChance) * 100;
-  // }
-  // return tableChancesPercent;
 }
 
 function getBossDropTable(boss) {
-  let { tableChances, totalChance } = calculateTableProbabilities(boss);
-  // console.log("Table Chances:", tableChances, "Total:", totalChance);
-  let roll = Math.random() * totalChance; //This should now based on probability function Total Chance
-  // console.log("Roll:", roll);
-  let accumulatedChance = 0;
-  //Check for RDT first
-  if (boss.rDT && roll <= boss.rDTChance) {
-    return "rareDropTable";
-  }
-  accumulatedChance = boss.rDTChance; //Offset roll
+  const { tableChances, totalChance } = calculateTableProbabilities(boss);
 
-  for (const [table, chance] of Object.entries(tableChances)) {
-    if (table === "rareDropTable") continue;
-    accumulatedChance += chance;
-    // console.log(
-    //   `Table: ${table}, Chance: ${chance}, Accumulated: ${accumulatedChance}`
-    // );
-    if (roll <= accumulatedChance) {
-      //Moving unique drop sound to rollForBossItem function.
-      //Tying sound to items and not tables
+  if (!tableChances || totalChance <= 0) return "other";
 
-      // if (table === "unique") {
-      //   playUniqueDropSound();
-      // }
-      return table;
+  let roll = Math.random() * totalChance;
+  let acc = 0;
+  for (const [tableName, weight] of Object.entries(tableChances)) {
+    acc += weight;
+    if (roll <= acc) {
+      return tableName; //returns the string key ("equipment", "rareDropTable", "rare ammo", etc)
     }
   }
-  //Fallback, should never happen
-  console.log("This should not be popping up");
+
+  // fallback
   return "other";
 }
 
+//Reworking getBossDropTable
+
+// function getBossDropTable(boss) {
+//   let { tableChances, totalChance } = calculateTableProbabilities(boss);
+//   let roll = Math.random() * totalChance;
+//   let accumulatedChance = 0;
+
+//   //Check for RDT first
+//   if (boss.rDT && roll <= boss.rDTChance) {
+//     return RareDropTable;
+//   }
+//   accumulatedChance = boss.rDTChance;
+
+//   for (const [table, chance] of Object.entries(tableChances)) {
+//     if (table === RareDropTable) continue;
+//     accumulatedChance += chance;
+//     if (roll <= accumulatedChance) {
+//       return table;
+//     }
+//   }
+//   //Fallback, should never happen
+//   console.log("This should not be popping up");
+//   return "other";
+// }
+
 function rollTableItems(table, tableName) {
-  if (!table || !Array.isArray(table) || table.length === 0) {
+  const items = getItems(table);
+  if (!items || !Array.isArray(items) || items.length === 0) {
     console.error(
       `Table "${tableName}" is either missing, not an array or empty!`,
       table
@@ -672,60 +123,111 @@ function rollTableItems(table, tableName) {
     return null;
   }
 
-  let totalWeight = table.reduce((sum, item) => sum + (item.rarity || 0), 0);
-  if (totalWeight === 0) {
+  let totalWeight = items.reduce((sum, it) => sum + (it?.rarity || 0), 0);
+  if (!totalWeight) {
     console.error(`Total weight is 0 for table "${tableName}"`);
     return null;
   }
 
   let roll = Math.random() * totalWeight;
-  //debugging
-  // console.log(
-  //   `Rolling in ${tableName} with roll: ${roll.toFixed(
-  //     4
-  //   )}, Total Weight: ${totalWeight.toFixed(4)}`
-  // );
-  let cumulativeWeight = 0;
-  for (const item of table) {
-    cumulativeWeight += item.rarity;
-    if (roll <= cumulativeWeight) {
-      //Debugging
-      // console.log(
-      //   `Selected item: ${item.item} (Cumulative: ${cumulativeWeight.toFixed(
-      //     4
-      //   )})`
-      // );
-      if (item.type === "table") {
-        console.log(`Type = Table! Entering sub-table: ${item.item}`);
-        //This is all being tested and can be deleted if required
-        const subResult = rollTableItems(rareDropTable[item.item], item.item);
-        if (subResult) {
-          subResult.tablePath = [tableName, item.item]; //Tracking nested path
+  let cumulative = 0;
+  for (const it of items) {
+    cumulative += it?.rarity || 0;
+    if (roll <= cumulative) {
+      if (it?.type === "table") {
+        const nestedName = it.name || it.item;
+        console.log(`Type = Table! Entering sub-table: ${nestedName}`);
+        const nestedTable = RareDropTable?.[nestedName];
+        if (!nestedTable) {
+          console.warn(
+            `Missing nested table "${nestedName}" referenced from "${tableName}"`
+          );
+          return null;
         }
-        return subResult;
-        //Line below works as intended, just commenting out to try fixing tests (Delete lines above up to comment, and uncomment line below)
-
-        // return rollTableItems(rareDropTable[item.item], item.item);
+        const nestedResult = rollTableItems(nestedTable, nestedName);
+        if (nestedResult) {
+          nestedResult.tablePath = nestedResult.tablePath
+            ? [tableName, ...nestedResult.tablePath]
+            : [tableName, nestedName];
+          nestedResult.dropTable = "rareDropTable";
+        }
+        return nestedResult;
       }
+
+      //normal item
       return {
-        item: item.item,
-        quantity: item.quantity || 1,
-        bigChime: item.bigChime || false,
-        chime: item.chime || false,
-        tablePath: [tableName], //Add tablePath for direct items (Testing)
+        item: it?.name || it?.item,
+        quantity: it?.quantity ?? 1,
+        type: it?.type ?? "standard",
+        cLog: it?.cLog ?? false,
+        bigChime: it?.bigChime ?? false,
+        chime: it?.chime ?? false,
+        tablePath: [tableName],
       };
     }
   }
-  console.warn(`No item found in table: "${tableName}"`);
-  return null;
+  console.warn(
+    `No item found in table "${tableName}" after rolling (roll = ${roll}, totalWeight = ${totalWeight})`
+  );
 }
+
+//Reworking rollTableItems
+
+// function rollTableItems(table, tableName) {
+//   const items = getItems(table);
+//   if (!items || !Array.isArray(items) || items.length === 0) {
+//     console.error(
+//       `Table "${tableName}" is either missing, not an array or empty!`,
+//       table
+//     );
+//     return null;
+//   }
+
+//   let totalWeight = items.reduce((sum, item) => sum + (item.rarity || 0), 0);
+//   if (totalWeight === 0) {
+//     console.error(`Total weight is 0 for table "${tableName}"`);
+//     return null;
+//   }
+
+//   let roll = Math.random() * totalWeight;
+//   let cumulativeWeight = 0;
+//   for (const item of items) {
+//     cumulativeWeight += item.rarity;
+//     if (roll <= cumulativeWeight) {
+//       if (item.type === "table") {
+//         console.log(`Type = Table! Entering sub-table: ${item.name}`);
+//         const subResult = rollTableItems(
+//           RareDropTable[item.name]?.items,
+//           item.name
+//         );
+//         if (subResult) {
+//           subResult.tablePath = [tableName, item.name];
+//           subResult.dropTable = "rareDropTable";
+//         }
+//         return subResult;
+//       }
+//       return {
+//         item: item.name,
+//         quantity: item.quantity || 1,
+//         bigChime: item.bigChime || false,
+//         chime: item.chime || false,
+//         tablePath: [tableName],
+//         type: item.type ?? "standard",
+//         cLog: item.cLog ?? false,
+//       };
+//     }
+//   }
+//   console.warn(`No item found in table: "${tableName}"`);
+//   return null;
+// }
 
 function rollGroupedTableItems(table, tableName) {
   let groupedDrops = [];
   let groups = {};
 
   // Organize items by their group
-  table.forEach((item) => {
+  const items = getItems(table);
+  items?.forEach((item) => {
     if (item.group) {
       if (!groups[item.group]) {
         groups[item.group] = [];
@@ -753,8 +255,8 @@ function rollGroupedTableItems(table, tableName) {
           : item.quantity;
 
         groupedDrops.push({
-          dropTable: tableName, //Keep track of table name
-          item: item.item,
+          dropTable: tableName,
+          item: item.name,
           quantity: finalQuantity,
           chime: item.chime || false,
         });
@@ -763,37 +265,6 @@ function rollGroupedTableItems(table, tableName) {
     }
   });
   return groupedDrops;
-  // for (const item of table) {
-  //   if (!item.group) {
-  //     console.warn(`Item ${item.item} in ${tableName} is missing a group!`);
-  //     continue;
-  //   }
-  //   if (!groupedItems[item.group]) {
-  //     groupedItems[item.group] = [];
-  //   }
-  //   groupedItems[item.group].push(item);
-  // }
-
-  // let finalDrops = [];
-  // for (const group in groupedItems) {
-  //   let selectedItem = rollTableItems(
-  //     groupedItems[group],
-  //     `${tableName} - ${group}`
-  //   );
-  //   if (selectedItem) {
-  //     let finalQuantity = Array.isArray(selectedItem.quantity)
-  //       ? rollItemQuantity(selectedItem.quantity[0], selectedItem.quantity[1])
-  //       : selectedItem.quantity;
-
-  //     finalDrops.push({
-  //       dropTable: tableName,
-  //       item: selectedItem.item,
-  //       quantity: finalQuantity,
-  //     });
-  //   }
-  // }
-
-  // return finalDrops.length > 0 ? finalDrops : null;
 }
 
 function rollForBossItem(boss, tableName) {
@@ -802,8 +273,8 @@ function rollForBossItem(boss, tableName) {
   if (tableName === "rareDropTable") {
     if (!boss.dropTables.rareDropTable) {
       console.error(
-        `Error: rareDropTable is missing for ${
-          Object.keys(bosses).find((name) => bosses[name] === boss) ||
+        `Error: RareDropTable is missing for ${
+          Object.keys(AllBosses).find((name) => AllBosses[name] === boss) ||
           "Unknown Boss"
         }`
       );
@@ -811,26 +282,31 @@ function rollForBossItem(boss, tableName) {
       return null;
     }
     return rollForRDTItem(boss.dropTables.rareDropTable);
-  } else if (rareDropTable[tableName]) {
-    table = rareDropTable[tableName];
-    //This is saying if its an internal table, we use it
-
-    // console.log(`Rolling on internal RDT table:${tableName} (rollForBossItem)`);
+  } else if (RareDropTable[tableName]) {
+    table = RareDropTable[tableName];
   } else {
     table = boss.dropTables[tableName];
-    // console.log(`Rolling on boss table: ${tableName}`);
-    //This is saying, otherwise use the normal drop tables
   }
-  const hasGroups = table.some((item) => item.group);
+
+  const items = getItems(table);
+
+  if (!items || !Array.isArray(items)) {
+    console.error(
+      `Table "${tableName}" is either missing, not an array or empty.`,
+      table
+    );
+
+    return null;
+  }
+
+  const hasGroups = items.some((item) => item.group);
   let droppedItem;
 
   if (hasGroups) {
-    droppedItem = rollGroupedTableItems(table, tableName);
+    droppedItem = rollGroupedTableItems(items, tableName);
   } else {
-    droppedItem = rollTableItems(table, tableName);
+    droppedItem = rollTableItems(items, tableName);
   }
-  // console.log("Dropped item:", droppedItem);
-  //If dropped item has the chime property, play the unique drop chime
   if (Array.isArray(droppedItem)) {
     droppedItem.forEach((item) => {
       if (item.chime) {
@@ -852,109 +328,80 @@ function rollForBossItem(boss, tableName) {
 
 function rollForTertiaryDrop(boss) {
   if (!boss.tertiaryDrops || boss.tertiaryDrops.length === 0) return null;
-  //Loop through tertiary items and roll for each INDIVIDUALLY
   for (const item of boss.tertiaryDrops) {
     const roll = Math.random();
     if (roll <= item.rarity) {
-      // console.log(`Tertiary roll: ${roll}, and result: ${item.item}`);
-      const droppedItem = { item: item.item, quantity: item.quantity || 1 };
+      const droppedItem = { item: item.name, quantity: item.quantity || 1 };
 
       if (item.bigChime) {
         playLeagueTaskSound();
         console.log("Jingle Jingle, BIG TERTIARY");
-        console.log(item.item);
+        console.log(item.name);
       }
 
       if (item.chime) {
         playUniqueDropSound();
         console.log("Jingle Jingle, tertiary");
-        console.log(item.item);
+        console.log(item.name);
       }
       return droppedItem;
     }
   }
-
-  //If no item matches, return null (No drop occurs. THIS SHOULD BE COMMON)
-  // console.log("No tertiary drop.");
   return null;
 }
 
-//Can implement a SCALING FACTOR, but should not be needed
-
-//Using generate function to set up reroll button in the modal later on
-
-//Had to adjust this because module takes over the global scope
-
+//Storing last boss rolled for reroll button functionality
 const bossState = {
   lastBossRolled: null,
   lastBossName: "",
 };
-//This is where we'll store the last boss rolled
 
-function generateBossDrop(boss) {
-  //Condensed roll logic to account for Boss special roll rules, and default to 1 if no rule applies
+function generateBossDrop(boss, bossName) {
   let rolls = boss.doubleRoll ? 2 : boss.tripleRoll ? 3 : 1;
   let drops = [];
-  let isExclusiveDrop = false; //Track for exclusive items
-
-  //Increment boss kill count for Inventory Module. New Below
-  const bossName =
-    Object.keys(bosses).find((name) => bosses[name] === boss) || "Unknown Boss";
-  InventoryModule.updateInventory(null, bossName, null, 0);
-
-  //Above added NEW for Inventory Module
-
-  //Roll the appropriate number of times
-
-  //Setting up guaranteed drops (happen regardless of exclusivity)
+  let isExclusiveDrop = false;
+  // InventoryModule.updateInventory(null, boss.name, null, 0);
 
   if (boss.dropTables.always) {
-    boss.dropTables.always.forEach(({ item, quantity }) => {
-      let finalQuantity = Array.isArray(quantity)
-        ? rollItemQuantity(quantity[0], quantity[1])
-        : quantity;
+    getItems(boss.dropTables.always)?.forEach((itemObj) => {
+      if (!itemObj.name) return;
+      let finalQuantity = Array.isArray(itemObj.quantity)
+        ? rollItemQuantity(itemObj.quantity[0], itemObj.quantity[1])
+        : itemObj.quantity;
       drops.push({
         dropTable: "always",
-        item,
+        item: itemObj.name,
         quantity: finalQuantity,
+        type: itemObj.type ?? "standard",
+        cLog: itemObj.cLog ?? false,
       });
     });
   }
 
-  let preRolled = false; //Pre-roll happens only once if "everyRoll" is false
+  let preRolled = false;
   let uniqueHit = false;
 
   // Rolling for Drops
   // Pre roll logic
   if (boss.preRoll) {
-    //If everyRoll is true, the pre-roll happens every time. Else once.
     let shouldPreRoll = boss.preRoll.everyRoll || !preRolled;
 
     if (shouldPreRoll) {
-      //Define chance to hit pre-roll table
-      const preRollTable = boss.dropTables[boss.preRoll.table];
-      const preRollChance = preRollTable.reduce(
+      const preRollItems = getItems(boss.dropTables[boss.preRoll.table]);
+      const preRollChance = preRollItems?.reduce(
         (sum, item) => sum + (item.rarity || 0),
         0
       );
 
       if (Math.random() < preRollChance) {
-        let preDropTable = boss.preRoll.table; //"unique" for Muspah
-
-        //Lines below would be after the equals.
-        //  getBossDropTable({
-        //   dropTables: {
-        //     [boss.preRoll.table]: boss.dropTables[boss.preRoll.table],
-        //   },
-        // });
-
+        let preDropTable = boss.preRoll.table;
         let preDrop = rollForBossItem(boss, preDropTable);
 
         if (preDrop) {
           //Check if item is exclusive
-          const tableItems = boss.dropTables[preDropTable];
-          const droppedItem = tableItems.find(
-            (item) => item.item === preDrop.item
+          const entries = getItems(boss.dropTables[preDropTable]);
+          const droppedItem = entries?.find(
+            (item) => item.name === preDrop.item
           );
           const isExclusive = droppedItem && droppedItem.exclusive === true;
           let finalQuantity = Array.isArray(preDrop.quantity)
@@ -965,19 +412,20 @@ function generateBossDrop(boss) {
             dropTable: boss.preRoll.table,
             item: preDrop.item,
             quantity: finalQuantity,
+            type: preDrop.type,
+            cLog: preDrop.cLog,
           });
 
-          uniqueHit = true; //We hit something on the pre-rolled table
-          // console.log(`Pre-roll hit! Dropped ${preDrop.item}`);
+          uniqueHit = true;
 
           if (isExclusive) {
-            isExclusiveDrop = true; //Set flag to skip standard rolls
+            isExclusiveDrop = true;
           }
         }
       } else {
-        // console.log("Pre-roll missed, proceeding with standard rolls only.");
+        console.log("Pre-roll missed, proceeding with standard rolls only.");
       }
-      preRolled = true; //Pre-roll only happens once if "everyRoll" is false
+      preRolled = true;
     }
   }
 
@@ -988,26 +436,29 @@ function generateBossDrop(boss) {
       //Exclude the pre-roll table
       do {
         dropTable = getBossDropTable(boss);
-        // console.log(`Pre-Roll occurred, excluding table!`);
-      } while (preRolled && dropTable === boss.preRoll.table); //Exclude pre-roll table
-
-      //Testing new logic above, commenting out current line below
-      // let dropTable = getBossDropTable(boss);
+        if (dropTable === RareDropTable) dropTable = "rareDropTable";
+      } while (preRolled && dropTable === boss.preRoll.table);
       let itemDrop = rollForBossItem(boss, dropTable);
+
       if (Array.isArray(itemDrop)) {
-        //If it's an array (from grouped drops), push each item separately
         itemDrop.forEach((drop) => drops.push(drop));
       } else if (itemDrop) {
         let finalQuantity = Array.isArray(itemDrop.quantity)
           ? rollItemQuantity(itemDrop.quantity[0], itemDrop.quantity[1])
           : itemDrop.quantity;
 
-        drops.push({
-          dropTable,
-          item: itemDrop.item,
-          quantity: finalQuantity,
-          tablePath: itemDrop.tablePath,
-        });
+        if (itemDrop?.item) {
+          drops.push({
+            dropTable,
+            item: itemDrop.item,
+            quantity: finalQuantity,
+            tablePath: itemDrop.tablePath,
+            type: itemDrop.type,
+            cLog: itemDrop.cLog,
+          });
+        } else {
+          console.warn("Skipping invalid drop:", itemDrop);
+        }
       }
     }
   } else {
@@ -1020,57 +471,65 @@ function generateBossDrop(boss) {
       dropTable: "tertiary",
       item: tertiaryDrop.item,
       quantity: tertiaryDrop.quantity,
+      type: tertiaryDrop.type,
+      cLog: tertiaryDrop.cLog,
     });
   }
-
-  //We're gonna populate the modal here using a separate function
   bossState.lastBossRolled = boss;
   bossState.lastBossName = bossName;
 
   populateBossDropModal(drops);
 
-  //Below doesn't work right. Boss KC is being incremented PER DROP and not PER KILL
+  // InventoryModule.updateInventory(null, boss.name, null, 0);
 
-  // if (!inventory.bosses[bossName]) {
-  //   inventory.bosses[bossName] = {
-  //     kills: 0,
-  //     drops: {},
-  //   };
-  // }
+  let killLogged = false;
 
-  // inventory.bosses[bossName].kills += 1;
-  // Updating item types to work with Inventory Module
   drops.forEach(({ item, quantity, dropTable, tablePath }) => {
     //Collection log setup
     let type = "standard";
-    let rare = false; //Default to false
+    let rare = false;
 
     let fullTable;
 
-    //We gotta handle the Rare Drop Table, because of course it doesn't work right.
-
     if (dropTable === "rareDropTable" && tablePath && tablePath.length > 0) {
-      //Use first table in the path (Specific RDT sub table)
-      const rdtSubTable = tablePath[0];
-      fullTable = rareDropTable[rdtSubTable];
+      const rdtFinalTable = tablePath[tablePath.length - 1];
+      fullTable = getItems(RareDropTable[rdtFinalTable]);
     } else if (dropTable === "tertiary") {
-      fullTable = boss.tertiaryDrops;
+      fullTable = getItems(boss.tertiaryDrops);
     } else {
-      fullTable = boss.dropTables[dropTable];
+      fullTable = getItems(boss.dropTables[dropTable]);
     }
 
-    const dropInfo = fullTable?.find((entry) => entry.item === item);
+    const dropInfo = fullTable?.find((entry) => entry.name === item);
+
+    if (!dropInfo || typeof dropInfo !== "object" || !dropInfo.name) {
+      console.warn(
+        "dropInfo is invalid or undefined:",
+        dropInfo,
+        "for item:",
+        item,
+        "from table:",
+        fullTable,
+        "at tablePath:",
+        tablePath
+      );
+    }
 
     const isCLog = dropInfo?.cLog === true;
     const isPet = dropInfo?.type === "pet";
 
     rare = dropInfo?.rare === true;
 
+    if (!killLogged) {
+      InventoryModule.updateInventory(null, boss.name, null, 0);
+      killLogged = true;
+    }
+
     if (isCLog && isPet) {
       // Log once for each category
       InventoryModule.updateInventory(
         null,
-        bossName,
+        boss.name,
         item,
         quantity,
         "pet",
@@ -1082,7 +541,7 @@ function generateBossDrop(boss) {
 
       InventoryModule.updateInventory(
         null,
-        bossName,
+        boss.name,
         item,
         quantity,
         type,
@@ -1094,7 +553,7 @@ function generateBossDrop(boss) {
 
       InventoryModule.updateInventory(
         null,
-        bossName,
+        boss.name,
         item,
         quantity,
         type,
@@ -1104,7 +563,7 @@ function generateBossDrop(boss) {
     } else {
       InventoryModule.updateInventory(
         null,
-        bossName,
+        boss.name,
         item,
         quantity,
         type,
@@ -1113,14 +572,11 @@ function generateBossDrop(boss) {
       );
     }
   });
-
-  //Update inventory modal after incrementing kill count
-  // InventoryModule.updateInventoryModal();
 }
 
 function rollAgain() {
   if (bossState.lastBossRolled) {
-    generateBossDrop(bossState.lastBossRolled);
+    generateBossDrop(bossState.lastBossRolled, bossState.lastBossName);
   } else {
     console.error("No boss has been rolled yet!");
   }
@@ -1133,7 +589,6 @@ function populateBossDropModal(drops) {
   bossDropResultText.textContent = "";
 
   let bossName = bossState.lastBossName;
-  // console.log(lastBossName);
   let tertiaryDrop = null;
 
   //Loop through each drop and display it
@@ -1141,16 +596,17 @@ function populateBossDropModal(drops) {
     const bossDropTableText = document.createElement("p");
 
     if (dropTable === "always") {
-      // console.log(bossName);
       bossDropTableText.textContent = `You received ${bossName} drop: ${quantity}x ${item}!`;
       bossDropResultText.appendChild(bossDropTableText);
     } else if (dropTable === "tertiary") {
       //Store the tertiary drop here to append later
       tertiaryDrop = { item, quantity };
     } else {
-      let formattedDropTable = dropTable
-        .replace(/([a-z])([A-Z])/g, "$1 $2")
-        .toUpperCase();
+      let formattedDropTable =
+        typeof dropTable === "string"
+          ? dropTable.replace(/([a-z])([A-Z])/g, "$1 $2").toUpperCase()
+          : (console.warn("DropTable not a string:", dropTable),
+            "UNKNOWN TABLE");
 
       if (dropTable === "rareDropTable") {
         bossDropTableText.textContent = `You hit the RARE DROP TABLE!`;
@@ -1182,7 +638,6 @@ function getBossTablesAndItems(boss) {
     return [];
   }
   let tablesAndItems = [];
-  //Attempting to add table chances, item rarities, and rarities within tables
   const { tableChances, totalChance } = calculateTableProbabilities(boss);
   const rolls = boss.doubleRoll ? 2 : boss.tripleRoll ? 3 : 1;
 
@@ -1194,9 +649,16 @@ function getBossTablesAndItems(boss) {
     }
     // Adding RDT in separate function
 
-    let tableItems = boss.dropTables[tableName];
+    const rawTable = boss.dropTables[tableName];
 
-    if (!Array.isArray(tableItems)) {
+    if (!(rawTable instanceof DropTable)) {
+      console.error(`Invalid DropTable for ${tableName}`, rawTable);
+      continue;
+    }
+
+    const tableItems = getItems(rawTable);
+
+    if (!tableItems) {
       console.error(
         `Unexpected data type for drop table: ${tableName}`,
         tableItems
@@ -1209,16 +671,14 @@ function getBossTablesAndItems(boss) {
       (sum, item) => sum + (item.rarity || 0),
       0
     );
-    // console.log("Total Weights", totalTableWeight);
-    let formattedItems = tableItems.map((item) => {
-      let quantityText =
+    const formattedItems = tableItems.map((item) => {
+      const quantityText =
         Array.isArray(item.quantity) && item.quantity.length === 2
           ? `${item.quantity[0]} - ${item.quantity[1]}`
           : item.quantity !== undefined
           ? item.quantity
           : "Unknown";
 
-      //Raw Item Rarity
       const rawRarity = item.rarity
         ? `${rolls} x (1 / ${((1 / item.rarity) * rolls).toFixed(3)})`
         : "N/A";
@@ -1227,41 +687,31 @@ function getBossTablesAndItems(boss) {
         ? `1 / ${(1 / item.rarity).toFixed(3)}`
         : "N/A";
 
-      //Rarity in Table
       const rarityInTable =
         item.rarity && totalTableWeight
           ? `${((item.rarity / totalTableWeight) * 100).toFixed(2)}%`
           : "N/A";
 
       return {
-        name: item.item,
+        name: item.name,
         quantity: quantityText,
-        //Adding new objects below
         perKillRarity,
         rawRarity,
         rarityInTable,
-        //End of new
       };
     });
 
     //Table chance as percentage per roll, scaled by number of rolls
-    let tableChancePercent =
+    const tableChancePercent =
       tableChances[tableName] && totalChance
         ? ((tableChances[tableName] / totalChance) * 100).toFixed(2) + "%"
         : "N/A";
-
-    // console.log(tableChances[tableName], `${tableName}`);
 
     tablesAndItems.push({
       table: tableName,
       items: formattedItems,
       tableChance: tableChancePercent,
-      //Adding new objects below
-      // tableChance: tableChances[tableName]
-      //   ? `${((tableChances[tableName] / totalChance) * 100).toFixed(2)}%`
-      //   : "N/A",
     });
-    //End of new
   }
 
   //Handle Rare Drop Table
@@ -1298,18 +748,14 @@ function getBossTablesAndItems(boss) {
           : drop.quantity !== undefined
           ? drop.quantity
           : "Unknown";
-      //Adding new below
       const rawRarity = drop.rarity ? `1 / ${1 / drop.rarity}` : "N/A";
-      const rarityInTable = rawRarity; //Tertiary is independent
-      //End of new
+      const rarityInTable = rawRarity;
 
       return {
-        name: drop.item,
+        name: drop.name,
         quantity: quantityText,
-        //Adding new below
         rawRarity,
         rarityInTable,
-        //End of new
       };
     });
 
@@ -1396,10 +842,6 @@ function populateBossItemsModal(boss) {
         tableCell2.style.verticalAlign = "middle";
         row.appendChild(tableCell2);
       }
-      //Moving this into block above to spread cell
-      // let tableCell2 = document.createElement("td");
-      // tableCell2.textContent = itemData.name;
-      // row.appendChild(tableCell2);
 
       let tableCell3 = document.createElement("td");
       tableCell3.textContent = itemData.name;
@@ -1485,11 +927,6 @@ function populateBossItemsModal(boss) {
           tableCell2.style.verticalAlign = "middle";
           row.appendChild(tableCell2);
         }
-        //Moving into block above
-
-        // let tableCell2 = document.createElement("td");
-        // tableCell2.textContent = itemData.name;
-        // row.appendChild(tableCell2);
 
         let tableCell3 = document.createElement("td");
         tableCell3.textContent = itemData.name;
@@ -1520,14 +957,6 @@ function populateBossItemsModal(boss) {
     rdtContainer.style.display = "none";
 
     setupRdtToggle();
-
-    //Commenting out OLD below for NEW above
-    // if (toggleButton) {
-    //   toggleButton.style.display = "inline-block";
-    //   //Reset Toggle State
-    //   toggleButton.textContent = "View Rare Drop Table";
-    //   rdtContainer.style.display = "none";
-    // }
   } else {
     // Hide toggle button if no RDT
     toggleButton.style.display = "none";
@@ -1585,22 +1014,21 @@ function openBossSelectionModal(callbackFunction, titleText) {
   // Reattach event listeners with the new callback
   document.querySelectorAll(".bossButton").forEach((button) => {
     button.addEventListener("click", (event) => {
-      const selectedBoss = event.target.getAttribute("boss-data");
-      callbackFunction(selectedBoss); // Run the passed function
+      const bossName = event.target.getAttribute("boss-data");
+      const selectedBoss = AllBosses[bossName];
+      callbackFunction(selectedBoss);
       closeModal(event);
     });
   });
 }
 
-function slayBoss(selectedBoss) {
-  const boss = bosses[selectedBoss];
-
-  generateBossDrop(boss);
+function slayBoss(boss) {
+  console.log("Selected Boss:", boss);
+  generateBossDrop(boss, boss.name);
 }
 
-function checkBossItems(selectedBoss) {
-  const boss = bosses[selectedBoss];
-
+function checkBossItems(boss) {
+  console.log("Selected Boss:", boss.name, boss);
   populateBossItemsModal(boss);
 }
 
@@ -1631,541 +1059,619 @@ function playLeagueTaskSound() {
 }
 
 //Rare Drop Table Functions
+
 function calculateRDTProbabilities(rdt) {
-  let tableChances = {};
-  for (const [tableName, items] of Object.entries(rdt)) {
+  if (!rdt || typeof rdt !== "object") {
+    console.error("RDT passed to calculateRDTProbabilities is invalid:", rdt);
+    return { tableChances: {}, totalChance: 0, subSplit: {}, subSplitTotal: 0 };
+  }
+
+  // const getItemsSafe = (t) =>
+  //   Array.isArray(t) ? t : t && Array.isArray(t.items) ? t.items : [];
+
+  // 1) Read the sub-tables pointer list (the "sub-tables" DropTable entry)
+  const subPointers = getItems(rdt["sub-tables"]) || [];
+  const subPointerNames = new Set();
+  const subSplit = {}; // {"Gem table": 0.156625, "Mega Rare table": 0.1172 } Previously subPointerChances
+  let subSplitTotal = 0;
+
+  subPointers.forEach((p) => {
+    if (p && p.type === "table" && p.name && typeof p.rarity === "number") {
+      subPointerNames.add(p.name);
+      subSplit[p.name] = (subSplit[p.name] || 0) + (p.rarity || 0);
+      subSplitTotal += p.rarity || 0;
+    }
+  });
+
+  // 2) For each top-level table (skip 'sub-tables' and skip the actual sub-table keys like "Gem table")
+  const tableChances = {}; // raw per-table chance (not normalized)
+  let rawTotal = 0;
+
+  for (const [tableName, dropTable] of Object.entries(rdt)) {
     if (tableName === "sub-tables") continue;
-    if (Array.isArray(items)) {
-      let tableChance = items.reduce(
-        (sum, item) => sum + (item.rarity || 0),
-        0
-      );
-      tableChances[tableName] = tableChance;
-    }
-  }
-  rdt["sub-tables"].forEach((subTable) => {
-    tableChances[subTable.item] = subTable.rarity;
-  });
-  let totalChance = Object.values(tableChances).reduce(
-    (sum, chance) => sum + chance,
-    0
-  );
-
-  return { tableChances, totalChance };
-  // let tableChancesPercent = {};
-  // for (const [table, chance] of Object.entries(tableChances)) {
-  //   tableChancesPercent[table] = (chance / totalChance) * 100;
-  // }
-  // //debugging
-  // console.log("RDT Probabilities:", tableChancesPercent);
-  // return tableChancesPercent;
-}
-
-function rollForRDTItem(rdt) {
-  const { tableChances, totalChance } = calculateRDTProbabilities(rdt);
-  let roll = Math.random() * totalChance;
-  //debugging
-  console.log(`Rolling for RDT table with roll: ${roll}`);
-  let accumulatedChance = 0;
-  let selectedTableName = null;
-  let table = null;
-
-  for (const [rdtTable, chance] of Object.entries(tableChances)) {
-    accumulatedChance += chance;
-    if (roll <= accumulatedChance) {
-      selectedTableName = rdtTable;
-      table = rdt[rdtTable] || rareDropTable[rdtTable];
-      //debugging
-      console.log(
-        `Rolled into RDT, table: ${selectedTableName} (Chance: ${chance.toFixed(
-          2
-        )}%, Accumulated: ${accumulatedChance.toFixed(2)})`
-      );
-      break;
-    }
-  }
-  /*
-  //This is temporary for testing
-  const result = rollTableItems(table, selectedTableName);
-  if (result) {
-    result.tableName = selectedTableName;
-  }
-  //Temporary as well, and commenting out main line
-  return result;
-  */
-  return rollTableItems(table, selectedTableName); //Letting tablePath handle tracking instead of (const result)
-}
-
-function getRareDropTableItemsWithRarities(rdtChance) {
-  let rareTables = [];
-  const { tableChances, totalChance } =
-    calculateRDTProbabilities(rareDropTable);
-
-  const subTableNames = new Set(
-    rareDropTable["sub-tables"].map((subTable) => subTable.item)
-  );
-  //Loop through main tables
-
-  //New Below
-  for (let category in rareDropTable) {
-    if (category === "sub-tables" || subTableNames.has(category)) continue;
-
-    const tableItems = rareDropTable[category];
-    if (Array.isArray(tableItems)) {
-      const totalTableWeight = tableItems.reduce(
-        (sum, item) => sum + (item.rarity || 0),
-        0
-      );
-      let tableChance = (tableChances[category] || 0) / totalChance;
-      let formattedItems = tableItems.map((item) => {
-        const quantityText = Array.isArray(item.quantity)
-          ? `${item.quantity[0]} - ${item.quantity[1]}`
-          : item.quantity;
-
-        // //Raw Rarity in RDT (item.rarity)
-        // const rawRarityWithinRDT = item.rarity
-        //   ? `1 / ${(1 / item.rarity).toFixed(2)}`
-        //   : "N/A";
-
-        //Adjusted rarity considering rDTChance and sub-table probabilities
-
-        const adjustedRarity = item.rarity
-          ? `1 / ${(1 / (item.rarity * rdtChance)).toFixed(2)}`
-          : "N/A";
-
-        const rarityInTable =
-          item.rarity && totalTableWeight
-            ? `${((item.rarity / totalTableWeight) * 100).toFixed(2)}%`
-            : "N/A";
-
-        return {
-          name: item.item,
-          quantity: quantityText,
-          rawRarity: adjustedRarity,
-          rarityInTable,
-        };
-      });
-
-      rareTables.push({
-        table: category,
-        tableChance: (tableChance * 100).toFixed(2) + "%",
-        items: formattedItems,
-      });
-    }
-    //Commenting out below, to update above
-
-    // if (category !== "sub-tables") {
-    //   //Skip sub-tables for now
-    //   rareTables[category] = rareDropTable[category].map((item) => ({
-    //     name: item.item,
-    //     quantity: Array.isArray(item.quantity)
-    //       ? `${item.quantity[0]} - ${item.quantity[1]}`
-    //       : item.quantity,
-    //   }));
-    // }
-  }
-
-  //Handle sub-tables
-
-  //New below
-
-  rareDropTable["sub-tables"].forEach((subTable) => {
-    if (subTable.type === "table") {
-      const tableItems = rareDropTable[subTable.item];
-      const totalTableWeight = tableItems.reduce(
-        (sum, item) => sum + (item.rarity || 0),
-        0
-      );
-      let tableChance = (tableChances[subTable.item] || 0) / totalChance;
-      let formattedItems = tableItems.map((item) => {
-        const quantityText = Array.isArray(item.quantity)
-          ? `${item.quantity[0]} - ${item.quantity[1]}`
-          : item.quantity;
-
-        // const rawRarityWithinRDT = item.rarity
-        //   ? `1 / ${(1 / item.rarity).toFixed(2)}`
-        //   : "N/A";
-
-        //Adjusted rarity: rDTChance * sub-table chance * item.rarity
-        const adjustedRarity = item.rarity
-          ? `1 / ${(1 / (item.rarity * tableChance * rdtChance)).toFixed(2)}`
-          : "N/A";
-
-        const rarityInTable =
-          item.rarity && totalTableWeight
-            ? `${((item.rarity / totalTableWeight) * 100).toFixed(2)}%`
-            : "N/A";
-
-        return {
-          name: item.item,
-          quantity: quantityText,
-          rawRarity: adjustedRarity,
-          rarityInTable,
-        };
-      });
-
-      rareTables.push({
-        table: subTable.item,
-        tableChance: (tableChance * 100).toFixed(2) + "%",
-        items: formattedItems,
-      });
-    }
-  });
-
-  return rareTables;
-}
-
-//Commenting out below to update above
-// if (rareDropTable["sub-tables"]) {
-//   rareDropTable["sub-tables"].forEach((subTable) => {
-//     if (subTable.type === "table") {
-//       rareTables[subTable.item] = rareDropTable[subTable.item].map(
-//         (item) => ({
-//           name: item.item,
-//           quantity: Array.isArray(item.quantity)
-//             ? `${item.quantity[0]} - ${item.quantity[1]}`
-//             : item.quantity,
-//         })
-//       );
-//     }
-//   });
-// }
-
-// //Convert rareTables object into an array for easier handling
-
-// return Object.entries(rareTables).map(([table, items]) => ({
-//   table,
-//   items,
-// }));
-// }
-
-//Test Functions
-
-function testTertiaryDropRate(boss, runs = 100) {
-  let tertiaryCount = 0;
-
-  for (let i = 0; i < runs; i++) {
-    let terDrop = rollForTertiaryDrop(boss);
-
-    if (terDrop) {
-      tertiaryCount++;
-      console.log(
-        `Run ${i + 1}: Tertiary drop - ${terDrop.item} x ${terDrop.quantity}`
-      );
-    }
-  }
-
-  console.log(
-    `Out of ${runs} kills, tertiary drops occurred ${tertiaryCount} times.`
-  );
-  console.log(`Drop rate: ${(tertiaryCount / runs) * 100}%`);
-}
-
-//Run below test with testRareDropRate(bosses.bossName, runAmount);, example testRareDropRate(bosses.Zulrah, 1000);
-
-function testRareDropRate(boss, runs = 100) {
-  let rdtCount = 0; // Total RDT hits
-  let uniqueCount = 0; // Total Unique hits
-  let rdtItems = {}; // Track RDT items and their counts
-  let rolls = boss.doubleRoll ? 2 : boss.tripleRoll ? 3 : 1; // Define rolls outside loop
-
-  for (let i = 0; i < runs; i++) {
-    for (let j = 0; j < rolls; j++) {
-      let dropTable = getBossDropTable(boss);
-      let drop = rollForBossItem(boss, dropTable);
-
-      if (drop) {
-        if (dropTable === "rareDropTable") {
-          rdtCount++;
-          let itemKey = `${drop.item} (from ${
-            drop.tablePath ? drop.tablePath.join(" -> ") : "Unknown"
-          })`;
-          rdtItems[itemKey] = (rdtItems[itemKey] || 0) + 1;
-        } else if (dropTable === "unique") {
-          uniqueCount++;
-        }
-      }
-    }
-  }
-
-  // Calculate observed rates without rounding first
-  let observedRDT = (rdtCount / (runs * rolls)) * 100;
-  let expectedRDT = boss.rDTChance * 100;
-  let observedUnique = (uniqueCount / (runs * rolls)) * 100;
-  let expectedUnique = (1 / 256) * 100;
-
-  // Display results with rounding only in the console output
-  console.log(`\nTest Results (${runs} kills):`);
-  console.log("---------------------------------------------");
-  console.log(`Total RDT hits: ${rdtCount}`);
-  console.log(`Observed RDT rate: ${observedRDT.toFixed(4)}%`);
-  console.log(
-    `Expected RDT rate: ${expectedRDT.toFixed(4)}% (based on ${boss.rDTChance})`
-  );
-  console.log(`Total Unique hits: ${uniqueCount}`);
-  console.log(`Observed Unique rate: ${observedUnique.toFixed(4)}%`);
-  console.log(
-    `Expected Unique rate: ${expectedUnique.toFixed(4)}% (1 / 256 per roll)`
-  );
-  console.log("RDT items received:", rdtItems);
-}
-
-function testRDTSubTables(rdt, iterations = 10000) {
-  let results = {
-    "Gem table": { hits: 0, items: {} },
-    "Mega Rare table": { hits: 0, items: {} },
-    other: { hits: 0, items: {} },
-  };
-  let megaFromGem = 0;
-
-  for (let i = 0; i < iterations; i++) {
-    const drop = rollForRDTItem(rdt);
-    if (!drop) continue;
-
-    const tablePath = drop.tablePath || ["other"];
-    const item = drop.item;
-    const initialTable = tablePath[0];
-
-    if (initialTable === "Gem table") {
-      results["Gem table"].hits++;
-      results["Gem table"].items[item] =
-        (results["Gem table"].items[item] || 0) + 1;
-      if (tablePath.includes("Mega Rare table")) {
-        megaFromGem++;
-        results["Mega Rare table"].items[item] =
-          (results["Mega Rare table"].items[item] || 0) + 1;
-      }
-    } else if (initialTable === "Mega Rare table") {
-      results["Mega Rare table"].hits++;
-      results["Mega Rare table"].items[item] =
-        (results["Mega Rare table"].items[item] || 0) + 1;
-    } else {
-      results.other.hits++;
-      results.other.items[item] = (results.other.items[item] || 0) + 1;
-    }
-  }
-
-  // Calculate expected values without rounding
-  let gemExpected = iterations / 6.4;
-  let megaExpected = iterations / 8.533;
-  let expectedMegaFromGem = results["Gem table"].hits / 128;
-
-  // Display results with rounding only at output
-  console.log(`\nRDT Sub-Table Test Results (${iterations} iterations):`);
-  console.log("---------------------------------------------");
-  console.log(
-    `Gem table hits: ${results["Gem table"].hits} (${(
-      (results["Gem table"].hits / iterations) *
-      100
-    ).toFixed(4)}%)`
-  );
-  console.log(
-    `Expected Gem table hits: ~${gemExpected.toFixed(4)} (${(100 / 6.4).toFixed(
-      4
-    )}%)`
-  );
-  console.log("Gem table items:", results["Gem table"].items);
-
-  console.log(
-    `Mega Rare table hits (direct): ${results["Mega Rare table"].hits} (${(
-      (results["Mega Rare table"].hits / iterations) *
-      100
-    ).toFixed(4)}%)`
-  );
-  console.log(
-    `Expected Mega Rare table hits: ~${megaExpected.toFixed(4)} (${(
-      100 / 8.533
-    ).toFixed(4)}%)`
-  );
-  console.log("Mega Rare table items:", results["Mega Rare table"].items);
-
-  console.log(
-    `Other table hits: ${results.other.hits} (${(
-      (results.other.hits / iterations) *
-      100
-    ).toFixed(4)}%)`
-  );
-  console.log("Other table items:", results.other.items);
-
-  console.log(`\nMega Rare table hits from Gem table: ${megaFromGem}`);
-  console.log(
-    `Expected Mega Rare from Gem: ~${expectedMegaFromGem.toFixed(4)} (${(
-      100 / 128
-    ).toFixed(4)}% of Gem hits)`
-  );
-}
-// */
-
-/* OLD COMMENTED OUT FOR TESTING
-
-//Code below is the first test created, but it rounds a lot throughout. 
-//Created updated code above to make test more accurate
-
-function testRareDropRate(boss, runs = 100) {
-  let rdtCount = 0; // Total RDT hits
-  let uniqueCount = 0; // Total Tanzanite Fang hits
-  let rdtItems = {}; // Track RDT items and their counts
-  let rolls = boss.doubleRoll ? 2 : boss.tripleRoll ? 3 : 1; // Define rolls outside loop
-
-  for (let i = 0; i < runs; i++) {
-    for (let j = 0; j < rolls; j++) {
-      let dropTable = getBossDropTable(boss);
-      let drop = rollForBossItem(boss, dropTable);
-      if (drop) {
-        if (dropTable === "rareDropTable") {
-          rdtCount++;
-          let itemKey = `${drop.item} (from ${
-            drop.tablePath ? drop.tablePath.join(" -> ") : "Unknown"
-          })`;
-          rdtItems[itemKey] = (rdtItems[itemKey] || 0) + 1;
-          console.log(
-            `Run ${i + 1}, Roll ${j + 1}: RDT Drop - ${drop.item} x ${
-              drop.quantity
-            } (from ${
-              drop.tablePath ? drop.tablePath.join(" -> ") : "Unknown"
-            })`
-          );
-        } else if (dropTable === "unique") {
-          uniqueCount++;
-          console.log(
-            `Run ${i + 1}, Roll ${j + 1}: Unique Drop - ${drop.item} x ${
-              drop.quantity
-            }`
-          );
-        }
-      }
-    }
-  }
-
-  // Calculate and display results
-  console.log(`\nTest Results (${runs} kills):`);
-  console.log("---------------------------------------------");
-  console.log(`Total RDT hits: ${rdtCount}`);
-  console.log(
-    `Observed RDT rate: ${((rdtCount / (runs * rolls)) * 100).toFixed(2)}%`
-  );
-  console.log(
-    `Expected RDT rate: ${(boss.rDTChance * 100).toFixed(2)}% (based on ${
-      boss.rDTChance
-    })`
-  );
-  console.log(`Total Unique hits: ${uniqueCount}`);
-  console.log(
-    `Observed Unique rate: ${((uniqueCount / (runs * rolls)) * 100).toFixed(
-      2
-    )}%`
-  );
-  console.log(
-    `Expected Unique rate: ${((1 / 256) * 100).toFixed(2)}% (1 / 256 per roll)`
-  );
-  console.log("RDT items received:", rdtItems);
-}
-
-
-
-
-function testRDTSubTables(rdt, iterations = 10000) {
-  // Track results
-  let results = {
-    "Gem table": { hits: 0, items: {} },
-    "Mega Rare table": { hits: 0, items: {} },
-    other: { hits: 0, items: {} },
-  };
-  let megaFromGem = 0;
-
-  // Run iterations
-  for (let i = 0; i < iterations; i++) {
-    const drop = rollForRDTItem(rdt);
-    if (!drop) {
-      console.warn(`Iteration ${i + 1}: No drop returned`);
+    if (subPointerNames.has(tableName)) {
+      //skip internal table contents here - those are indicated as pointer chances above
       continue;
     }
 
-    // Determine which table was hit (requires some inference from logs or modification) (We modified rollTableItems to track)
-    const tablePath = drop.tablePath || ["other"];
-    const item = drop.item;
+    const items = getItems(dropTable);
+    if (!Array.isArray(items) || items.length === 0) continue;
 
-    const initialTable = tablePath[0];
-    if (initialTable === "Gem table") {
-      results["Gem table"].hits++;
-      results["Gem table"].items[item] =
-        (results["Gem table"].items[item] || 0) + 1;
-      if (tablePath.includes("Mega Rare table")) {
-        megaFromGem++;
-        results["Mega Rare table"].items[item] =
-          (results["Mega Rare table"].items[item] || 0) + 1;
-      }
-    } else if (initialTable === "Mega Rare table") {
-      results["Mega Rare table"].hits++;
-      results["Mega Rare table"].items[item] =
-        (results["Mega Rare table"].items[item] || 0) + 1;
-    } else {
-      results.other.hits++;
-      results.other.items[item] = (results.other.items[item] || 0) + 1;
+    //table chance = sum(item.rarity) for this table
+    const sumRarity = items.reduce((s, it) => s + (it?.rarity || 0), 0);
+    if (sumRarity > 0) {
+      tableChances[tableName] = sumRarity;
+      rawTotal += sumRarity;
     }
   }
 
-  // Analyze results
-  console.log(`\nRDT Sub-Table Test Results (${iterations} iterations):`);
-  console.log("---------------------------------------------");
+  // 3) Add the sub-table pointer chances into the same namespace so the map covers every selectable top table outcome
+  for (const [subName, chance] of Object.entries(subSplit)) {
+    tableChances[subName] = (tableChances[subName] || 0) + chance;
+    rawTotal += chance;
+  }
 
-  // Gem table
-  const gemHits = results["Gem table"].hits;
-  const gemExpected = (1 / 6.4) * iterations; // Expected hits based on rarity
-  console.log(
-    `Gem table hits: ${gemHits} (${((gemHits / iterations) * 100).toFixed(2)}%)`
-  );
-  console.log(
-    `Expected Gem table hits: ~${Math.round(gemExpected)} (${(
-      (1 / 6.4) *
-      100
-    ).toFixed(2)}%)`
-  );
-  console.log("Gem table items:", results["Gem table"].items);
+  // rawTotal should be ~1.0 for a well formed RDT; but we can normalize it later if we need to
+  return {
+    tableChances, //raw chance-like numbers for each table (sum = rawTotal)
+    totalChance: rawTotal,
+    subSplit,
+    subSplitTotal,
+  };
+}
 
-  // Mega Rare table (direct hits from RDT)
-  const megaHits = results["Mega Rare table"].hits;
-  const megaExpected = (1 / 8.533) * iterations;
-  console.log(
-    `Mega Rare table hits (direct): ${megaHits} (${(
-      (megaHits / iterations) *
-      100
-    ).toFixed(2)}%)`
-  );
-  console.log(
-    `Expected Mega Rare table hits: ~${Math.round(megaExpected)} (${(
-      (1 / 8.533) *
-      100
-    ).toFixed(2)}%)`
-  );
-  console.log("Mega Rare table items:", results["Mega Rare table"].items);
+//Reworking calculateRDTProbabilities again to fine tune it
 
-  // Other tables
-  console.log(
-    `Other table hits: ${results.other.hits} (${(
-      (results.other.hits / iterations) *
-      100
-    ).toFixed(2)}%)`
-  );
-  console.log("Other table items:", results.other.items);
+// function calculateRDTProbabilities(rdt) {
+//   if (!rdt || typeof rdt !== "object") {
+//     console.error("RDT passed to calculateRDTProbabilities is invalid:", rdt);
+//     return { tableChances: {}, totalChance: 0, subSplit: {}, subSplitTotal: 0 };
+//   }
 
-  // Check nested Mega Rare table from Gem table (requires deeper tracking)
-  console.log(`\nMega Rare table hits from Gem table: ${megaFromGem}`);
+//   const getItemsSafe = (t) =>
+//     Array.isArray(t) ? t : t && Array.isArray(t.items) ? t.items : [];
+
+//   // This is where we split which names are nested (present inside "sub-tables" key)
+//   const subTableItems = getItemsSafe(rdt["sub-tables"]) || [];
+//   const subTableNames = new Set(
+//     subTableItems
+//       .filter(
+//         (i) => i?.type === "table" && typeof i.name === "string" && i.rarity
+//       )
+//       .map((i) => i.name)
+//   );
+
+//   // This is where we build the top-level weighting (include ONLY top level weights, and skip sub-tables/nested weights)
+
+//   const tableChances = {};
+//   let totalChance = 0;
+
+//   for (const [name, dropTable] of Object.entries(rdt)) {
+//     if (name === "sub-tables") continue;
+//     if (subTableNames.has(name)) continue; // don't double count Gem/Mega Rare
+
+//     const items = getItemsSafe(dropTable);
+//     if (!Array.isArray(items) || items.length === 0) continue;
+
+//     // Treat each item.rarity as "1 / N" (weight = N)
+//     const weight = items.reduce(
+//       (sum, it) => sum + (it?.rarity ? 1 / it.rarity : 0),
+//       0
+//     );
+//     tableChances[name] = weight;
+//     totalChance += weight;
+//   }
+
+//   // Add a synthetic top-level container for the "sub-tables" split
+//   const subSplit = {};
+//   let subSplitTotal = 0;
+
+//   subTableItems.forEach((it) => {
+//     if (it?.type === "table" && it.rarity && typeof it.name === "string") {
+//       const w = 1 / it.rarity; // Ex. Gem table 1/(1/6.4) = 6.4
+//       subSplit[it.name] = (subSplit[it.name] || 0) + w;
+//       subSplitTotal += w;
+//     }
+//   });
+
+//   // if (subSplitTotal > 0) {
+//   //   tableChances["__subTables__"] = subSplitTotal; //Sub-Tables compete at top level
+//   //   totalChance += subSplitTotal;
+//   // }
+//   totalChance += subSplitTotal;
+
+//   return { tableChances, totalChance, subSplit, subSplitTotal };
+// }
+
+// Commenting out old below to try and correct math issues.
+
+// function calculateRDTProbabilities(rdt) {
+//   if (!rdt || typeof rdt !== "object") {
+//     console.error("RDT passed to calculateRDTProbabilities is invalid:", rdt);
+//   }
+//   let tableChances = {};
+
+//   for (const [tableName, dropTable] of Object.entries(rdt)) {
+//     if (tableName === "sub-tables") continue; //Skip non-rollable entry
+
+//     const items = Array.isArray(dropTable) ? dropTable : dropTable.items;
+//     if (!Array.isArray(items)) continue;
+
+//     let tableWeight = 0;
+//     for (const item of items) {
+//       const rarity = item?.rarity;
+//       if (!rarity || rarity <= 0) continue;
+//       tableWeight += 1 / rarity;
+//     }
+//     tableChances[tableName] = tableWeight;
+//   }
+
+//   const totalChance = Object.values(tableChances).reduce(
+//     (sum, chance) => sum + chance,
+//     0
+//   );
+
+//   return { tableChances, totalChance };
+// }
+
+function rollForRDTItem(rdt) {
+  if (!rdt) {
+    console.error("rollForRDTItem called with undefined RDT!");
+    return null;
+  }
+
+  const { tableChances, totalChance, subSplit, subSplitTotal } =
+    calculateRDTProbabilities(rdt);
+
+  if (!tableChances || totalChance <= 0) {
+    console.warn(
+      "rollForRDTItem: invalid probabilities",
+      tableChances,
+      totalChance
+    );
+    return null;
+  }
+
+  const topTotal = Object.values(tableChances).reduce(
+    (s, v) => s + (v || 0),
+    0
+  );
+  const roll = Math.random() * totalChance;
   console.log(
-    `Expected Mega Rare from Gem: ~${Math.round(gemHits * (1 / 128))} (${(
-      (1 / 128) *
-      100
-    ).toFixed(2)}% of Gem hits)`
+    `Rolling for RDT table with roll: ${roll} (topTotal = ${topTotal}, subSplitTotal= ${subSplitTotal})`
+  );
+
+  //if roll falls into top-level tables
+  let acc = 0;
+  for (const [name, weight] of Object.entries(tableChances)) {
+    acc += weight;
+    if (roll <= acc) {
+      //choose this top-level RDT table
+      const tableObj = rdt[name] || RareDropTable[name];
+      console.log(`Hit top level RDT table: ${name}`);
+      return rollTableItems(getItems(tableObj), name);
+    }
+  }
+
+  //Otherwise roll among sub-tables (Gem table, Mega Rare table)
+  if (subSplit && subSplitTotal > 0) {
+    const subRoll = roll - topTotal;
+    let subAcc = 0;
+    for (const [subName, subWeight] of Object.entries(subSplit)) {
+      subAcc += subWeight;
+      if (subRoll <= subAcc) {
+        const nested = rdt[subName] || RareDropTable[subName];
+        console.log(`Hit sub-table: ${subName}`);
+        return rollTableItems(getItems(nested), subName);
+      }
+    }
+  }
+
+  console.warn("rollForRDTItem: failed to select a table (unexpected)");
+  return null;
+}
+
+// Reworking rollForRDTItem
+
+// function rollForRDTItem(rdt) {
+//   if (!rdt) {
+//     console.error("rollForRDTItem called with undefined RDT!");
+//     return null;
+//   }
+
+//   const { tableChances, totalChance } = calculateRDTProbabilities(rdt);
+//   let roll = Math.random() * totalChance;
+//   console.log(`Rolling for RDT table with roll: ${roll}`);
+//   let accumulatedChance = 0;
+//   let selectedTableName = null;
+//   let table = null;
+
+//   for (const [rdtTable, chance] of Object.entries(tableChances)) {
+//     accumulatedChance += chance;
+//     if (roll <= accumulatedChance) {
+//       selectedTableName = rdtTable;
+//       table = getItems(rdt[rdtTable] || RareDropTable[rdtTable]);
+//       console.log(
+//         `Rolled into RDT, table: ${selectedTableName} (Chance: ${chance.toFixed(
+//           2
+//         )}%, Accumulated: ${accumulatedChance.toFixed(2)})`
+//       );
+//       break;
+//     }
+//   }
+//   return rollTableItems(table, selectedTableName); //Letting tablePath handle tracking instead of (const result)
+// }
+
+function getRareDropTableItemsWithRarities(rdtChance) {
+  const rareTables = [];
+  const { tableChances, totalChance } =
+    calculateRDTProbabilities(RareDropTable);
+
+  if (!tableChances || !totalChance || totalChance <= 0) {
+    return rareTables;
+  }
+
+  for (const [tableName, dropTable] of Object.entries(RareDropTable)) {
+    if (tableName === "sub-tables") continue;
+
+    const items = getItems(dropTable);
+    if (!Array.isArray(items) || items.length === 0) {
+      rareTables.push({
+        table: tableName,
+        tableChance: `${(
+          ((tableChances[tableName] || 0) / totalChance) *
+          100
+        ).toFixed(2)}%`,
+        items: [],
+      });
+      continue;
+    }
+    // conditional chance of this table given RDT was hit:
+    const conditionalTableChance =
+      totalChance > 0 ? (tableChances[tableName] || 0) / totalChance : 0;
+
+    const nonTableItems = items.filter((it) => it?.rarity !== "table");
+
+    //sum of rarities inside this table
+    const itemRaritySum = nonTableItems.reduce(
+      (s, it) => s + (it?.rarity || 0),
+      0
+    );
+    // Build formatted items list for UI
+    const formattedItems = nonTableItems.map((it) => {
+      const rawItemRarity = it?.rarity || 0; // e.g. 1/42.67 decimal
+      const inTablePct =
+        itemRaritySum > 0
+          ? ((rawItemRarity / itemRaritySum) * 100).toFixed(2) + "%"
+          : "N/A";
+
+      // Final per-kill probability = rdtChance * conditionalTableChance * (rawItemRarity / itemRaritySum)
+      const finalProbability =
+        itemRaritySum > 0
+          ? rdtChance * conditionalTableChance * (rawItemRarity / itemRaritySum)
+          : 0;
+
+      return {
+        name: it.name,
+        quantity: Array.isArray(it.quantity)
+          ? `${it.quantity[0]} - ${it.quantity[1]}`
+          : it.quantity,
+        rarityInTable: inTablePct,
+        rawRarity:
+          finalProbability > 0
+            ? `1 / ${(1 / finalProbability).toFixed(2)}`
+            : "N/A",
+      };
+    });
+
+    // Push the table summary (table name, conditional chance, and the internal items)
+    rareTables.push({
+      table: tableName,
+      tableChance: `${(conditionalTableChance * 100).toFixed(2)}%`,
+      items: formattedItems,
+    });
+  }
+
+  // Return arrays where each table is represented and each item contains:
+  // - rarityInTable: percentage inside the table
+  // - rawRarity: per-kill rarity string (1 / X) using rdtChance * conditionalTableChance * (item fraction)
+  return rareTables;
+}
+
+// Redoing whole function below, commenting out in case I break everything
+
+// function getRareDropTableItemsWithRarities(rdtChance) {
+//   const rareTables = [];
+//   const { tableChances, totalChance } =
+//     calculateRDTProbabilities(RareDropTable);
+
+//   for (const [key, dropTable] of Object.entries(RareDropTable)) {
+//     if (key === "sub-tables") continue;
+
+//     const items = getItems(dropTable);
+//     if (!Array.isArray(items)) continue;
+
+//     const tableWeight = tableChances[key];
+//     const tableChance = tableWeight / totalChance;
+//     // const tableChance = (tableChances[key] || 0) / totalChance;
+//     // const totalWeight = items.reduce(
+//     //   (sum, item) => sum + (item.rarity || 0),
+//     //   0
+//     // );
+
+//     const formattedItems = [];
+
+//     for (const item of items) {
+//       const itemWeight = item.rarity ? 1 / item.rarity : 0;
+
+//       if (item.type === "table") {
+//         const nestedTable = RareDropTable[item.name || item.item];
+//         const nestedItems = getItems(nestedTable);
+//         const nestedWeight = nestedItems.reduce(
+//           (sum, ni) => sum + (ni.rarity ? 1 / ni.rarity : 0),
+//           0
+//         );
+
+//         for (const nestedItem of nestedItems) {
+//           const nestedItemWeight = nestedItem.rarity
+//             ? 1 / nestedItem.rarity
+//             : 0;
+
+//           const itemProbability =
+//             rdtChance *
+//             tableChance *
+//             (itemWeight / tableWeight) *
+//             (nestedItemWeight / nestedWeight);
+
+//           // const finalProbability =
+//           //   rdtChance * tableChance * itemProbability * nestedProbability;
+
+//           formattedItems.push({
+//             name: nestedItem.name,
+//             quantity: Array.isArray(nestedItem.quantity)
+//               ? `${nestedItem.quantity[0]} - ${nestedItem.quantity[1]}`
+//               : nestedItem.quantity,
+//             rarityInTable:
+//               nestedItemWeight && nestedWeight
+//                 ? `${((nestedItemWeight / nestedWeight) * 100).toFixed(2)}%`
+//                 : "N/A",
+//             rawRarity: itemProbability
+//               ? `1 / ${(1 / itemProbability).toFixed(2)}`
+//               : "N/A",
+//           });
+//         }
+//       } else {
+//         const itemProbability =
+//           rdtChance * tableChance * (itemWeight / tableWeight);
+//         // const finalProbability = rdtChance * tableChance * itemProbability;
+
+//         formattedItems.push({
+//           name: item.name,
+//           quantity: Array.isArray(item.quantity)
+//             ? `${item.quantity[0]} - ${item.quantity[1]}`
+//             : item.quantity,
+//           rarityInTable:
+//             item.rarity && tableWeight
+//               ? `${((itemWeight / tableWeight) * 100).toFixed(2)}%`
+//               : "N/A",
+//           rawRarity: itemProbability
+//             ? `1 / ${(1 / itemProbability).toFixed(2)}`
+//             : "N/A",
+//         });
+//       }
+//     }
+
+//     rareTables.push({
+//       table: key,
+//       tableChance: (tableChance * 100).toFixed(2) + "%",
+//       items: formattedItems,
+//     });
+//   }
+
+//   return rareTables;
+// }
+
+//Below is my old code, was not functioning as intended. Want to have it for reference.
+
+// function getRareDropTableItemsWithRarities(rdtChance) {
+//   let rareTables = [];
+//   const { tableChances, totalChance } =
+//     calculateRDTProbabilities(RareDropTable);
+
+//   const subTables = getItems(RareDropTable["sub-tables"]);
+//   if (Array.isArray(subTables)) {
+//     subTables.forEach((subTable) => {
+//       if (subTable.type === "table") {
+//         const tableItems = RareDropTable[subTable.item];
+//         if (!Array.isArray(tableItems)) {
+//           console.warn(`Missing or invalid sub-table "${subTable.item}"`);
+//           return;
+//         }
+
+//         const totalTableWeight = tableItems.reduce(
+//           (sum, item) => sum + (item.rarity || 0),
+//           0
+//         );
+
+//         let tableChance = (tableChances[subTable.item] || 0) / totalChance;
+
+//         const formattedItems = tableIems.map((item) => ({
+//           name: item.name,
+//           quantity: Array.isArray(item.quantity)
+//             ? `${item.quantity[0]} = ${item.quantity[1]}`
+//             : item.quantity,
+//           rawRarity: item.rarity
+//             ? `1 / ${(1 / (item.rarity * tableChance * rdtChance)).toFixed(2)}%`
+//             : "N/A",
+//         }));
+
+//         rareTables.push({
+//           table: subTable.item,
+//           tableChance: (tableChance * 100).toFixed(2) + "%",
+//           items: formattedItems,
+//         });
+//       }
+//     });
+//   }
+
+//   const subTableNames = new Set(
+//     getItems(RareDropTable["sub-tables"]).map((subTable) => subTable.item)
+//   );
+//   //Loop through main tables
+
+//   for (let category in RareDropTable) {
+//     if (category === "sub-tables" || subTableNames.has(category)) continue;
+
+//     const tableItems = RareDropTable[category];
+//     if (Array.isArray(tableItems)) {
+
+//       const totalTableWeight = tableItems.reduce(
+//         (sum, item) => sum + (item.rarity || 0),
+//         0
+//       );
+
+//       let tableChance = (tableChances[category] || 0) / totalChance;
+//       let formattedItems = tableItems.map((item) => {
+//         const quantityText = Array.isArray(item.quantity)
+//           ? `${item.quantity[0]} - ${item.quantity[1]}`
+//           : item.quantity;
+
+//         const adjustedRarity = item.rarity
+//           ? `1 / ${(1 / (item.rarity * rdtChance)).toFixed(2)}`
+//           : "N/A";
+
+//         const rarityInTable =
+//           item.rarity && totalTableWeight
+//             ? `${((item.rarity / totalTableWeight) * 100).toFixed(2)}%`
+//             : "N/A";
+
+//         return {
+//           name: item.name,
+//           quantity: quantityText,
+//           rawRarity: adjustedRarity,
+//           rarityInTable,
+//         };
+//       });
+
+//       rareTables.push({
+//         table: category,
+//         tableChance: (tableChance * 100).toFixed(2) + "%",
+//         items: formattedItems,
+//       });
+//     }
+//   }
+
+//   //Handle sub-tables
+//   getItems(RareDropTable["sub-tables"]).forEach((subTable) => {
+//     if (subTable.type === "table") {
+//       const tableItems = RareDropTable[subTable.item];
+
+//       if (!Array.isArray(tableItems)) {
+//         console.warn(
+//           `Missing or invalid sub-table "${subTable.item}" in Rare Drop Table.`
+//         );
+//         return;
+//       }
+
+//       const totalTableWeight = tableItems.reduce(
+//         (sum, item) => sum + (item.rarity || 0),
+//         0
+//       );
+
+//       let tableChance = (tableChances[subTable.item] || 0) / totalChance;
+
+//       let formattedItems = tableItems.map((item) => {
+//         const quantityText = Array.isArray(item.quantity)
+//           ? `${item.quantity[0]} - ${item.quantity[1]}`
+//           : item.quantity;
+
+//         const adjustedRarity = item.rarity
+//           ? `1 / ${(1 / (item.rarity * tableChance * rdtChance)).toFixed(2)}`
+//           : "N/A";
+
+//         const rarityInTable =
+//           item.rarity && totalTableWeight
+//             ? `${((item.rarity / totalTableWeight) * 100).toFixed(2)}%`
+//             : "N/A";
+
+//         return {
+//           name: item.name,
+//           quantity: quantityText,
+//           rawRarity: adjustedRarity,
+//           rarityInTable,
+//         };
+//       });
+
+//       rareTables.push({
+//         table: subTable.item,
+//         tableChance: (tableChance * 100).toFixed(2) + "%",
+//         items: formattedItems,
+//       });
+//     }
+//   });
+
+//   return rareTables;
+// }
+
+function testRDTDistribution(trials = 100000) {
+  const counts = {
+    "rare ammo": 0,
+    "rare equipment": 0,
+    "rare other": 0,
+    "Gem table": 0,
+    "Mega Rare table": 0,
+  };
+
+  for (let i = 0; i < trials; i++) {
+    const { tableChances, totalChance, subSplit, subSplitTotal } =
+      calculateRDTProbabilities(RareDropTable);
+    const roll = Math.random() * totalChance;
+
+    const topTotal = Object.values(tableChances).reduce((a, b) => a + b, 0);
+    let acc = 0;
+    let hit = null;
+
+    // top-level
+    for (const [name, weight] of Object.entries(tableChances)) {
+      acc += weight;
+      if (roll <= acc) {
+        hit = name;
+        break;
+      }
+    }
+
+    // sub-tables
+    if (!hit && subSplit && subSplitTotal > 0) {
+      const subRoll = roll - topTotal;
+      let subAcc = 0;
+      for (const [name, w] of Object.entries(subSplit)) {
+        subAcc += w;
+        if (subRoll <= subAcc) {
+          hit = name;
+          break;
+        }
+      }
+    }
+
+    if (hit && counts[hit] !== undefined) counts[hit]++;
+  }
+
+  console.table(
+    Object.entries(counts).map(([k, v]) => ({
+      Table: k,
+      "Observed %": ((v / trials) * 100).toFixed(2) + "%",
+    }))
   );
 }
 
-*/
+//Because we made this whole thing modular, the above function is not in the global scope by default. This means we can't test it.
+//The below line of code adds this function to the global scope allowing it to be used.
+window.testRDTDistribution = testRDTDistribution;
 
 // ======== Event Listeners ========
 
 // Rare Drop Table Toggle / Inventory Setup
 document.addEventListener("DOMContentLoaded", () => {
-  //Moved event listeners below into DOMContentLoaded
   // Boss Selection Modal listeners
   document.getElementById("slayBossButton").addEventListener("click", () => {
     openBossSelectionModal(slayBoss, "What boss would you like to slay?");
@@ -2187,22 +1693,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setupInventoryModal();
 });
-
-// Inventory Reset Button
-
-// Set up within module
-
-// document.addEventListener("DOMContentLoaded", () => {
-//   const resetButton = document.getElementById("resetInventoryButton");
-//   if (resetButton) {
-//     resetButton.addEventListener("click", () => {
-//       if (
-//         confirm(
-//           "Are you sure you want to reset your inventory? This cannot be undone."
-//         )
-//       ) {
-//         InventoryModule.resetInventory();
-//       }
-//     });
-//   }
-// });

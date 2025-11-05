@@ -73,7 +73,11 @@ const InventoryModule = (function () {
 
     const itemKey = `${itemName}_${category}`;
     if (!inventory.full[category][itemKey]) {
-      inventory.full[category][itemKey] = { name: itemName, quantity: 0, rare }; // Storing rare property
+      inventory.full[category][itemKey] = {
+        name: itemName,
+        quantity: 0,
+        rare,
+      }; // Storing rare property
     }
     inventory.full[category][itemKey].quantity += quantity;
 
