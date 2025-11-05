@@ -6,15 +6,11 @@ function rollRandomNumber(max) {
   return Math.floor(Math.random() * max) + 1;
 }
 
-// console.log(rollRandomNumber(5000));
-
 //Now I'll define the drop tables. Will use generic names for the tables until I decide to flesh them out further or make them more specific.
 
 //Decided to go with tables pertaining to each tier of equipment (Bronze through Dragon.)
 
 const dropTables = {
-  //   common: ["Coins", "Iron Sword", "Bronze Helmet", "Steel Axe"],
-  //   uncommon: ["Black Sword", "Maple Shortbow", "Mithril Pickaxe"],
   low: [
     { item: "Bronze Platebody", weight: 83 },
     { item: "Bronze Kiteshield", weight: 83 },
@@ -95,7 +91,6 @@ const tableChances = [
   { name: "rare", chance: 1 },
 ];
 
-// console.log(tableChances);
 // Chance to roll each table will be out of 100
 
 function getDropTable() {
@@ -110,9 +105,6 @@ function getDropTable() {
   }
   return "low"; //In case we somehow don't hit a table
 }
-
-// console.log(getDropTable());
-//Nice, this is showing the name of the drop tables
 
 //Now we need to roll for a specific item when we hit a drop table
 
@@ -134,46 +126,6 @@ function rollForItem(tableName) {
   }
 }
 
-// console.log(rollForItem("rare"));
-//This is choosing an item from the specific table. Now we just need to make a function that 1. Chooses a table, and 2. Chooses an item from that table.
-
-//Decided to comment out all of the code I was working on and leave comments so I could look at it later, and re-write code below so it looks cleaner
-
-/*
-function generateDrop() {
-  let dropTable = getDropTable();
-  console.log(`You hit the ${dropTable} drop table!`);
-
-  let itemDrop = rollForItem(dropTable);
-  console.log(`You looted: ${itemDrop}!`);
-
-  //Trying something besides "alert" because I want the option to roll again right from the box that appears
-
-  //   alert(`You hit the ${dropTable.toLocaleUpperCase()} drop table \nYou received: ${itemDrop}!`);
-
-  let repeat = confirm(
-    `You hit the ${dropTable.toLocaleUpperCase()} drop table \nYou received: ${itemDrop}!\n\nWould you like to roll again?`
-  );
-
-  if (repeat) {
-    generateDrop();
-    //Nothing below allowed me to be able to spam click OK in the confirmation box to rapidly call the function
-
-    // let intervalId = setInterval(function () {
-    //   generateDrop(); //This should call the function again
-    // }, 0); //Start interval to check after a small delay
-    // setTimeout(function () {
-    //   clearInterval(intervalId); //Stop interval after 1 execution
-    // }, 100); //Clear interval after a short delay to allow a retry
-  }
-}
-
-// generateDrop(); //Running this now Chooses a table, then a drop, and console logs them both!
-
-//The plan is to eventually tie this to a button and make it populate somewhere on the page
-*/
-
-//This is where I'll clean up the code, and integrate the custom modal I set up so it will all hopefully look nicer.
 function generateDrop() {
   InventoryModule.updateInventory();
 
