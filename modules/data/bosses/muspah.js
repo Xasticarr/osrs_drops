@@ -5,25 +5,6 @@ import { DropTable } from "../../models/DropTable.js";
 import { Boss } from "../../models/Boss.js";
 import { RareDropTable } from "../rareDropTable.js";
 
-// const mutagen = new DropTable("mutagen", [
-//     new Item("Tanzanite mutagen", 1, 2 * (1 / 13106), {
-//       bigChime: true,
-//       cLog: true,
-//       rare: true,
-//     }),
-//     new Item("Magma mutagen", 1, 2 * (1 / 13106), {
-//       bigChime: true,
-//       cLog: true,
-//       rare: true,
-//     }),
-//   ]);
-
-//   const equipment = new DropTable("equipment", [
-//     new Item("Battlestaff (noted)", 10, 2 * (1 / 24.8)),
-//     new Item("Dragon med helm", 1, 2 * (1 / 124)),
-//     new Item("Dragon halberd", 1, 2 * (1 / 124)),
-//   ]);
-
 const unique = new DropTable("unique", [
   new Item("Ancient essence", [540, 599], 1 / 1.667, {
     cLog: true,

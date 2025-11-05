@@ -23,10 +23,6 @@ function getItems(table) {
   return Array.isArray(table.items) ? table.items : [];
 }
 
-// function getItems(table) {
-//   return Array.isArray(table) ? table : table?.items;
-// }
-
 function calculateTableProbabilities(boss) {
   let tableChances = {};
   const rolls = boss.doubleRoll ? 2 : boss.tripleRoll ? 3 : 1;
@@ -88,31 +84,6 @@ function getBossDropTable(boss) {
   return "other";
 }
 
-//Reworking getBossDropTable
-
-// function getBossDropTable(boss) {
-//   let { tableChances, totalChance } = calculateTableProbabilities(boss);
-//   let roll = Math.random() * totalChance;
-//   let accumulatedChance = 0;
-
-//   //Check for RDT first
-//   if (boss.rDT && roll <= boss.rDTChance) {
-//     return RareDropTable;
-//   }
-//   accumulatedChance = boss.rDTChance;
-
-//   for (const [table, chance] of Object.entries(tableChances)) {
-//     if (table === RareDropTable) continue;
-//     accumulatedChance += chance;
-//     if (roll <= accumulatedChance) {
-//       return table;
-//     }
-//   }
-//   //Fallback, should never happen
-//   console.log("This should not be popping up");
-//   return "other";
-// }
-
 function rollTableItems(table, tableName) {
   const items = getItems(table);
   if (!items || !Array.isArray(items) || items.length === 0) {
@@ -170,56 +141,6 @@ function rollTableItems(table, tableName) {
     `No item found in table "${tableName}" after rolling (roll = ${roll}, totalWeight = ${totalWeight})`
   );
 }
-
-//Reworking rollTableItems
-
-// function rollTableItems(table, tableName) {
-//   const items = getItems(table);
-//   if (!items || !Array.isArray(items) || items.length === 0) {
-//     console.error(
-//       `Table "${tableName}" is either missing, not an array or empty!`,
-//       table
-//     );
-//     return null;
-//   }
-
-//   let totalWeight = items.reduce((sum, item) => sum + (item.rarity || 0), 0);
-//   if (totalWeight === 0) {
-//     console.error(`Total weight is 0 for table "${tableName}"`);
-//     return null;
-//   }
-
-//   let roll = Math.random() * totalWeight;
-//   let cumulativeWeight = 0;
-//   for (const item of items) {
-//     cumulativeWeight += item.rarity;
-//     if (roll <= cumulativeWeight) {
-//       if (item.type === "table") {
-//         console.log(`Type = Table! Entering sub-table: ${item.name}`);
-//         const subResult = rollTableItems(
-//           RareDropTable[item.name]?.items,
-//           item.name
-//         );
-//         if (subResult) {
-//           subResult.tablePath = [tableName, item.name];
-//           subResult.dropTable = "rareDropTable";
-//         }
-//         return subResult;
-//       }
-//       return {
-//         item: item.name,
-//         quantity: item.quantity || 1,
-//         bigChime: item.bigChime || false,
-//         chime: item.chime || false,
-//         tablePath: [tableName],
-//         type: item.type ?? "standard",
-//         cLog: item.cLog ?? false,
-//       };
-//     }
-//   }
-//   console.warn(`No item found in table: "${tableName}"`);
-//   return null;
-// }
 
 function rollGroupedTableItems(table, tableName) {
   let groupedDrops = [];
@@ -360,7 +281,6 @@ function generateBossDrop(boss, bossName) {
   let rolls = boss.doubleRoll ? 2 : boss.tripleRoll ? 3 : 1;
   let drops = [];
   let isExclusiveDrop = false;
-  // InventoryModule.updateInventory(null, boss.name, null, 0);
 
   if (boss.dropTables.always) {
     getItems(boss.dropTables.always)?.forEach((itemObj) => {
@@ -479,8 +399,6 @@ function generateBossDrop(boss, bossName) {
   bossState.lastBossName = bossName;
 
   populateBossDropModal(drops);
-
-  // InventoryModule.updateInventory(null, boss.name, null, 0);
 
   let killLogged = false;
 
@@ -1066,9 +984,6 @@ function calculateRDTProbabilities(rdt) {
     return { tableChances: {}, totalChance: 0, subSplit: {}, subSplitTotal: 0 };
   }
 
-  // const getItemsSafe = (t) =>
-  //   Array.isArray(t) ? t : t && Array.isArray(t.items) ? t.items : [];
-
   // 1) Read the sub-tables pointer list (the "sub-tables" DropTable entry)
   const subPointers = getItems(rdt["sub-tables"]) || [];
   const subPointerNames = new Set();
@@ -1119,100 +1034,6 @@ function calculateRDTProbabilities(rdt) {
     subSplitTotal,
   };
 }
-
-//Reworking calculateRDTProbabilities again to fine tune it
-
-// function calculateRDTProbabilities(rdt) {
-//   if (!rdt || typeof rdt !== "object") {
-//     console.error("RDT passed to calculateRDTProbabilities is invalid:", rdt);
-//     return { tableChances: {}, totalChance: 0, subSplit: {}, subSplitTotal: 0 };
-//   }
-
-//   const getItemsSafe = (t) =>
-//     Array.isArray(t) ? t : t && Array.isArray(t.items) ? t.items : [];
-
-//   // This is where we split which names are nested (present inside "sub-tables" key)
-//   const subTableItems = getItemsSafe(rdt["sub-tables"]) || [];
-//   const subTableNames = new Set(
-//     subTableItems
-//       .filter(
-//         (i) => i?.type === "table" && typeof i.name === "string" && i.rarity
-//       )
-//       .map((i) => i.name)
-//   );
-
-//   // This is where we build the top-level weighting (include ONLY top level weights, and skip sub-tables/nested weights)
-
-//   const tableChances = {};
-//   let totalChance = 0;
-
-//   for (const [name, dropTable] of Object.entries(rdt)) {
-//     if (name === "sub-tables") continue;
-//     if (subTableNames.has(name)) continue; // don't double count Gem/Mega Rare
-
-//     const items = getItemsSafe(dropTable);
-//     if (!Array.isArray(items) || items.length === 0) continue;
-
-//     // Treat each item.rarity as "1 / N" (weight = N)
-//     const weight = items.reduce(
-//       (sum, it) => sum + (it?.rarity ? 1 / it.rarity : 0),
-//       0
-//     );
-//     tableChances[name] = weight;
-//     totalChance += weight;
-//   }
-
-//   // Add a synthetic top-level container for the "sub-tables" split
-//   const subSplit = {};
-//   let subSplitTotal = 0;
-
-//   subTableItems.forEach((it) => {
-//     if (it?.type === "table" && it.rarity && typeof it.name === "string") {
-//       const w = 1 / it.rarity; // Ex. Gem table 1/(1/6.4) = 6.4
-//       subSplit[it.name] = (subSplit[it.name] || 0) + w;
-//       subSplitTotal += w;
-//     }
-//   });
-
-//   // if (subSplitTotal > 0) {
-//   //   tableChances["__subTables__"] = subSplitTotal; //Sub-Tables compete at top level
-//   //   totalChance += subSplitTotal;
-//   // }
-//   totalChance += subSplitTotal;
-
-//   return { tableChances, totalChance, subSplit, subSplitTotal };
-// }
-
-// Commenting out old below to try and correct math issues.
-
-// function calculateRDTProbabilities(rdt) {
-//   if (!rdt || typeof rdt !== "object") {
-//     console.error("RDT passed to calculateRDTProbabilities is invalid:", rdt);
-//   }
-//   let tableChances = {};
-
-//   for (const [tableName, dropTable] of Object.entries(rdt)) {
-//     if (tableName === "sub-tables") continue; //Skip non-rollable entry
-
-//     const items = Array.isArray(dropTable) ? dropTable : dropTable.items;
-//     if (!Array.isArray(items)) continue;
-
-//     let tableWeight = 0;
-//     for (const item of items) {
-//       const rarity = item?.rarity;
-//       if (!rarity || rarity <= 0) continue;
-//       tableWeight += 1 / rarity;
-//     }
-//     tableChances[tableName] = tableWeight;
-//   }
-
-//   const totalChance = Object.values(tableChances).reduce(
-//     (sum, chance) => sum + chance,
-//     0
-//   );
-
-//   return { tableChances, totalChance };
-// }
 
 function rollForRDTItem(rdt) {
   if (!rdt) {
@@ -1270,37 +1091,6 @@ function rollForRDTItem(rdt) {
   console.warn("rollForRDTItem: failed to select a table (unexpected)");
   return null;
 }
-
-// Reworking rollForRDTItem
-
-// function rollForRDTItem(rdt) {
-//   if (!rdt) {
-//     console.error("rollForRDTItem called with undefined RDT!");
-//     return null;
-//   }
-
-//   const { tableChances, totalChance } = calculateRDTProbabilities(rdt);
-//   let roll = Math.random() * totalChance;
-//   console.log(`Rolling for RDT table with roll: ${roll}`);
-//   let accumulatedChance = 0;
-//   let selectedTableName = null;
-//   let table = null;
-
-//   for (const [rdtTable, chance] of Object.entries(tableChances)) {
-//     accumulatedChance += chance;
-//     if (roll <= accumulatedChance) {
-//       selectedTableName = rdtTable;
-//       table = getItems(rdt[rdtTable] || RareDropTable[rdtTable]);
-//       console.log(
-//         `Rolled into RDT, table: ${selectedTableName} (Chance: ${chance.toFixed(
-//           2
-//         )}%, Accumulated: ${accumulatedChance.toFixed(2)})`
-//       );
-//       break;
-//     }
-//   }
-//   return rollTableItems(table, selectedTableName); //Letting tablePath handle tracking instead of (const result)
-// }
 
 function getRareDropTableItemsWithRarities(rdtChance) {
   const rareTables = [];
@@ -1377,241 +1167,6 @@ function getRareDropTableItemsWithRarities(rdtChance) {
   // - rawRarity: per-kill rarity string (1 / X) using rdtChance * conditionalTableChance * (item fraction)
   return rareTables;
 }
-
-// Redoing whole function below, commenting out in case I break everything
-
-// function getRareDropTableItemsWithRarities(rdtChance) {
-//   const rareTables = [];
-//   const { tableChances, totalChance } =
-//     calculateRDTProbabilities(RareDropTable);
-
-//   for (const [key, dropTable] of Object.entries(RareDropTable)) {
-//     if (key === "sub-tables") continue;
-
-//     const items = getItems(dropTable);
-//     if (!Array.isArray(items)) continue;
-
-//     const tableWeight = tableChances[key];
-//     const tableChance = tableWeight / totalChance;
-//     // const tableChance = (tableChances[key] || 0) / totalChance;
-//     // const totalWeight = items.reduce(
-//     //   (sum, item) => sum + (item.rarity || 0),
-//     //   0
-//     // );
-
-//     const formattedItems = [];
-
-//     for (const item of items) {
-//       const itemWeight = item.rarity ? 1 / item.rarity : 0;
-
-//       if (item.type === "table") {
-//         const nestedTable = RareDropTable[item.name || item.item];
-//         const nestedItems = getItems(nestedTable);
-//         const nestedWeight = nestedItems.reduce(
-//           (sum, ni) => sum + (ni.rarity ? 1 / ni.rarity : 0),
-//           0
-//         );
-
-//         for (const nestedItem of nestedItems) {
-//           const nestedItemWeight = nestedItem.rarity
-//             ? 1 / nestedItem.rarity
-//             : 0;
-
-//           const itemProbability =
-//             rdtChance *
-//             tableChance *
-//             (itemWeight / tableWeight) *
-//             (nestedItemWeight / nestedWeight);
-
-//           // const finalProbability =
-//           //   rdtChance * tableChance * itemProbability * nestedProbability;
-
-//           formattedItems.push({
-//             name: nestedItem.name,
-//             quantity: Array.isArray(nestedItem.quantity)
-//               ? `${nestedItem.quantity[0]} - ${nestedItem.quantity[1]}`
-//               : nestedItem.quantity,
-//             rarityInTable:
-//               nestedItemWeight && nestedWeight
-//                 ? `${((nestedItemWeight / nestedWeight) * 100).toFixed(2)}%`
-//                 : "N/A",
-//             rawRarity: itemProbability
-//               ? `1 / ${(1 / itemProbability).toFixed(2)}`
-//               : "N/A",
-//           });
-//         }
-//       } else {
-//         const itemProbability =
-//           rdtChance * tableChance * (itemWeight / tableWeight);
-//         // const finalProbability = rdtChance * tableChance * itemProbability;
-
-//         formattedItems.push({
-//           name: item.name,
-//           quantity: Array.isArray(item.quantity)
-//             ? `${item.quantity[0]} - ${item.quantity[1]}`
-//             : item.quantity,
-//           rarityInTable:
-//             item.rarity && tableWeight
-//               ? `${((itemWeight / tableWeight) * 100).toFixed(2)}%`
-//               : "N/A",
-//           rawRarity: itemProbability
-//             ? `1 / ${(1 / itemProbability).toFixed(2)}`
-//             : "N/A",
-//         });
-//       }
-//     }
-
-//     rareTables.push({
-//       table: key,
-//       tableChance: (tableChance * 100).toFixed(2) + "%",
-//       items: formattedItems,
-//     });
-//   }
-
-//   return rareTables;
-// }
-
-//Below is my old code, was not functioning as intended. Want to have it for reference.
-
-// function getRareDropTableItemsWithRarities(rdtChance) {
-//   let rareTables = [];
-//   const { tableChances, totalChance } =
-//     calculateRDTProbabilities(RareDropTable);
-
-//   const subTables = getItems(RareDropTable["sub-tables"]);
-//   if (Array.isArray(subTables)) {
-//     subTables.forEach((subTable) => {
-//       if (subTable.type === "table") {
-//         const tableItems = RareDropTable[subTable.item];
-//         if (!Array.isArray(tableItems)) {
-//           console.warn(`Missing or invalid sub-table "${subTable.item}"`);
-//           return;
-//         }
-
-//         const totalTableWeight = tableItems.reduce(
-//           (sum, item) => sum + (item.rarity || 0),
-//           0
-//         );
-
-//         let tableChance = (tableChances[subTable.item] || 0) / totalChance;
-
-//         const formattedItems = tableIems.map((item) => ({
-//           name: item.name,
-//           quantity: Array.isArray(item.quantity)
-//             ? `${item.quantity[0]} = ${item.quantity[1]}`
-//             : item.quantity,
-//           rawRarity: item.rarity
-//             ? `1 / ${(1 / (item.rarity * tableChance * rdtChance)).toFixed(2)}%`
-//             : "N/A",
-//         }));
-
-//         rareTables.push({
-//           table: subTable.item,
-//           tableChance: (tableChance * 100).toFixed(2) + "%",
-//           items: formattedItems,
-//         });
-//       }
-//     });
-//   }
-
-//   const subTableNames = new Set(
-//     getItems(RareDropTable["sub-tables"]).map((subTable) => subTable.item)
-//   );
-//   //Loop through main tables
-
-//   for (let category in RareDropTable) {
-//     if (category === "sub-tables" || subTableNames.has(category)) continue;
-
-//     const tableItems = RareDropTable[category];
-//     if (Array.isArray(tableItems)) {
-
-//       const totalTableWeight = tableItems.reduce(
-//         (sum, item) => sum + (item.rarity || 0),
-//         0
-//       );
-
-//       let tableChance = (tableChances[category] || 0) / totalChance;
-//       let formattedItems = tableItems.map((item) => {
-//         const quantityText = Array.isArray(item.quantity)
-//           ? `${item.quantity[0]} - ${item.quantity[1]}`
-//           : item.quantity;
-
-//         const adjustedRarity = item.rarity
-//           ? `1 / ${(1 / (item.rarity * rdtChance)).toFixed(2)}`
-//           : "N/A";
-
-//         const rarityInTable =
-//           item.rarity && totalTableWeight
-//             ? `${((item.rarity / totalTableWeight) * 100).toFixed(2)}%`
-//             : "N/A";
-
-//         return {
-//           name: item.name,
-//           quantity: quantityText,
-//           rawRarity: adjustedRarity,
-//           rarityInTable,
-//         };
-//       });
-
-//       rareTables.push({
-//         table: category,
-//         tableChance: (tableChance * 100).toFixed(2) + "%",
-//         items: formattedItems,
-//       });
-//     }
-//   }
-
-//   //Handle sub-tables
-//   getItems(RareDropTable["sub-tables"]).forEach((subTable) => {
-//     if (subTable.type === "table") {
-//       const tableItems = RareDropTable[subTable.item];
-
-//       if (!Array.isArray(tableItems)) {
-//         console.warn(
-//           `Missing or invalid sub-table "${subTable.item}" in Rare Drop Table.`
-//         );
-//         return;
-//       }
-
-//       const totalTableWeight = tableItems.reduce(
-//         (sum, item) => sum + (item.rarity || 0),
-//         0
-//       );
-
-//       let tableChance = (tableChances[subTable.item] || 0) / totalChance;
-
-//       let formattedItems = tableItems.map((item) => {
-//         const quantityText = Array.isArray(item.quantity)
-//           ? `${item.quantity[0]} - ${item.quantity[1]}`
-//           : item.quantity;
-
-//         const adjustedRarity = item.rarity
-//           ? `1 / ${(1 / (item.rarity * tableChance * rdtChance)).toFixed(2)}`
-//           : "N/A";
-
-//         const rarityInTable =
-//           item.rarity && totalTableWeight
-//             ? `${((item.rarity / totalTableWeight) * 100).toFixed(2)}%`
-//             : "N/A";
-
-//         return {
-//           name: item.name,
-//           quantity: quantityText,
-//           rawRarity: adjustedRarity,
-//           rarityInTable,
-//         };
-//       });
-
-//       rareTables.push({
-//         table: subTable.item,
-//         tableChance: (tableChance * 100).toFixed(2) + "%",
-//         items: formattedItems,
-//       });
-//     }
-//   });
-
-//   return rareTables;
-// }
 
 function testRDTDistribution(trials = 100000) {
   const counts = {

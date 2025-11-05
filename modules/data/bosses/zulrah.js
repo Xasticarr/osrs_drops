@@ -129,7 +129,6 @@ export const Zulrah = new Boss("Zulrah", {
     resources,
     other,
     rareDropTable: RareDropTable,
-    //Flesh out common tables and put them here
   },
   tertiaryDrops: tertiary,
 });
