@@ -28,7 +28,7 @@
       </header>
       <main>
         <div class="button_container">
-          <button class="drop_button" id="runRaidButton">
+          <button class="drop_button" id="selectRaidButton">
             <div class="drop_button_content">Send a Raid!</div>
           </button>
           <button class="drop_button" id="raidItemsButton">
@@ -49,13 +49,22 @@
             </div>
             <div class="modal-body">
               <!-- This is where raid buttons go -->
-              <button class="raidButton modal-button" raid-data="Chambers">
+              <button
+                class="raidButton modal-button selectRaid"
+                raid-data="Chambers"
+              >
                 🐉🐉Chambers of Xeric🐉🐉
               </button>
-              <button class="raidButton modal-button" raid-data="Theatre">
+              <button
+                class="raidButton modal-button selectRaid"
+                raid-data="Theatre"
+              >
                 🩸🩸Theatre of Blood🩸🩸
               </button>
-              <button class="raidButton modal-button" raid-data="Tombs">
+              <button
+                class="raidButton modal-button selectRaid"
+                raid-data="Tombs"
+              >
                 🐪🐪Tombs of Amascut🐪🐪
               </button>
               <!-- Add  more buttons for more raids later -->

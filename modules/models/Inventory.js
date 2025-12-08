@@ -22,7 +22,8 @@ const InventoryModule = (function () {
     quantity = 0,
     type = "standard",
     killCount = null,
-    rare = false //Added for table formatting
+    rare = false, //Added for table formatting
+    megaRare = false //Added for table formatting
   ) {
     if (bossName && !itemName) {
       if (!inventory.bosses[bossName]) {
@@ -77,6 +78,7 @@ const InventoryModule = (function () {
         name: itemName,
         quantity: 0,
         rare,
+        megaRare,
       }; // Storing rare property
     }
     inventory.full[category][itemKey].quantity += quantity;
@@ -228,18 +230,39 @@ const InventoryModule = (function () {
           .forEach((name, nameIndex) => {
             const items = categoryItems[name];
 
-            // Sort items: rare items first, then by quantity descending
             items.sort((a, b) => {
-              if (a.rare && !b.rare) return -1; //Rare items first
-              if (!a.rare && b.rare) return 1;
-              return b.quantity - a.quantity; // Highest quantity first
+              const rarityRank = (item) => {
+                if (item.megaRare) return 3; //highest priority
+                if (item.rare) return 2; //middle priority
+                return 1; //lowest priority (non-rare)
+              };
+
+              const rankA = rarityRank(a);
+              const rankB = rarityRank(b);
+
+              // Sorty by rarity rank (descending 3 > 2 > 1)
+              if (rankA !== rankB) return rankB - rankA;
+
+              //Within same rarity, sory by quantity (descending)
+
+              return b.quantity - a.quantity;
             });
+            // // Sort items: rare items first, then by quantity descending
+            // items.sort((a, b) => {
+            //   if (a.rare && !b.rare) return -1; //Rare items first
+            //   if (!a.rare && b.rare) return 1;
+            //   return b.quantity - a.quantity; // Highest quantity first
+            // });
 
             const rowSpanCount = items.length;
             items.forEach((item, index) => {
               const row = document.createElement("tr");
 
               // Apply rare item styling
+              if (item.megaRare) {
+                row.classList.add("mega-rare-item");
+              }
+
               if (item.rare) {
                 row.classList.add("rare-item");
               }
@@ -268,6 +291,11 @@ const InventoryModule = (function () {
                 else if (name === "Vorkath") nameCell.classList.add("Vorkath");
                 else if (name === "Muspah") nameCell.classList.add("Muspah");
                 else if (name === "N/A") nameCell.classList.add("Generic");
+
+                nameCell.classList.add("raid-name");
+                if (name === "Chambers") nameCell.classList.add("Chambers");
+                else if (name === "Theatre") nameCell.classList.add("Theatre");
+                else if (name === "Tombs") nameCell.classList.add("Tombs");
                 row.appendChild(nameCell);
               }
 

@@ -12,5 +12,7 @@ export class Item {
     this.exclusive = options.exclusive || false;
     this.group = options.group || null;
     this.rare = options.rare || false;
+    this.megaRare = options.megaRare || false;
+    this.divisor = options.divisor || 0;
   }
 }
