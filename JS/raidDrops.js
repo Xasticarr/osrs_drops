@@ -894,7 +894,8 @@ function showRaidConfigModal(raid) {
     footer.id = "raidConfigModalFooter";
     content.appendChild(footer);
 
-    document.querySelector("main").appendChild(modal);
+    document.getElementById("raidConfigModalContainer").appendChild(modal);
+    // document.querySelector("main").appendChild(modal);
   }
 
   // --------------------------------------
