@@ -172,11 +172,13 @@ main {
   font-size: 22px;
 }
 
-#bossItemModal {
+#bossItemModal,
+#raidItemModal {
   padding: 20px;
 }
 
-.boss-drop-table {
+.boss-drop-table,
+.raid-drop-table {
   margin-bottom: 20px;
 }
 
@@ -214,6 +216,7 @@ main {
 
 #genericItemModal table,
 #bossItemModal table,
+#raidItemModal table,
 #inventoryItemsTable {
   width: 100%;
   border-collapse: collapse;
@@ -222,9 +225,11 @@ main {
 
 #genericItemModal th,
 #bossItemModal th,
+#raidItemModal th,
 #inventoryItemsTable th,
 #genericItemModal td,
 #bossItemModal td,
+#raidItemModal td,
 #inventoryItemsTable td {
   border: 1px solid #ddd;
   padding: 8px;
@@ -238,7 +243,8 @@ main {
   background-color: rgb(71, 53, 25);
 }
 #genericItemModal tr,
-#bossItemModal tr {
+#bossItemModal tr,
+#raidItemModal tr {
   height: 40px;
 }
 
@@ -328,8 +334,25 @@ main {
   background-color: rgb(110, 31, 110);
 }
 
-#inventoryItemsTable td.boss-name {
+#inventoryItemsTable tr.mega-rare-item {
+  background-color: rgb(83, 1, 115);
+}
+
+#inventoryItemsTable td.boss-name,
+#inventoryItemsTable td.raid-name {
   font-weight: bold;
+}
+
+.Tombs {
+  background-color: rgba(122, 85, 0, 0.662);
+}
+
+.Theatre {
+  background-color: rgba(96, 3, 3, 0.664);
+}
+
+.Chambers {
+  background-color: rgba(112, 255, 68, 0.662);
 }
 
 .Zulrah {
