@@ -14,6 +14,5 @@ export class Raid {
     this.uniqueChanceNormal = config.uniqueChanceNormal ?? 0;
     this.uniqueChanceHard = config.uniqueChanceHard ?? 0;
     this.uniqueChance = config.uniqueChance ?? 0;
-    // this.divisor = config.divisor ?? 0;
   }
 }

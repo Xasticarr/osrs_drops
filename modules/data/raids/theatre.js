@@ -168,12 +168,6 @@ export function theatreDropFunction(raid, options = {}, helpers = {}) {
   const drops = [];
   const difficulty = options.difficulty === "Hard" ? "Hard" : "Normal";
 
-  //   console.log("ToB DropFunction Start", {
-  //     difficulty,
-  //     normalChance: raid.uniqueChanceNormal,
-  //     hardChance: raid.uniqueChanceHard,
-  //   });
-
   // Unique Chance
   const uniqueChance =
     difficulty === "Hard"
@@ -237,18 +231,6 @@ export function theatreDropFunction(raid, options = {}, helpers = {}) {
         });
       }
     }
-    // for (const tert of tertiaryList) {
-    //   const chance = tert.rarity ?? 0;
-    //   if (Math.random() < chance) {
-    //     drops.push({
-    //       dropTable: "tertiary",
-    //       item: tert.name,
-    //       quantity: 1,
-    //       type: tert.type,
-    //       cLog: tert.cLog,
-    //     });
-    //   }
-    // }
 
     // Unique is exclusive, no common drops
     return drops;
@@ -299,18 +281,6 @@ export function theatreDropFunction(raid, options = {}, helpers = {}) {
       });
     }
   }
-  //   for (const tert of tertiaryList) {
-  //     const chance = tert.rarity ?? 0;
-  //     if (Math.random() < chance) {
-  //       drops.push({
-  //         dropTable: "tertiary",
-  //         item: tert.name,
-  //         quantity: 1,
-  //         type: tert.type,
-  //         cLog: tert.cLog,
-  //       });
-  //     }
-  //   }
 
   return drops;
 }
@@ -319,7 +289,6 @@ export const Theatre = new Raid("Theatre", {
   key: "ToB",
   name: "Theatre",
   tripleRoll: true,
-  //   preRoll: { table: "unique", everyRoll: false },
   dropFunction: theatreDropFunction,
   uniqueChanceNormal: 1 / 9.1,
   uniqueChanceHard: 1 / 7.7,

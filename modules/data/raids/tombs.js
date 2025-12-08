@@ -206,16 +206,6 @@ export function tombsDropFunction(raid, options = {}, helpers = {}) {
   const petChance = Math.min((pointsEarned / petDenom) * 0.01, 1);
   //   let X, Y;
 
-  //   if (RL < 400) {
-  //     X = RL;
-  //     Y = 0;
-  //   } else {
-  //     X = 400;
-  //     Y = RL - 400;
-  //   }
-
-  //   const petChance = 350000 - (X + Y / 3);
-
   // Roll for unique
 
   const uniqueTableExists = raid.dropTables?.unique;
@@ -318,94 +308,6 @@ export function tombsDropFunction(raid, options = {}, helpers = {}) {
     });
   }
 
-  //   // --- COMMON DROPS (3 rolls) ---
-  //   const commonEntries = getItems(raid.dropTables.common) ?? [];
-
-  //   for (let i = 0; i < 3; i++) {
-  //     const roll = rollForRaidItem(raid, "common");
-  //     if (!roll || !roll.item) continue;
-
-  //     // Find the original table entry so we can read the correct divisor
-  //     const sourceEntry = commonEntries.find((e) => e.name === roll.item) ?? {};
-
-  //     const divisor = sourceEntry.divisor ?? 1;
-
-  //     let qty;
-  //     if (RL < 300) {
-  //       qty = Math.floor(pointsEarned / divisor);
-  //     } else {
-  //       const scale = 1.15 + 0.01 * Math.floor((RL - 300) / 5);
-  //       qty = Math.floor((pointsEarned / divisor) * scale);
-  //     }
-
-  //     drops.push({
-  //       dropTable: "common",
-  //       item: roll.item,
-  //       quantity: qty,
-  //       tablePath: roll.tablePath,
-  //       type: roll.type,
-  //       cLog: roll.cLog,
-  //     });
-  //   }
-
-  //Roll for common drops (3 rolls for ToA)
-  //   const commonTable = raid.dropTables?.common;
-  //   if (!commonTable) return drops;
-
-  //   for (let i = 0; i < 3; i++) {
-  //     const roll = rollForRaidItem(raid, "common");
-  //     if (!roll || !roll.item) continue;
-
-  //     let qty = Array.isArray(roll.quantity)
-  //       ? rollItemQuantity(roll.quantity[0], roll.quantity[1])
-  //       : roll.quantity;
-
-  //     //Apply scaling using divisor if provided
-  //     const divisor = roll.divisor ?? roll.options?.divisor ?? 1;
-
-  //     if (RL < 300) {
-  //       qty = Math.floor(pointsEarned / divisor);
-  //     } else {
-  //       const scale = 1.15 + 0.01 * Math.floor((RL - 300) / 5);
-  //       qty = Math.floor((pointsEarned / divisor) * scale);
-  //     }
-
-  //     drops.push({
-  //       dropTable: "common",
-  //       item: roll.item,
-  //       quantity: qty,
-  //       tablePath: roll.tablePath,
-  //       type: roll.type,
-  //       cLog: roll.cLog,
-  //     });
-  //   }
-
-  //   // --- COMMON DROPS (3 rolls) ---
-  //   for (let i = 0; i < 3; i++) {
-  //     const roll = rollForRaidItem(raid, "common");
-  //     if (!roll || !roll.item) continue;
-
-  //     let divisor = roll.divisor ?? roll.options?.divisor ?? 1;
-
-  //     let qty;
-
-  //     if (RL < 300) {
-  //       qty = Math.floor(pointsEarned / divisor);
-  //     } else {
-  //       const scale = 1.15 + 0.01 * Math.floor((RL - 300) / 5);
-  //       qty = Math.floor((pointsEarned / divisor) * scale);
-  //     }
-
-  //     drops.push({
-  //       dropTable: "common",
-  //       item: roll.item,
-  //       quantity: qty,
-  //       tablePath: roll.tablePath,
-  //       type: roll.type,
-  //       cLog: roll.cLog,
-  //     });
-  //   }
-
   // --- UNIVERSAL TERTIARY ROLLS (fire regardless of unique or common) ---
   for (const tert of raid.tertiaryDrops) {
     // Select correct chance
@@ -466,3 +368,5 @@ export const Tombs = new Raid("Tombs", {
 // Invo 400 = 22181 Points
 // Invo 450 = 24363 Points
 // Invo 500 = 25779 Points
+
+//These values were all pulled from wiki calc
